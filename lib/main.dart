@@ -13,6 +13,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: const ColorScheme(
           brightness: Brightness.light,
@@ -88,6 +89,7 @@ class MyApp extends StatelessWidget {
         ),
         useMaterial3: true,
       ),
+      // homepage
       home: const HomePage(),
     );
   }
