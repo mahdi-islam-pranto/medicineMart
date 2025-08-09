@@ -24,7 +24,7 @@ class _BannerCarouselState extends State<BannerCarousel> {
   final List<BannerData> _banners = [
     BannerData(
       title: 'Free Delivery',
-      subtitle: 'On orders above ₹500',
+      subtitle: 'On orders above ৳500',
       description: 'Get your medicines delivered to your doorstep for free!',
       color: AppColors.primary,
       icon: Icons.local_shipping,
@@ -58,6 +58,7 @@ class _BannerCarouselState extends State<BannerCarousel> {
     _startAutoScroll();
   }
 
+// Stop auto-scroll when widget is disposed
   @override
   void dispose() {
     _pageController.dispose();

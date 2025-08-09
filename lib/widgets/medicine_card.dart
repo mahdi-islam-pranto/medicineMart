@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 
-/// MedicineCard - A reusable card widget for displaying medicine information
+/// MedicineCard - A modern horizontal card widget for displaying medicine information
 ///
 /// This widget provides:
+/// - Modern horizontal layout with image on left, details in center, actions on right
 /// - Professional card design with proper spacing and shadows
 /// - Medicine image with placeholder support
 /// - Medicine name, quantity, and brand information
-/// - Regular and discount pricing display
+/// - Regular and discount pricing display with percentage badges
 /// - Favorite toggle functionality
 /// - Add to cart with quantity selection
-/// - Responsive design that works in grid layouts
+/// - Responsive design optimized for list layouts
 class MedicineCard extends StatefulWidget {
   final Medicine medicine;
   final bool isFavorite;
@@ -38,13 +39,14 @@ class _MedicineCardState extends State<MedicineCard> {
   Widget build(BuildContext context) {
     // Get screen dimensions for responsive design
     final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
 
     // Calculate responsive values
-    final cardPadding = (screenWidth * 0.03).clamp(8.0, 16.0);
-    final borderRadius = (screenWidth * 0.03).clamp(8.0, 16.0);
+    final cardPadding = 12.0;
+    final borderRadius = 12.0;
+    final imageSize = 80.0;
 
     return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(borderRadius),
@@ -60,68 +62,50 @@ class _MedicineCardState extends State<MedicineCard> {
           ),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Image and favorite button
-          _buildImageSection(screenWidth, borderRadius),
+      child: Padding(
+        padding: EdgeInsets.all(cardPadding),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Medicine image section
+            _buildImageSection(imageSize, borderRadius),
 
-          // Medicine information
-          Expanded(
-            child: Padding(
-              padding: EdgeInsets.all(cardPadding),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Medicine name and quantity
-                  _buildNameSection(screenWidth),
+            const SizedBox(width: 12),
 
-                  SizedBox(height: cardPadding * 0.3),
-
-                  // Brand name
-                  _buildBrandSection(screenWidth),
-
-                  SizedBox(height: cardPadding * 0.6),
-
-                  // Pricing
-                  _buildPricingSection(screenWidth),
-
-                  const Spacer(),
-
-                  // Add to cart section
-                  _buildAddToCartSection(screenWidth, cardPadding),
-                ],
-              ),
+            // Medicine details section
+            Expanded(
+              child: _buildDetailsSection(screenWidth),
             ),
-          ),
-        ],
+
+            const SizedBox(width: 8),
+
+            // Action buttons section
+            _buildActionSection(),
+          ],
+        ),
       ),
     );
   }
 
-  /// Builds the image section with favorite button
-  Widget _buildImageSection(double screenWidth, double borderRadius) {
-    // Calculate responsive image height
-    final imageHeight = (screenWidth * 0.25).clamp(100.0, 140.0);
+  /// Builds the image section for horizontal layout
+  Widget _buildImageSection(double imageSize, double borderRadius) {
     return Stack(
       children: [
-        // Medicine image
+        // Medicine image container
         Container(
-          height: imageHeight,
-          width: double.infinity,
+          width: imageSize,
+          height: imageSize,
           decoration: BoxDecoration(
             color: AppColors.surfaceVariant,
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(borderRadius),
-              topRight: Radius.circular(borderRadius),
+            borderRadius: BorderRadius.circular(borderRadius),
+            border: Border.all(
+              color: AppColors.borderLight,
+              width: 1,
             ),
           ),
           child: widget.medicine.imageUrl != null
               ? ClipRRect(
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(borderRadius),
-                    topRight: Radius.circular(borderRadius),
-                  ),
+                  borderRadius: BorderRadius.circular(borderRadius),
                   child: Image.network(
                     widget.medicine.imageUrl!,
                     fit: BoxFit.cover,
@@ -133,52 +117,29 @@ class _MedicineCardState extends State<MedicineCard> {
               : _buildPlaceholderImage(),
         ),
 
-        // Favorite button
-        Positioned(
-          top: 8,
-          right: 8,
-          child: GestureDetector(
-            onTap: () => widget.onFavoriteToggle(widget.medicine),
-            child: Container(
-              padding: const EdgeInsets.all(6),
-              decoration: BoxDecoration(
-                color: AppColors.surface.withOpacity(0.9),
-                shape: BoxShape.circle,
-                boxShadow: const [
-                  BoxShadow(
-                    color: AppColors.shadowLight,
-                    offset: Offset(0, 2),
-                    blurRadius: 4,
-                  ),
-                ],
-              ),
-              child: Icon(
-                widget.isFavorite ? Icons.favorite : Icons.favorite_border,
-                color: widget.isFavorite
-                    ? AppColors.error
-                    : AppColors.textSecondary,
-                size: 16,
-              ),
-            ),
-          ),
-        ),
-
         // Discount badge (if applicable)
         if (widget.medicine.discountPercentage > 0)
           Positioned(
-            top: 8,
-            left: 8,
+            top: -2,
+            left: -2,
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
               decoration: BoxDecoration(
                 color: AppColors.error,
                 borderRadius: BorderRadius.circular(8),
+                boxShadow: const [
+                  BoxShadow(
+                    color: AppColors.shadowLight,
+                    offset: Offset(0, 1),
+                    blurRadius: 2,
+                  ),
+                ],
               ),
               child: Text(
-                '${widget.medicine.discountPercentage}% OFF',
+                '${widget.medicine.discountPercentage.toStringAsFixed(1)}%',
                 style: const TextStyle(
                   color: AppColors.textOnPrimary,
-                  fontSize: 10,
+                  fontSize: 9,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -194,134 +155,179 @@ class _MedicineCardState extends State<MedicineCard> {
       child: Icon(
         Icons.medication,
         color: AppColors.textSecondary,
-        size: 40,
+        size: 32,
       ),
     );
   }
 
-  /// Builds medicine name and quantity section
-  Widget _buildNameSection(double screenWidth) {
-    final nameFontSize = (screenWidth * 0.035).clamp(12.0, 16.0);
-
-    return Text(
-      '${widget.medicine.name} ${widget.medicine.quantity}',
-      style: TextStyle(
-        color: AppColors.textPrimary,
-        fontSize: nameFontSize,
-        fontWeight: FontWeight.w600,
-        height: 1.2,
-      ),
-      maxLines: 2,
-      overflow: TextOverflow.ellipsis,
-    );
-  }
-
-  /// Builds brand name section
-  Widget _buildBrandSection(double screenWidth) {
-    final brandFontSize = (screenWidth * 0.03).clamp(10.0, 14.0);
-
-    return Text(
-      widget.medicine.brand,
-      style: TextStyle(
-        color: AppColors.textSecondary,
-        fontSize: brandFontSize,
-        fontWeight: FontWeight.w400,
-      ),
-      maxLines: 1,
-      overflow: TextOverflow.ellipsis,
-    );
-  }
-
-  /// Builds pricing section with regular and discount prices
-  Widget _buildPricingSection(double screenWidth) {
-    final priceFontSize = (screenWidth * 0.04).clamp(14.0, 18.0);
-    final smallPriceFontSize = (screenWidth * 0.03).clamp(10.0, 14.0);
+  /// Builds the details section with medicine info and pricing
+  Widget _buildDetailsSection(double screenWidth) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Discount price (if applicable)
+        // Medicine name with type/form
+        Text(
+          '${widget.medicine.name.toUpperCase()} (${widget.medicine.quantity})',
+          style: const TextStyle(
+            color: AppColors.textPrimary,
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            height: 1.2,
+          ),
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+        ),
+
+        const SizedBox(height: 2),
+
+        // Brand name
+        Text(
+          widget.medicine.brand.toUpperCase(),
+          style: const TextStyle(
+            color: AppColors.textSecondary,
+            fontSize: 11,
+            fontWeight: FontWeight.w500,
+            letterSpacing: 0.5,
+          ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+
+        const SizedBox(height: 8),
+
+        // Pricing section
+        _buildPricingRow(),
+      ],
+    );
+  }
+
+  /// Builds pricing row with regular and discount prices
+  Widget _buildPricingRow() {
+    return Row(
+      children: [
+        // Regular price (crossed out if discount available)
         if (widget.medicine.discountPrice != null)
           Text(
-            '৳${widget.medicine.discountPrice!.toStringAsFixed(2)}',
-            style: TextStyle(
-              color: AppColors.primary,
-              fontSize: priceFontSize,
-              fontWeight: FontWeight.bold,
+            '৳ ${widget.medicine.regularPrice.toStringAsFixed(0)}.00',
+            style: const TextStyle(
+              color: AppColors.textSecondary,
+              fontSize: 12,
+              fontWeight: FontWeight.w400,
+              decoration: TextDecoration.lineThrough,
             ),
           ),
 
-        // Regular price
+        if (widget.medicine.discountPrice != null) const SizedBox(width: 8),
+
+        // Current/discount price
         Text(
-          '৳${widget.medicine.regularPrice.toStringAsFixed(2)}',
-          style: TextStyle(
-            color: widget.medicine.discountPrice != null
-                ? AppColors.textSecondary
-                : AppColors.primary,
-            fontSize: widget.medicine.discountPrice != null
-                ? smallPriceFontSize
-                : priceFontSize,
-            fontWeight: widget.medicine.discountPrice != null
-                ? FontWeight.w400
-                : FontWeight.bold,
-            decoration: widget.medicine.discountPrice != null
-                ? TextDecoration.lineThrough
-                : null,
+          '৳ ${(widget.medicine.discountPrice ?? widget.medicine.regularPrice).toStringAsFixed(0)}.00',
+          style: const TextStyle(
+            color: AppColors.primary,
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
           ),
         ),
       ],
     );
   }
 
-  /// Builds add to cart section with quantity selection
-  Widget _buildAddToCartSection(double screenWidth, double cardPadding) {
-    final buttonFontSize = (screenWidth * 0.03).clamp(10.0, 14.0);
-    final buttonHeight = (screenWidth * 0.08).clamp(32.0, 40.0);
+  /// Builds action section with favorite and cart buttons
+  Widget _buildActionSection() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        // Favorite button
+        GestureDetector(
+          onTap: () => widget.onFavoriteToggle(widget.medicine),
+          child: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: widget.isFavorite
+                  ? AppColors.error.withOpacity(0.1)
+                  : AppColors.surfaceVariant,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: widget.isFavorite
+                    ? AppColors.error.withOpacity(0.3)
+                    : AppColors.borderLight,
+                width: 1,
+              ),
+            ),
+            child: Icon(
+              widget.isFavorite ? Icons.favorite : Icons.favorite_border,
+              color:
+                  widget.isFavorite ? AppColors.error : AppColors.textSecondary,
+              size: 18,
+            ),
+          ),
+        ),
+
+        const SizedBox(height: 8),
+
+        // Add to cart button
+        _buildCartButton(),
+      ],
+    );
+  }
+
+  /// Builds cart button with quantity controls or add button
+  Widget _buildCartButton() {
     if (widget.cartQuantity > 0) {
       // Show quantity controls when item is in cart
       return Container(
-        height: buttonHeight,
+        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
         decoration: BoxDecoration(
           color: AppColors.primary.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(cardPadding),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: AppColors.primary.withOpacity(0.3),
+            width: 1,
+          ),
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        child: Column(
           children: [
-            // Decrease quantity
-            IconButton(
-              onPressed: () {
-                if (widget.cartQuantity > 1) {
-                  widget.onAddToCart(widget.medicine, widget.cartQuantity - 1);
-                } else {
-                  widget.onAddToCart(widget.medicine, 0); // Remove from cart
-                }
+            // Increase quantity
+            GestureDetector(
+              onTap: () {
+                widget.onAddToCart(widget.medicine, widget.cartQuantity + 1);
               },
-              icon: Icon(
-                widget.cartQuantity > 1 ? Icons.remove : Icons.delete_outline,
-                color: AppColors.primary,
-                size: 16,
+              child: Container(
+                padding: const EdgeInsets.all(4),
+                child: const Icon(
+                  Icons.add,
+                  color: AppColors.primary,
+                  size: 14,
+                ),
               ),
             ),
 
             // Current quantity
             Text(
               '${widget.cartQuantity}',
-              style: TextStyle(
+              style: const TextStyle(
                 color: AppColors.primary,
-                fontSize: buttonFontSize,
+                fontSize: 12,
                 fontWeight: FontWeight.w600,
               ),
             ),
 
-            // Increase quantity
-            IconButton(
-              onPressed: () {
-                widget.onAddToCart(widget.medicine, widget.cartQuantity + 1);
+            // Decrease quantity
+            GestureDetector(
+              onTap: () {
+                if (widget.cartQuantity > 1) {
+                  widget.onAddToCart(widget.medicine, widget.cartQuantity - 1);
+                } else {
+                  widget.onAddToCart(widget.medicine, 0); // Remove from cart
+                }
               },
-              icon: const Icon(
-                Icons.add,
-                color: AppColors.primary,
-                size: 16,
+              child: Container(
+                padding: const EdgeInsets.all(4),
+                child: Icon(
+                  widget.cartQuantity > 1 ? Icons.remove : Icons.delete_outline,
+                  color: AppColors.primary,
+                  size: 14,
+                ),
               ),
             ),
           ],
@@ -329,28 +335,27 @@ class _MedicineCardState extends State<MedicineCard> {
       );
     } else {
       // Show add to cart button when item is not in cart
-      return SizedBox(
-        width: double.infinity,
-        height: buttonHeight,
-        child: ElevatedButton(
-          onPressed: () {
-            widget.onAddToCart(widget.medicine, _selectedQuantity);
-          },
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.primary,
-            foregroundColor: AppColors.textOnPrimary,
-            padding: EdgeInsets.symmetric(vertical: cardPadding * 0.5),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(cardPadding),
-            ),
-            elevation: 0,
+      return GestureDetector(
+        onTap: () {
+          widget.onAddToCart(widget.medicine, _selectedQuantity);
+        },
+        child: Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: AppColors.primary,
+            borderRadius: BorderRadius.circular(8),
+            boxShadow: const [
+              BoxShadow(
+                color: AppColors.shadowLight,
+                offset: Offset(0, 2),
+                blurRadius: 4,
+              ),
+            ],
           ),
-          child: Text(
-            'Add to Cart',
-            style: TextStyle(
-              fontSize: buttonFontSize,
-              fontWeight: FontWeight.w600,
-            ),
+          child: const Icon(
+            Icons.shopping_cart_outlined,
+            color: AppColors.textOnPrimary,
+            size: 18,
           ),
         ),
       );

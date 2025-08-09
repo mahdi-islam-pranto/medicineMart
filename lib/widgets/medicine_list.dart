@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 import 'medicine_card.dart';
 
-/// MedicineList - A grid widget that displays medicines with filtering and sorting
+/// MedicineList - A modern vertical list widget that displays medicines with filtering and sorting
 ///
 /// This widget provides:
-/// - Responsive grid layout that adapts to screen size
+/// - Modern vertical list layout optimized for horizontal medicine cards
 /// - Filtering by search query, brand, and alphabet
 /// - Loading states and empty states
 /// - Proper spacing and padding
@@ -85,87 +85,114 @@ class _MedicineListState extends State<MedicineList> {
     return _buildMedicineGrid(filtered);
   }
 
-  /// Builds the main medicine grid with responsive design
+  /// Builds the main medicine list with modern vertical layout
   Widget _buildMedicineGrid(List<Medicine> medicines) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        // Calculate responsive grid parameters
-        final screenWidth = constraints.maxWidth;
-        final cardWidth = (screenWidth * 0.45).clamp(160.0, 200.0);
-        final crossAxisCount = (screenWidth / cardWidth).floor().clamp(2, 3);
-        final spacing = (screenWidth * 0.03).clamp(8.0, 16.0);
-        final horizontalPadding = (screenWidth * 0.04).clamp(12.0, 20.0);
-
-        // Calculate aspect ratio based on screen size
-        final aspectRatio = screenWidth < 360 ? 0.7 : 0.75;
-
-        return Padding(
-          padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
-          child: GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: crossAxisCount,
-              childAspectRatio: aspectRatio,
-              crossAxisSpacing: spacing,
-              mainAxisSpacing: spacing,
-            ),
-            itemCount: medicines.length,
-            itemBuilder: (context, index) {
-              final medicine = medicines[index];
-              return MedicineCard(
-                medicine: medicine,
-                isFavorite: widget.favorites[medicine.id] ?? false,
-                cartQuantity: widget.cartItems[medicine.id] ?? 0,
-                onFavoriteToggle: widget.onFavoriteToggle,
-                onAddToCart: widget.onAddToCart,
-              );
-            },
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Product header section
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'Product',
+                style: TextStyle(
+                  color: AppColors.textPrimary,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              // Filter/sort icon
+              Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: AppColors.surfaceVariant,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: const Icon(
+                  Icons.tune,
+                  color: AppColors.textSecondary,
+                  size: 18,
+                ),
+              ),
+            ],
           ),
-        );
-      },
+        ),
+
+        // Medicine list
+        ListView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: medicines.length,
+          itemBuilder: (context, index) {
+            final medicine = medicines[index];
+            return MedicineCard(
+              medicine: medicine,
+              isFavorite: widget.favorites[medicine.id] ?? false,
+              cartQuantity: widget.cartItems[medicine.id] ?? 0,
+              onFavoriteToggle: widget.onFavoriteToggle,
+              onAddToCart: widget.onAddToCart,
+            );
+          },
+        ),
+      ],
     );
   }
 
   /// Builds loading state with shimmer effect
   Widget _buildLoadingState() {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        // Use same responsive calculations as main grid
-        final screenWidth = constraints.maxWidth;
-        final cardWidth = (screenWidth * 0.45).clamp(160.0, 200.0);
-        final crossAxisCount = (screenWidth / cardWidth).floor().clamp(2, 3);
-        final spacing = (screenWidth * 0.03).clamp(8.0, 16.0);
-        final horizontalPadding = (screenWidth * 0.04).clamp(12.0, 20.0);
-        final aspectRatio = screenWidth < 360 ? 0.7 : 0.75;
-
-        return Padding(
-          padding: EdgeInsets.symmetric(horizontal: horizontalPadding),
-          child: GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: crossAxisCount,
-              childAspectRatio: aspectRatio,
-              crossAxisSpacing: spacing,
-              mainAxisSpacing: spacing,
-            ),
-            itemCount: 6, // Show 6 loading cards
-            itemBuilder: (context, index) {
-              return _buildLoadingCard(screenWidth);
-            },
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Product header loading
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Container(
+                height: 16,
+                width: 80,
+                decoration: BoxDecoration(
+                  color: AppColors.surfaceVariant,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              ),
+              Container(
+                height: 30,
+                width: 30,
+                decoration: BoxDecoration(
+                  color: AppColors.surfaceVariant,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+              ),
+            ],
           ),
-        );
-      },
+        ),
+
+        // Loading cards list
+        ListView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: 6, // Show 6 loading cards
+          itemBuilder: (context, index) {
+            return _buildLoadingCard();
+          },
+        ),
+      ],
     );
   }
 
-  /// Builds individual loading card with shimmer effect
-  Widget _buildLoadingCard(double screenWidth) {
-    final borderRadius = (screenWidth * 0.03).clamp(8.0, 16.0);
-    final cardPadding = (screenWidth * 0.03).clamp(8.0, 16.0);
-    final imageHeight = (screenWidth * 0.25).clamp(100.0, 140.0);
+  /// Builds individual loading card with shimmer effect for horizontal layout
+  Widget _buildLoadingCard() {
+    const borderRadius = 12.0;
+    const cardPadding = 12.0;
+    const imageSize = 80.0;
+
     return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(borderRadius),
@@ -174,32 +201,31 @@ class _MedicineListState extends State<MedicineList> {
           width: 1,
         ),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Image placeholder
-          Container(
-            height: imageHeight,
-            width: double.infinity,
-            decoration: BoxDecoration(
-              color: AppColors.surfaceVariant,
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(borderRadius),
-                topRight: Radius.circular(borderRadius),
+      child: Padding(
+        padding: const EdgeInsets.all(cardPadding),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Image placeholder
+            Container(
+              width: imageSize,
+              height: imageSize,
+              decoration: BoxDecoration(
+                color: AppColors.surfaceVariant,
+                borderRadius: BorderRadius.circular(borderRadius),
+              ),
+              child: const Center(
+                child: CircularProgressIndicator(
+                  color: AppColors.primary,
+                  strokeWidth: 2,
+                ),
               ),
             ),
-            child: const Center(
-              child: CircularProgressIndicator(
-                color: AppColors.primary,
-                strokeWidth: 2,
-              ),
-            ),
-          ),
 
-          // Content placeholder
-          Expanded(
-            child: Padding(
-              padding: EdgeInsets.all(cardPadding),
+            const SizedBox(width: 12),
+
+            // Content placeholder
+            Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -213,46 +239,59 @@ class _MedicineListState extends State<MedicineList> {
                     ),
                   ),
 
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 4),
 
                   // Brand placeholder
                   Container(
                     height: 12,
+                    width: 100,
+                    decoration: BoxDecoration(
+                      color: AppColors.surfaceVariant,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+
+                  const SizedBox(height: 8),
+
+                  // Price placeholder
+                  Container(
+                    height: 14,
                     width: 80,
                     decoration: BoxDecoration(
                       color: AppColors.surfaceVariant,
                       borderRadius: BorderRadius.circular(4),
                     ),
                   ),
-
-                  const SizedBox(height: 12),
-
-                  // Price placeholder
-                  Container(
-                    height: 14,
-                    width: 60,
-                    decoration: BoxDecoration(
-                      color: AppColors.surfaceVariant,
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                  ),
-
-                  const Spacer(),
-
-                  // Button placeholder
-                  Container(
-                    height: 32,
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      color: AppColors.surfaceVariant,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
                 ],
               ),
             ),
-          ),
-        ],
+
+            const SizedBox(width: 8),
+
+            // Action buttons placeholder
+            Column(
+              children: [
+                Container(
+                  width: 34,
+                  height: 34,
+                  decoration: BoxDecoration(
+                    color: AppColors.surfaceVariant,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Container(
+                  width: 34,
+                  height: 34,
+                  decoration: BoxDecoration(
+                    color: AppColors.surfaceVariant,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
