@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'screens/main_navigation.dart';
+import 'screens/splash_screen.dart';
 import 'theme/app_colors.dart';
 
 void main() {
@@ -89,8 +89,8 @@ class MyApp extends StatelessWidget {
         ),
         useMaterial3: true,
       ),
-      // Main navigation with bottom navigation bar
-      home: const MainNavigation(),
+      // Start with splash screen
+      home: const SplashScreen(),
     );
   }
 }
