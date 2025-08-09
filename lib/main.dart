@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'screens/homepage.dart';
-import 'theme/app_colors.dart'; // Add this import
+import 'screens/main_navigation.dart';
+import 'theme/app_colors.dart';
 
 void main() {
   runApp(const MyApp());
@@ -89,8 +89,8 @@ class MyApp extends StatelessWidget {
         ),
         useMaterial3: true,
       ),
-      // homepage
-      home: const HomePage(),
+      // Main navigation with bottom navigation bar
+      home: const MainNavigation(),
     );
   }
 }

@@ -389,16 +389,16 @@ class _HomePageState extends State<HomePage> {
           title: const Row(
             children: [
               Icon(
-                Icons.local_pharmacy,
+                Icons.local_pharmacy_outlined,
                 color: AppColors.textOnPrimary,
-                size: 24,
+                size: 16,
               ),
               SizedBox(width: 8),
               Text(
-                'MediCare+',
+                'Modu Medicine ',
                 style: TextStyle(
                   color: AppColors.textOnPrimary,
-                  fontSize: 20,
+                  fontSize: 16,
                   fontWeight: FontWeight.bold,
                   letterSpacing: 0.5,
                 ),
