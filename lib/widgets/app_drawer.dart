@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../theme/app_colors.dart';
+import '../screens/explore_products_page.dart';
+import '../bloc/bloc.dart';
 import 'drawer_header_widget.dart';
 import 'drawer_item.dart';
 
@@ -40,6 +43,17 @@ class AppDrawer extends StatelessWidget {
               children: [
                 // Main navigation section
                 _buildSectionHeader('Main Menu'),
+
+                DrawerItem(
+                  icon: Icons.explore_outlined,
+                  selectedIcon: Icons.explore,
+                  title: 'Explore All Products',
+                  subtitle: 'Browse all medicines & products',
+                  onTap: () {
+                    Navigator.pop(context);
+                    _navigateToExploreProducts(context);
+                  },
+                ),
 
                 DrawerItem(
                   icon: Icons.upload_file_outlined,
@@ -257,6 +271,19 @@ class AppDrawer extends StatelessWidget {
           titlePadding: const EdgeInsets.fromLTRB(24, 24, 24, 0),
         );
       },
+    );
+  }
+
+  /// Navigate to explore products page
+  void _navigateToExploreProducts(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => BlocProvider(
+          create: (context) => ExploreProductsCubit(),
+          child: const ExploreProductsPage(),
+        ),
+      ),
     );
   }
 }

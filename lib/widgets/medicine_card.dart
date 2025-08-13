@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
+import '../models/models.dart';
 
 /// MedicineCard - A modern horizontal card widget for displaying medicine information
 ///
@@ -361,38 +362,4 @@ class _MedicineCardState extends State<MedicineCard> {
       );
     }
   }
-}
-
-/// Medicine data model
-class Medicine {
-  final String id;
-  final String name;
-  final String quantity;
-  final String brand;
-  final double regularPrice;
-  final double? discountPrice;
-  final String? imageUrl;
-  final String description;
-  final bool requiresPrescription;
-
-  Medicine({
-    required this.id,
-    required this.name,
-    required this.quantity,
-    required this.brand,
-    required this.regularPrice,
-    this.discountPrice,
-    this.imageUrl,
-    required this.description,
-    this.requiresPrescription = false,
-  });
-
-  /// Calculate discount percentage
-  int get discountPercentage {
-    if (discountPrice == null) return 0;
-    return ((regularPrice - discountPrice!) / regularPrice * 100).round();
-  }
-
-  /// Get effective price (discount price if available, otherwise regular price)
-  double get effectivePrice => discountPrice ?? regularPrice;
 }

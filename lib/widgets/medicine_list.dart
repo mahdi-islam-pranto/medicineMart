@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
+import '../models/models.dart';
 import 'medicine_card.dart';
 
 /// MedicineList - A modern vertical list widget that displays medicines with filtering and sorting

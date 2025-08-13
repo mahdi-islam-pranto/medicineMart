@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../theme/app_colors.dart';
+import '../bloc/bloc.dart';
 import 'homepage.dart';
 import 'categories_page.dart';
 import 'cart_page.dart';
@@ -14,50 +16,58 @@ import 'profile_page.dart';
 /// - Badge support for cart items and notifications
 /// - Professional design matching the app theme
 /// - User-friendly navigation experience
-class MainNavigation extends StatefulWidget {
+class MainNavigation extends StatelessWidget {
   const MainNavigation({super.key});
 
-  @override
-  State<MainNavigation> createState() => _MainNavigationState();
-}
-
-class _MainNavigationState extends State<MainNavigation> {
-  int _currentIndex = 0;
-
-  // Sample cart count for badge display
-  int _cartItemCount = 3;
-
-  // Sample favorites count
-  int _favoritesCount = 5;
-
   // List of pages for navigation
-  late final List<Widget> _pages;
-
-  @override
-  void initState() {
-    super.initState();
-    _pages = [
-      const HomePage(),
-      const CategoriesPage(),
-      const CartPage(),
-      const FavoritesPage(),
-      const ProfilePage(),
-    ];
-  }
+  static const List<Widget> _pages = [
+    HomePage(),
+    CategoriesPage(),
+    CartPage(),
+    FavoritesPage(),
+    ProfilePage(),
+  ];
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: IndexedStack(
-        index: _currentIndex,
-        children: _pages,
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<CartCubit, CartState>(
+          listener: (context, state) {
+            if (state is CartLoaded) {
+              context
+                  .read<NavigationCubit>()
+                  .updateCartItemCount(state.totalItems);
+            }
+          },
+        ),
+        BlocListener<FavoritesCubit, FavoritesState>(
+          listener: (context, state) {
+            if (state is FavoritesLoaded) {
+              context
+                  .read<NavigationCubit>()
+                  .updateFavoritesCount(state.totalItems);
+            }
+          },
+        ),
+      ],
+      child: BlocBuilder<NavigationCubit, NavigationState>(
+        builder: (context, state) {
+          return Scaffold(
+            body: IndexedStack(
+              index: state.currentIndex,
+              children: _pages,
+            ),
+            bottomNavigationBar: _buildBottomNavigationBar(context, state),
+          );
+        },
       ),
-      bottomNavigationBar: _buildBottomNavigationBar(),
     );
   }
 
   /// Builds the modern bottom navigation bar
-  Widget _buildBottomNavigationBar() {
+  Widget _buildBottomNavigationBar(
+      BuildContext context, NavigationState state) {
     return Container(
       decoration: const BoxDecoration(
         // Use a slightly darker surface color for better contrast
@@ -86,6 +96,8 @@ class _MainNavigationState extends State<MainNavigation> {
             children: [
               Expanded(
                 child: _buildNavItem(
+                  context: context,
+                  state: state,
                   index: 0,
                   icon: Icons.home_outlined,
                   activeIcon: Icons.home,
@@ -94,6 +106,8 @@ class _MainNavigationState extends State<MainNavigation> {
               ),
               Expanded(
                 child: _buildNavItem(
+                  context: context,
+                  state: state,
                   index: 1,
                   icon: Icons.category_outlined,
                   activeIcon: Icons.category,
@@ -102,24 +116,30 @@ class _MainNavigationState extends State<MainNavigation> {
               ),
               Expanded(
                 child: _buildNavItem(
+                  context: context,
+                  state: state,
                   index: 2,
                   icon: Icons.shopping_cart_outlined,
                   activeIcon: Icons.shopping_cart,
                   label: 'Cart',
-                  badgeCount: _cartItemCount,
+                  badgeCount: state.cartItemCount,
                 ),
               ),
               Expanded(
                 child: _buildNavItem(
+                  context: context,
+                  state: state,
                   index: 3,
                   icon: Icons.favorite_outline,
                   activeIcon: Icons.favorite,
                   label: 'Favorites',
-                  badgeCount: _favoritesCount,
+                  badgeCount: state.favoritesCount,
                 ),
               ),
               Expanded(
                 child: _buildNavItem(
+                  context: context,
+                  state: state,
                   index: 4,
                   icon: Icons.person_outline,
                   activeIcon: Icons.person,
@@ -135,19 +155,19 @@ class _MainNavigationState extends State<MainNavigation> {
 
   /// Builds individual navigation item with badge support
   Widget _buildNavItem({
+    required BuildContext context,
+    required NavigationState state,
     required int index,
     required IconData icon,
     required IconData activeIcon,
     required String label,
     int? badgeCount,
   }) {
-    final isActive = _currentIndex == index;
+    final isActive = state.currentIndex == index;
 
     return GestureDetector(
       onTap: () {
-        setState(() {
-          _currentIndex = index;
-        });
+        context.read<NavigationCubit>().changeTab(index);
       },
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 4),
@@ -227,19 +247,5 @@ class _MainNavigationState extends State<MainNavigation> {
         ),
       ),
     );
-  }
-
-  /// Updates cart item count (to be called from other screens)
-  void updateCartCount(int count) {
-    setState(() {
-      _cartItemCount = count;
-    });
-  }
-
-  /// Updates favorites count (to be called from other screens)
-  void updateFavoritesCount(int count) {
-    setState(() {
-      _favoritesCount = count;
-    });
   }
 }

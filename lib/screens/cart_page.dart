@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../theme/app_colors.dart';
+import '../bloc/bloc.dart';
+import '../models/models.dart';
 
 /// CartPage - Shopping cart with checkout functionality
 ///
@@ -9,95 +12,101 @@ import '../theme/app_colors.dart';
 /// - Checkout functionality
 /// - Empty cart state
 /// - Modern design matching app theme
-class CartPage extends StatefulWidget {
+class CartPage extends StatelessWidget {
   const CartPage({super.key});
-
-  @override
-  State<CartPage> createState() => _CartPageState();
-}
-
-class _CartPageState extends State<CartPage> {
-  // Sample cart items
-  List<CartItem> _cartItems = [
-    CartItem(
-      id: '1',
-      name: 'Tablet- Acipro',
-      quantity: 'Box',
-      brand: 'Square',
-      price: 410.00,
-      originalPrice: 500.00,
-      cartQuantity: 2,
-      imageUrl: 'https://via.placeholder.com/80x80/E3F2FD/1976D2?text=ACIPRO',
-    ),
-    CartItem(
-      id: '2',
-      name: 'Syrup- Asthalin',
-      quantity: '100ml',
-      brand: 'Renata',
-      price: 230.00,
-      originalPrice: 360.00,
-      cartQuantity: 1,
-      imageUrl: 'https://via.placeholder.com/80x80/E8F5E8/4CAF50?text=SYRUP',
-    ),
-    CartItem(
-      id: '3',
-      name: 'Capsule- Amoxicillin',
-      quantity: '500ml',
-      brand: 'Beximco',
-      price: 410.00,
-      originalPrice: 600.00,
-      cartQuantity: 1,
-      imageUrl: 'https://via.placeholder.com/80x80/FFF8E1/FFC107?text=CAPS',
-    ),
-  ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: _buildAppBar(),
-      body: _cartItems.isEmpty ? _buildEmptyCart() : _buildCartContent(),
-      bottomNavigationBar: _cartItems.isEmpty ? null : _buildCheckoutSection(),
+      body: BlocBuilder<CartCubit, CartState>(
+        builder: (context, state) {
+          if (state is CartLoading) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (state is CartError) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.error_outline,
+                      size: 64, color: AppColors.error),
+                  const SizedBox(height: 16),
+                  Text('Error loading cart'),
+                  const SizedBox(height: 8),
+                  Text(state.message),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () => context.read<CartCubit>().loadCart(),
+                    child: const Text('Retry'),
+                  ),
+                ],
+              ),
+            );
+          } else if (state is CartLoaded) {
+            return state.isEmpty ? _buildEmptyCart() : _buildCartContent(state);
+          }
+          return const SizedBox.shrink();
+        },
+      ),
+      bottomNavigationBar: BlocBuilder<CartCubit, CartState>(
+        builder: (context, state) {
+          if (state is CartLoaded && state.isNotEmpty) {
+            return _buildCheckoutSection(state);
+          }
+          return const SizedBox.shrink();
+        },
+      ),
     );
   }
 
   /// Builds the app bar
   PreferredSizeWidget _buildAppBar() {
-    return AppBar(
-      title: Text(
-        'My Cart (${_cartItems.length})',
-        style: const TextStyle(
-          color: AppColors.textOnPrimary,
-          fontSize: 20,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-      backgroundColor: AppColors.primary,
-      elevation: 0,
-      automaticallyImplyLeading: false,
-      actions: [
-        if (_cartItems.isNotEmpty)
-          IconButton(
-            onPressed: _clearCart,
-            icon: const Icon(
-              Icons.delete_outline,
-              color: AppColors.textOnPrimary,
+    return PreferredSize(
+      preferredSize: const Size.fromHeight(kToolbarHeight),
+      child: BlocBuilder<CartCubit, CartState>(
+        builder: (context, state) {
+          final itemCount = state is CartLoaded ? state.totalItems : 0;
+          final hasItems = state is CartLoaded && state.isNotEmpty;
+
+          return AppBar(
+            title: Text(
+              'My Cart ($itemCount)',
+              style: const TextStyle(
+                color: AppColors.textOnPrimary,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-          ),
-      ],
+            backgroundColor: AppColors.primary,
+            elevation: 0,
+            automaticallyImplyLeading: false,
+            actions: [
+              if (hasItems)
+                IconButton(
+                  onPressed: () => context.read<CartCubit>().clearCart(),
+                  icon: const Icon(
+                    Icons.delete_outline,
+                    color: AppColors.textOnPrimary,
+                  ),
+                ),
+            ],
+          );
+        },
+      ),
     );
   }
 
   /// Builds the cart content
-  Widget _buildCartContent() {
+  Widget _buildCartContent(CartLoaded state) {
     return Column(
       children: [
         // Cart items list
         Expanded(
           child: ListView.builder(
             padding: const EdgeInsets.all(16),
-            itemCount: _cartItems.length,
+            itemCount: state.items.length,
             itemBuilder: (context, index) {
-              final item = _cartItems[index];
+              final item = state.items[index];
               return _buildCartItemCard(item, index);
             },
           ),
@@ -148,9 +157,9 @@ class _CartPageState extends State<CartPage> {
                 ),
               ),
             ),
-            
+
             const SizedBox(width: 12),
-            
+
             // Product details
             Expanded(
               child: Column(
@@ -166,9 +175,9 @@ class _CartPageState extends State<CartPage> {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  
+
                   const SizedBox(height: 2),
-                  
+
                   Text(
                     item.brand.toUpperCase(),
                     style: const TextStyle(
@@ -177,9 +186,9 @@ class _CartPageState extends State<CartPage> {
                       fontWeight: FontWeight.w500,
                     ),
                   ),
-                  
+
                   const SizedBox(height: 8),
-                  
+
                   // Price
                   Row(
                     children: [
@@ -192,10 +201,8 @@ class _CartPageState extends State<CartPage> {
                             decoration: TextDecoration.lineThrough,
                           ),
                         ),
-                      
                       if (item.originalPrice > item.price)
                         const SizedBox(width: 8),
-                      
                       Text(
                         '৳ ${item.price.toStringAsFixed(0)}',
                         style: const TextStyle(
@@ -209,29 +216,32 @@ class _CartPageState extends State<CartPage> {
                 ],
               ),
             ),
-            
+
             // Quantity controls
             Column(
               children: [
                 // Remove button
-                GestureDetector(
-                  onTap: () => _removeItem(index),
-                  child: Container(
-                    padding: const EdgeInsets.all(4),
-                    decoration: BoxDecoration(
-                      color: AppColors.error.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: const Icon(
-                      Icons.close,
-                      color: AppColors.error,
-                      size: 16,
+                Builder(
+                  builder: (context) => GestureDetector(
+                    onTap: () =>
+                        context.read<CartCubit>().removeFromCart(item.id),
+                    child: Container(
+                      padding: const EdgeInsets.all(4),
+                      decoration: BoxDecoration(
+                        color: AppColors.error.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: const Icon(
+                        Icons.close,
+                        color: AppColors.error,
+                        size: 16,
+                      ),
                     ),
                   ),
                 ),
-                
+
                 const SizedBox(height: 8),
-                
+
                 // Quantity controls
                 Container(
                   decoration: BoxDecoration(
@@ -240,18 +250,21 @@ class _CartPageState extends State<CartPage> {
                   ),
                   child: Column(
                     children: [
-                      GestureDetector(
-                        onTap: () => _updateQuantity(index, item.cartQuantity + 1),
-                        child: Container(
-                          padding: const EdgeInsets.all(4),
-                          child: const Icon(
-                            Icons.add,
-                            color: AppColors.primary,
-                            size: 16,
+                      Builder(
+                        builder: (context) => GestureDetector(
+                          onTap: () => context
+                              .read<CartCubit>()
+                              .updateQuantity(item.id, item.cartQuantity + 1),
+                          child: Container(
+                            padding: const EdgeInsets.all(4),
+                            child: const Icon(
+                              Icons.add,
+                              color: AppColors.primary,
+                              size: 16,
+                            ),
                           ),
                         ),
                       ),
-                      
                       Text(
                         '${item.cartQuantity}',
                         style: const TextStyle(
@@ -260,21 +273,23 @@ class _CartPageState extends State<CartPage> {
                           fontWeight: FontWeight.w600,
                         ),
                       ),
-                      
-                      GestureDetector(
-                        onTap: () {
-                          if (item.cartQuantity > 1) {
-                            _updateQuantity(index, item.cartQuantity - 1);
-                          }
-                        },
-                        child: Container(
-                          padding: const EdgeInsets.all(4),
-                          child: Icon(
-                            Icons.remove,
-                            color: item.cartQuantity > 1 
-                                ? AppColors.primary 
-                                : AppColors.textSecondary,
-                            size: 16,
+                      Builder(
+                        builder: (context) => GestureDetector(
+                          onTap: () {
+                            if (item.cartQuantity > 1) {
+                              context.read<CartCubit>().updateQuantity(
+                                  item.id, item.cartQuantity - 1);
+                            }
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.all(4),
+                            child: Icon(
+                              Icons.remove,
+                              color: item.cartQuantity > 1
+                                  ? AppColors.primary
+                                  : AppColors.textSecondary,
+                              size: 16,
+                            ),
                           ),
                         ),
                       ),
@@ -307,9 +322,7 @@ class _CartPageState extends State<CartPage> {
               color: AppColors.primary,
             ),
           ),
-          
           const SizedBox(height: 24),
-          
           const Text(
             'Your cart is empty',
             style: TextStyle(
@@ -318,9 +331,7 @@ class _CartPageState extends State<CartPage> {
               fontWeight: FontWeight.w600,
             ),
           ),
-          
           const SizedBox(height: 8),
-          
           const Text(
             'Add some medicines to get started',
             style: TextStyle(
@@ -334,11 +345,9 @@ class _CartPageState extends State<CartPage> {
   }
 
   /// Builds checkout section
-  Widget _buildCheckoutSection() {
-    final subtotal = _cartItems.fold<double>(
-      0, (sum, item) => sum + (item.price * item.cartQuantity),
-    );
-    final delivery = 50.0;
+  Widget _buildCheckoutSection(CartLoaded state) {
+    final subtotal = state.totalPrice;
+    const delivery = 50.0;
     final total = subtotal + delivery;
 
     return Container(
@@ -371,9 +380,9 @@ class _CartPageState extends State<CartPage> {
                 ),
               ],
             ),
-            
+
             const SizedBox(height: 4),
-            
+
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -387,9 +396,9 @@ class _CartPageState extends State<CartPage> {
                 ),
               ],
             ),
-            
+
             const Divider(height: 16),
-            
+
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -411,27 +420,36 @@ class _CartPageState extends State<CartPage> {
                 ),
               ],
             ),
-            
+
             const SizedBox(height: 16),
-            
+
             // Checkout button
             SizedBox(
               width: double.infinity,
-              child: ElevatedButton(
-                onPressed: _checkout,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: AppColors.textOnPrimary,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+              child: Builder(
+                builder: (context) => ElevatedButton(
+                  onPressed: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Checkout functionality coming soon!'),
+                        backgroundColor: AppColors.primary,
+                      ),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: AppColors.textOnPrimary,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
-                ),
-                child: const Text(
-                  'Proceed to Checkout',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
+                  child: const Text(
+                    'Proceed to Checkout',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
               ),
@@ -441,77 +459,4 @@ class _CartPageState extends State<CartPage> {
       ),
     );
   }
-
-  /// Updates item quantity
-  void _updateQuantity(int index, int newQuantity) {
-    setState(() {
-      _cartItems[index].cartQuantity = newQuantity;
-    });
-  }
-
-  /// Removes item from cart
-  void _removeItem(int index) {
-    setState(() {
-      _cartItems.removeAt(index);
-    });
-  }
-
-  /// Clears entire cart
-  void _clearCart() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Clear Cart'),
-        content: const Text('Are you sure you want to remove all items?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              setState(() {
-                _cartItems.clear();
-              });
-              Navigator.pop(context);
-            },
-            child: const Text('Clear'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  /// Handles checkout
-  void _checkout() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Checkout functionality coming soon!'),
-        backgroundColor: AppColors.primary,
-      ),
-    );
-  }
-}
-
-/// Cart item data model
-class CartItem {
-  final String id;
-  final String name;
-  final String quantity;
-  final String brand;
-  final double price;
-  final double originalPrice;
-  int cartQuantity;
-  final String imageUrl;
-
-  CartItem({
-    required this.id,
-    required this.name,
-    required this.quantity,
-    required this.brand,
-    required this.price,
-    required this.originalPrice,
-    required this.cartQuantity,
-    required this.imageUrl,
-  });
 }
