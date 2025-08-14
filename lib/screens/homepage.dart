@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../widgets/app_drawer.dart';
 import '../widgets/banner_carousel.dart';
-import '../widgets/search_widget.dart';
-import '../widgets/filter_widgets.dart';
-import '../widgets/medicine_list.dart';
+import '../widgets/medicine_card.dart';
+import '../screens/explore_products_page.dart';
+import '../models/models.dart';
 import '../theme/app_colors.dart';
 import '../bloc/bloc.dart';
 
@@ -31,97 +31,21 @@ class HomePage extends StatelessWidget {
                   // Banner carousel section
                   const BannerCarousel(),
 
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 16),
 
                   if (medicineState is MedicineLoaded) ...[
-                    // Brand filter section
-                    FilterSection(
-                      child: BrandFilter(
-                        brands: medicineState.brands,
-                        selectedBrand: medicineState.selectedBrand,
-                        onBrandSelected: (brand) => context
-                            .read<MedicineCubit>()
-                            .updateBrandFilter(brand),
-                      ),
-                    ),
+                    // Compact search and quick filters section
+                    _buildCompactSearchSection(context, medicineState),
 
-                    // Alphabet filter section
-                    FilterSection(
-                      showDivider: false,
-                      child: AlphabetFilter(
-                        selectedLetter: medicineState.selectedLetter,
-                        onLetterSelected: (letter) => context
-                            .read<MedicineCubit>()
-                            .updateLetterFilter(letter),
-                      ),
-                    ),
+                    const SizedBox(height: 16),
 
-                    const SizedBox(height: 10),
+                    // Quick access section
+                    _buildQuickAccessSection(context),
 
-                    // Active filters display
-                    ActiveFilters(
-                      selectedBrand: medicineState.selectedBrand,
-                      selectedLetter: medicineState.selectedLetter,
-                      searchQuery: medicineState.searchQuery,
-                      onBrandRemoved: (brand) =>
-                          context.read<MedicineCubit>().clearBrandFilter(),
-                      onLetterRemoved: (letter) =>
-                          context.read<MedicineCubit>().clearLetterFilter(),
-                      onSearchRemoved: (query) =>
-                          context.read<MedicineCubit>().updateSearchQuery(''),
-                      onClearAll: () =>
-                          context.read<MedicineCubit>().clearAllFilters(),
-                    ),
+                    const SizedBox(height: 16),
 
-                    // Search section
-                    SearchWidget(
-                      onSearchChanged: (query) => context
-                          .read<MedicineCubit>()
-                          .updateSearchQuery(query),
-                      initialQuery: medicineState.searchQuery,
-                    ),
-
-                    const SizedBox(height: 10),
-
-                    // Medicine list section
-                    BlocBuilder<FavoritesCubit, FavoritesState>(
-                      builder: (context, favoritesState) {
-                        return BlocBuilder<CartCubit, CartState>(
-                          builder: (context, cartState) {
-                            final favorites = <String, bool>{};
-                            final cartItems = <String, int>{};
-
-                            if (favoritesState is FavoritesLoaded) {
-                              for (final item in favoritesState.items) {
-                                favorites[item.id] = true;
-                              }
-                            }
-
-                            if (cartState is CartLoaded) {
-                              for (final item in cartState.items) {
-                                cartItems[item.id] = item.cartQuantity;
-                              }
-                            }
-
-                            return MedicineList(
-                              medicines: medicineState.medicines,
-                              searchQuery: medicineState.searchQuery,
-                              selectedBrand: medicineState.selectedBrand,
-                              selectedLetter: medicineState.selectedLetter,
-                              favorites: favorites,
-                              cartItems: cartItems,
-                              onFavoriteToggle: (medicine) => context
-                                  .read<FavoritesCubit>()
-                                  .toggleFavorite(medicine),
-                              onAddToCart: (medicine, quantity) => context
-                                  .read<CartCubit>()
-                                  .addToCart(medicine, quantity),
-                              isLoading: medicineState.isRefreshing,
-                            );
-                          },
-                        );
-                      },
-                    ),
+                    // Featured medicines section
+                    _buildFeaturedMedicinesSection(context, medicineState),
                   ] else if (medicineState is MedicineLoading) ...[
                     const Center(
                       child: Padding(
@@ -170,7 +94,7 @@ class HomePage extends StatelessWidget {
   PreferredSizeWidget _buildAppBar(BuildContext context) {
     return AppBar(
       title: const Text(
-        'Online Medicine',
+        'Health & Medicine',
         style: TextStyle(
           color: AppColors.textOnPrimary,
           fontSize: 20,
@@ -235,6 +159,341 @@ class HomePage extends StatelessWidget {
 
         const SizedBox(width: 12), // Right padding
       ],
+    );
+  }
+
+  /// Builds compact search section with quick filters
+  Widget _buildCompactSearchSection(
+      BuildContext context, MedicineLoaded state) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      child: Column(
+        children: [
+          // Search bar
+          Container(
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: AppColors.borderLight),
+              boxShadow: const [
+                BoxShadow(
+                  color: AppColors.shadowLight,
+                  offset: Offset(0, 2),
+                  blurRadius: 4,
+                ),
+              ],
+            ),
+            child: TextField(
+              onChanged: (query) =>
+                  context.read<MedicineCubit>().updateSearchQuery(query),
+              onSubmitted: (query) {
+                if (query.trim().isNotEmpty) {
+                  _navigateToExploreProducts(context,
+                      searchQuery: query.trim());
+                }
+              },
+              decoration: InputDecoration(
+                hintText: 'Search medicines, brands...',
+                prefixIcon:
+                    const Icon(Icons.search, color: AppColors.textSecondary),
+                suffixIcon: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Search button
+                    IconButton(
+                      onPressed: () {
+                        final query = state.searchQuery.trim();
+                        if (query.isNotEmpty) {
+                          _navigateToExploreProducts(context,
+                              searchQuery: query);
+                        } else {
+                          _navigateToExploreProducts(context);
+                        }
+                      },
+                      icon: const Icon(Icons.arrow_forward,
+                          color: AppColors.primary),
+                      tooltip: 'Search',
+                    ),
+                    // Advanced filters button
+                    IconButton(
+                      onPressed: () => _navigateToExploreProducts(context),
+                      icon: const Icon(Icons.tune, color: AppColors.primary),
+                      tooltip: 'Advanced Filters',
+                    ),
+                  ],
+                ),
+                border: InputBorder.none,
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 12),
+
+          // Quick brand filters (only show top 5 brands)
+          if (state.brands.isNotEmpty) ...[
+            SizedBox(
+              height: 35,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: state.brands.length > 5 ? 5 : state.brands.length,
+                itemBuilder: (context, index) {
+                  final brand = state.brands[index];
+                  final isSelected = state.selectedBrand == brand;
+
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: FilterChip(
+                      label: Text(brand),
+                      selected: isSelected,
+                      onSelected: (selected) {
+                        // Navigate to explore products with brand filter
+                        _navigateToExploreProducts(context,
+                            selectedBrand: brand);
+                      },
+                      backgroundColor: AppColors.surfaceVariant,
+                      selectedColor: AppColors.primary.withOpacity(0.1),
+                      labelStyle: TextStyle(
+                        color: isSelected
+                            ? AppColors.primary
+                            : AppColors.textSecondary,
+                        fontSize: 12,
+                        fontWeight:
+                            isSelected ? FontWeight.w600 : FontWeight.normal,
+                      ),
+                      side: BorderSide(
+                        color: isSelected
+                            ? AppColors.primary
+                            : AppColors.borderMedium,
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  /// Builds quick access section with special offers and trending
+  Widget _buildQuickAccessSection(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      child: Row(
+        children: [
+          // Special Offers
+          Expanded(
+            child: _buildQuickAccessCard(
+              title: 'Special Offers',
+              subtitle: 'Up to 50% OFF',
+              icon: Icons.local_offer,
+              color: AppColors.secondary,
+              onTap: () => _navigateToExploreProducts(context,
+                  productCategory: 'specialOffer'),
+            ),
+          ),
+
+          const SizedBox(width: 12),
+
+          // Trending Products
+          Expanded(
+            child: _buildQuickAccessCard(
+              title: 'Trending',
+              subtitle: 'Popular medicines',
+              icon: Icons.trending_up,
+              color: AppColors.accentDark,
+              onTap: () => _navigateToExploreProducts(context,
+                  productCategory: 'trending'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Builds individual quick access card
+  Widget _buildQuickAccessCard({
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: color.withOpacity(0.3)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(icon, color: color, size: 24),
+            const SizedBox(height: 8),
+            Text(
+              title,
+              style: TextStyle(
+                color: color,
+                fontSize: 14,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            Text(
+              subtitle,
+              style: TextStyle(
+                color: color.withOpacity(0.8),
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Builds featured medicines section with limited items and "View All" button
+  Widget _buildFeaturedMedicinesSection(
+      BuildContext context, MedicineLoaded state) {
+    // Show only first 3-4 medicines as featured
+    final featuredMedicines = state.medicines.take(4).toList();
+
+    return Column(
+      children: [
+        // Section header
+        Container(
+          margin: const EdgeInsets.symmetric(horizontal: 16),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'Top Selling Medicines',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              TextButton(
+                onPressed: () => _navigateToExploreProducts(context),
+                child: const Text(
+                  'View All',
+                  style: TextStyle(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        const SizedBox(height: 8),
+
+        // Featured medicines list
+        BlocBuilder<FavoritesCubit, FavoritesState>(
+          builder: (context, favoritesState) {
+            return BlocBuilder<CartCubit, CartState>(
+              builder: (context, cartState) {
+                final favorites = <String, bool>{};
+                final cartItems = <String, int>{};
+
+                if (favoritesState is FavoritesLoaded) {
+                  for (final item in favoritesState.items) {
+                    favorites[item.id] = true;
+                  }
+                }
+
+                if (cartState is CartLoaded) {
+                  for (final item in cartState.items) {
+                    cartItems[item.id] = item.cartQuantity;
+                  }
+                }
+
+                return ListView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: featuredMedicines.length,
+                  itemBuilder: (context, index) {
+                    final medicine = featuredMedicines[index];
+                    return MedicineCard(
+                      medicine: medicine,
+                      isFavorite: favorites[medicine.id] ?? false,
+                      cartQuantity: cartItems[medicine.id] ?? 0,
+                      onFavoriteToggle: (medicine) => context
+                          .read<FavoritesCubit>()
+                          .toggleFavorite(medicine),
+                      onAddToCart: (medicine, quantity) => context
+                          .read<CartCubit>()
+                          .addToCart(medicine, quantity),
+                    );
+                  },
+                );
+              },
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  /// Navigate to explore products page with optional filters
+  void _navigateToExploreProducts(
+    BuildContext context, {
+    String? searchQuery,
+    String? selectedBrand,
+    String? productCategory,
+  }) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => BlocProvider(
+          create: (context) {
+            final cubit = ExploreProductsCubit();
+            // Load products first
+            cubit.loadProducts().then((_) {
+              // Apply filters after products are loaded
+              if (searchQuery != null && searchQuery.isNotEmpty) {
+                cubit.updateSearchQuery(searchQuery);
+              }
+              if (selectedBrand != null) {
+                final currentState = cubit.state;
+                if (currentState is ExploreProductsLoaded) {
+                  final newFilter = currentState.currentFilter.copyWith(
+                    selectedBrands: [selectedBrand],
+                  );
+                  cubit.applyFilter(newFilter);
+                }
+              }
+              if (productCategory != null) {
+                ProductCategory category;
+                switch (productCategory) {
+                  case 'specialOffer':
+                    category = ProductCategory.specialOffer;
+                    break;
+                  case 'trending':
+                    category = ProductCategory.trending;
+                    break;
+                  case 'newProduct':
+                    category = ProductCategory.newProduct;
+                    break;
+                  default:
+                    category = ProductCategory.all;
+                }
+                cubit.updateProductCategory(category);
+              }
+            });
+            return cubit;
+          },
+          child: const ExploreProductsPage(),
+        ),
+      ),
     );
   }
 }

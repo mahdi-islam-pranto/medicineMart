@@ -31,7 +31,7 @@ class _ExploreProductsPageState extends State<ExploreProductsPage>
   void initState() {
     super.initState();
     _tabController = TabController(length: 4, vsync: this);
-    
+
     // Load products when page initializes
     context.read<ExploreProductsCubit>().loadProducts();
   }
@@ -94,13 +94,13 @@ class _ExploreProductsPageState extends State<ExploreProductsPage>
               children: [
                 // Search bar
                 _buildSearchBar(state),
-                
+
                 // Category tabs
                 _buildCategoryTabs(state),
-                
+
                 // Filter and sort bar
                 _buildFilterSortBar(state),
-                
+
                 // Products list
                 Expanded(
                   child: _buildProductsList(state),
@@ -188,25 +188,33 @@ class _ExploreProductsPageState extends State<ExploreProductsPage>
               scrollDirection: Axis.horizontal,
               child: Row(
                 children: ProductCategory.values.map((category) {
-                  final isSelected = state.currentFilter.productCategory == category;
+                  final isSelected =
+                      state.currentFilter.productCategory == category;
                   return Padding(
                     padding: const EdgeInsets.only(right: 8),
                     child: FilterChip(
                       label: Text(category.displayName),
                       selected: isSelected,
                       onSelected: (selected) {
-                        context.read<ExploreProductsCubit>().updateProductCategory(category);
+                        context
+                            .read<ExploreProductsCubit>()
+                            .updateProductCategory(category);
                       },
                       backgroundColor: AppColors.surfaceVariant,
                       selectedColor: AppColors.primary,
                       labelStyle: TextStyle(
-                        color: isSelected ? AppColors.textOnPrimary : AppColors.textPrimary,
-                        fontWeight: isSelected ? FontWeight.w500 : FontWeight.normal,
+                        color: isSelected
+                            ? AppColors.textOnPrimary
+                            : AppColors.textPrimary,
+                        fontWeight:
+                            isSelected ? FontWeight.w500 : FontWeight.normal,
                       ),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(20),
                         side: BorderSide(
-                          color: isSelected ? AppColors.primary : AppColors.borderMedium,
+                          color: isSelected
+                              ? AppColors.primary
+                              : AppColors.borderMedium,
                         ),
                       ),
                     ),
@@ -239,12 +247,14 @@ class _ExploreProductsPageState extends State<ExploreProductsPage>
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.tune, size: 18, color: AppColors.textSecondary),
+                  const Icon(Icons.tune,
+                      size: 18, color: AppColors.textSecondary),
                   const SizedBox(width: 4),
                   if (state.currentFilter.hasActiveFilters)
                     Container(
                       margin: const EdgeInsets.only(left: 4),
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 6, vertical: 2),
                       decoration: BoxDecoration(
                         color: AppColors.primary,
                         borderRadius: BorderRadius.circular(10),
@@ -262,9 +272,9 @@ class _ExploreProductsPageState extends State<ExploreProductsPage>
               ),
             ),
           ),
-          
+
           const SizedBox(width: 8),
-          
+
           // Sort button
           InkWell(
             onTap: () => _showSortBottomSheet(state),
@@ -280,7 +290,8 @@ class _ExploreProductsPageState extends State<ExploreProductsPage>
                 children: [
                   Icon(Icons.sort, size: 18, color: AppColors.textSecondary),
                   SizedBox(width: 4),
-                  Icon(Icons.keyboard_arrow_down, size: 16, color: AppColors.textSecondary),
+                  Icon(Icons.keyboard_arrow_down,
+                      size: 16, color: AppColors.textSecondary),
                 ],
               ),
             ),
@@ -305,15 +316,15 @@ class _ExploreProductsPageState extends State<ExploreProductsPage>
             Text(
               'No products found',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                color: AppColors.textSecondary,
-              ),
+                    color: AppColors.textSecondary,
+                  ),
             ),
             const SizedBox(height: 8),
             Text(
               'Try adjusting your search or filters',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppColors.textTertiary,
-              ),
+                    color: AppColors.textTertiary,
+                  ),
             ),
           ],
         ),
@@ -363,7 +374,8 @@ class _ExploreProductsPageState extends State<ExploreProductsPage>
       builder: (context) => SortBottomSheet(
         currentSortOption: state.currentFilter.sortOption,
         onApplySort: (sortOption) {
-          final newFilter = state.currentFilter.copyWith(sortOption: sortOption);
+          final newFilter =
+              state.currentFilter.copyWith(sortOption: sortOption);
           context.read<ExploreProductsCubit>().applyFilter(newFilter);
         },
       ),

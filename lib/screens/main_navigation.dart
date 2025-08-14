@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../theme/app_colors.dart';
 import '../bloc/bloc.dart';
 import 'homepage.dart';
-import 'categories_page.dart';
+import 'explore_products_page.dart';
 import 'cart_page.dart';
 import 'favorites_page.dart';
 import 'profile_page.dart';
@@ -20,12 +20,15 @@ class MainNavigation extends StatelessWidget {
   const MainNavigation({super.key});
 
   // List of pages for navigation
-  static const List<Widget> _pages = [
-    HomePage(),
-    CategoriesPage(),
-    CartPage(),
-    FavoritesPage(),
-    ProfilePage(),
+  static final List<Widget> _pages = [
+    const HomePage(),
+    BlocProvider(
+      create: (context) => ExploreProductsCubit(),
+      child: const ExploreProductsPage(),
+    ),
+    const CartPage(),
+    const FavoritesPage(),
+    const ProfilePage(),
   ];
 
   @override
@@ -109,9 +112,9 @@ class MainNavigation extends StatelessWidget {
                   context: context,
                   state: state,
                   index: 1,
-                  icon: Icons.category_outlined,
-                  activeIcon: Icons.category,
-                  label: 'Categories',
+                  icon: Icons.medical_services_outlined,
+                  activeIcon: Icons.medical_services,
+                  label: 'Medicines',
                 ),
               ),
               Expanded(

@@ -32,12 +32,16 @@ class NavigationCubit extends Cubit<NavigationState> {
     int? newCartCount;
     int? newFavoritesCount;
 
-    if (cartItemCount != null && cartItemCount != state.cartItemCount && cartItemCount >= 0) {
+    if (cartItemCount != null &&
+        cartItemCount != state.cartItemCount &&
+        cartItemCount >= 0) {
       newCartCount = cartItemCount;
       shouldUpdate = true;
     }
 
-    if (favoritesCount != null && favoritesCount != state.favoritesCount && favoritesCount >= 0) {
+    if (favoritesCount != null &&
+        favoritesCount != state.favoritesCount &&
+        favoritesCount >= 0) {
       newFavoritesCount = favoritesCount;
       shouldUpdate = true;
     }
@@ -58,8 +62,8 @@ class NavigationCubit extends Cubit<NavigationState> {
   /// Navigate to home tab
   void goToHome() => changeTab(0);
 
-  /// Navigate to categories tab
-  void goToCategories() => changeTab(1);
+  /// Navigate to explore products tab
+  void goToExploreProducts() => changeTab(1);
 
   /// Navigate to cart tab
   void goToCart() => changeTab(2);
@@ -76,7 +80,7 @@ class NavigationCubit extends Cubit<NavigationState> {
       case 0:
         return 'Home';
       case 1:
-        return 'Categories';
+        return 'Explore';
       case 2:
         return 'Cart';
       case 3:

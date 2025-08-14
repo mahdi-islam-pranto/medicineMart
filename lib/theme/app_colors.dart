@@ -27,6 +27,9 @@ class AppColors {
   /// Warm accent color - Light beige for warmth and comfort
   static const Color accent = Color(0xFFDCD0A8);
 
+  /// Darker accent for contrast and emphasis
+  static const Color accentDark = Color(0xFFC4B48C);
+
   /// Cream accent for very light backgrounds
   static const Color accentLight = Color(0xFFFFF9E5);
 

@@ -40,7 +40,7 @@ class _BannerCarouselState extends State<BannerCarousel> {
       title: '24/7 Support',
       subtitle: 'Expert consultation',
       description: 'Get professional medical advice anytime, anywhere',
-      color: AppColors.accent,
+      color: AppColors.primaryLight,
       icon: Icons.support_agent,
     ),
     BannerData(
