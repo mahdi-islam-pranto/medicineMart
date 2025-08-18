@@ -34,6 +34,22 @@ class _ExploreProductsPageState extends State<ExploreProductsPage>
 
     // Load products when page initializes
     context.read<ExploreProductsCubit>().loadProducts();
+
+    // Listen to state changes to update search controller
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _updateSearchControllerFromState();
+    });
+  }
+
+  /// Update search controller text when state changes
+  void _updateSearchControllerFromState() {
+    final state = context.read<ExploreProductsCubit>().state;
+    if (state is ExploreProductsLoaded) {
+      final searchQuery = state.currentFilter.searchQuery ?? '';
+      if (_searchController.text != searchQuery) {
+        _searchController.text = searchQuery;
+      }
+    }
   }
 
   @override
@@ -48,69 +64,77 @@ class _ExploreProductsPageState extends State<ExploreProductsPage>
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: _buildAppBar(),
-      body: BlocBuilder<ExploreProductsCubit, ExploreProductsState>(
-        builder: (context, state) {
-          if (state is ExploreProductsLoading) {
-            return const Center(
-              child: CircularProgressIndicator(color: AppColors.primary),
-            );
+      body: BlocListener<ExploreProductsCubit, ExploreProductsState>(
+        listener: (context, state) {
+          // Update search controller when state changes
+          if (state is ExploreProductsLoaded) {
+            _updateSearchControllerFromState();
           }
+        },
+        child: BlocBuilder<ExploreProductsCubit, ExploreProductsState>(
+          builder: (context, state) {
+            if (state is ExploreProductsLoading) {
+              return const Center(
+                child: CircularProgressIndicator(color: AppColors.primary),
+              );
+            }
 
-          if (state is ExploreProductsError) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+            if (state is ExploreProductsError) {
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(
+                      Icons.error_outline,
+                      size: 64,
+                      color: AppColors.error,
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Error loading products',
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      state.message,
+                      style: Theme.of(context).textTheme.bodyMedium,
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 16),
+                    ElevatedButton(
+                      onPressed: () {
+                        context.read<ExploreProductsCubit>().loadProducts();
+                      },
+                      child: const Text('Retry'),
+                    ),
+                  ],
+                ),
+              );
+            }
+
+            if (state is ExploreProductsLoaded) {
+              return Column(
                 children: [
-                  const Icon(
-                    Icons.error_outline,
-                    size: 64,
-                    color: AppColors.error,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Error loading products',
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    state.message,
-                    style: Theme.of(context).textTheme.bodyMedium,
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () {
-                      context.read<ExploreProductsCubit>().loadProducts();
-                    },
-                    child: const Text('Retry'),
+                  // Search bar
+                  _buildSearchBar(state),
+
+                  // Category tabs
+                  _buildCategoryTabs(state),
+
+                  // Filter and sort bar
+                  _buildFilterSortBar(state),
+
+                  // Products list
+                  Expanded(
+                    child: _buildProductsList(state),
                   ),
                 ],
-              ),
-            );
-          }
+              );
+            }
 
-          if (state is ExploreProductsLoaded) {
-            return Column(
-              children: [
-                // Search bar
-                _buildSearchBar(state),
-
-                // Category tabs
-                _buildCategoryTabs(state),
-
-                // Filter and sort bar
-                _buildFilterSortBar(state),
-
-                // Products list
-                Expanded(
-                  child: _buildProductsList(state),
-                ),
-              ],
-            );
-          }
-
-          return const SizedBox.shrink();
-        },
+            return const SizedBox.shrink();
+          },
+        ),
       ),
     );
   }

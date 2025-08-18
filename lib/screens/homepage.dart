@@ -8,9 +8,14 @@ import '../models/models.dart';
 import '../theme/app_colors.dart';
 import '../bloc/bloc.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -34,8 +39,8 @@ class HomePage extends StatelessWidget {
                   const SizedBox(height: 16),
 
                   if (medicineState is MedicineLoaded) ...[
-                    // Compact search and quick filters section
-                    _buildCompactSearchSection(context, medicineState),
+                    // Brand filters section
+                    _buildBrandFiltersSection(context, medicineState),
 
                     const SizedBox(height: 16),
 
@@ -162,76 +167,40 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  /// Builds compact search section with quick filters
-  Widget _buildCompactSearchSection(
-      BuildContext context, MedicineLoaded state) {
+  /// Builds brand filters section with see all option
+  Widget _buildBrandFiltersSection(BuildContext context, MedicineLoaded state) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
       child: Column(
         children: [
-          // Search bar
-          Container(
-            decoration: BoxDecoration(
-              color: AppColors.surface,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: AppColors.borderLight),
-              boxShadow: const [
-                BoxShadow(
-                  color: AppColors.shadowLight,
-                  offset: Offset(0, 2),
-                  blurRadius: 4,
+          // Section header
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'Shop by Brand',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textPrimary,
                 ),
-              ],
-            ),
-            child: TextField(
-              onChanged: (query) =>
-                  context.read<MedicineCubit>().updateSearchQuery(query),
-              onSubmitted: (query) {
-                if (query.trim().isNotEmpty) {
-                  _navigateToExploreProducts(context,
-                      searchQuery: query.trim());
-                }
-              },
-              decoration: InputDecoration(
-                hintText: 'Search medicines, brands...',
-                prefixIcon:
-                    const Icon(Icons.search, color: AppColors.textSecondary),
-                suffixIcon: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // Search button
-                    IconButton(
-                      onPressed: () {
-                        final query = state.searchQuery.trim();
-                        if (query.isNotEmpty) {
-                          _navigateToExploreProducts(context,
-                              searchQuery: query);
-                        } else {
-                          _navigateToExploreProducts(context);
-                        }
-                      },
-                      icon: const Icon(Icons.arrow_forward,
-                          color: AppColors.primary),
-                      tooltip: 'Search',
-                    ),
-                    // Advanced filters button
-                    IconButton(
-                      onPressed: () => _navigateToExploreProducts(context),
-                      icon: const Icon(Icons.tune, color: AppColors.primary),
-                      tooltip: 'Advanced Filters',
-                    ),
-                  ],
-                ),
-                border: InputBorder.none,
-                contentPadding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               ),
-            ),
+              TextButton(
+                onPressed: () => _navigateToExploreProducts(context),
+                child: const Text(
+                  'See All',
+                  style: TextStyle(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ),
+            ],
           ),
 
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
 
-          // Quick brand filters (only show top 5 brands)
+          // Brand filters (show top 5 brands)
           if (state.brands.isNotEmpty) ...[
             SizedBox(
               height: 35,

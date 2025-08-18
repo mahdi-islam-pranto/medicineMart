@@ -9,15 +9,15 @@ class MedicineCubit extends Cubit<MedicineState> {
   /// Load medicines data
   Future<void> loadMedicines() async {
     emit(const MedicineLoading());
-    
+
     try {
       // Simulate API call delay
       await Future.delayed(const Duration(milliseconds: 500));
-      
+
       // Sample medicine data - In a real app, this would come from an API
       final medicines = _getSampleMedicines();
       final brands = _extractBrands(medicines);
-      
+
       emit(MedicineLoaded(
         medicines: medicines,
         brands: brands,
@@ -32,22 +32,23 @@ class MedicineCubit extends Cubit<MedicineState> {
     final currentState = state;
     if (currentState is MedicineLoaded) {
       emit(currentState.copyWith(isRefreshing: true));
-      
+
       try {
         // Simulate API call delay
         await Future.delayed(const Duration(milliseconds: 1000));
-        
+
         // Reload data
         final medicines = _getSampleMedicines();
         final brands = _extractBrands(medicines);
-        
+
         emit(currentState.copyWith(
           medicines: medicines,
           brands: brands,
           isRefreshing: false,
         ));
       } catch (e) {
-        emit(MedicineError(message: 'Failed to refresh medicines: ${e.toString()}'));
+        emit(MedicineError(
+            message: 'Failed to refresh medicines: ${e.toString()}'));
       }
     } else {
       // If not loaded, just load normally
@@ -117,7 +118,8 @@ class MedicineCubit extends Cubit<MedicineState> {
         brand: 'Square',
         regularPrice: 500.00,
         discountPrice: 410.00,
-        imageUrl: 'https://via.placeholder.com/150x150/E3F2FD/1976D2?text=ACIPRO',
+        imageUrl:
+            'https://via.placeholder.com/150x150/E3F2FD/1976D2?text=ACIPRO',
         description: 'Pain relief and fever reducer',
         requiresPrescription: false,
       ),
@@ -139,7 +141,8 @@ class MedicineCubit extends Cubit<MedicineState> {
         brand: 'Renata',
         regularPrice: 360.00,
         discountPrice: 230.00,
-        imageUrl: 'https://via.placeholder.com/150x150/E8F5E8/4CAF50?text=SYRUP',
+        imageUrl:
+            'https://via.placeholder.com/150x150/E8F5E8/4CAF50?text=SYRUP',
         description: 'Antihistamine for allergies',
         requiresPrescription: false,
       ),
@@ -171,7 +174,8 @@ class MedicineCubit extends Cubit<MedicineState> {
         brand: 'Renata',
         regularPrice: 630.00,
         discountPrice: 500.00,
-        imageUrl: 'https://via.placeholder.com/150x150/FCE4EC/E91E63?text=SYRUP',
+        imageUrl:
+            'https://via.placeholder.com/150x150/FCE4EC/E91E63?text=SYRUP',
         description: 'Vitamin B complex syrup',
         requiresPrescription: false,
       ),
