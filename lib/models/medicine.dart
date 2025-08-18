@@ -11,6 +11,7 @@ class Medicine extends Equatable {
   final String? imageUrl;
   final String description;
   final bool requiresPrescription;
+  final List<int> quantityOptions;
 
   const Medicine({
     required this.id,
@@ -22,6 +23,7 @@ class Medicine extends Equatable {
     this.imageUrl,
     required this.description,
     this.requiresPrescription = false,
+    this.quantityOptions = const [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
   });
 
   /// Calculate discount percentage
@@ -34,7 +36,8 @@ class Medicine extends Equatable {
   double get effectivePrice => discountPrice ?? regularPrice;
 
   /// Check if medicine has discount
-  bool get hasDiscount => discountPrice != null && discountPrice! < regularPrice;
+  bool get hasDiscount =>
+      discountPrice != null && discountPrice! < regularPrice;
 
   /// Create a copy of this medicine with updated fields
   Medicine copyWith({
@@ -47,6 +50,7 @@ class Medicine extends Equatable {
     String? imageUrl,
     String? description,
     bool? requiresPrescription,
+    List<int>? quantityOptions,
   }) {
     return Medicine(
       id: id ?? this.id,
@@ -58,6 +62,7 @@ class Medicine extends Equatable {
       imageUrl: imageUrl ?? this.imageUrl,
       description: description ?? this.description,
       requiresPrescription: requiresPrescription ?? this.requiresPrescription,
+      quantityOptions: quantityOptions ?? this.quantityOptions,
     );
   }
 
@@ -73,6 +78,7 @@ class Medicine extends Equatable {
       'imageUrl': imageUrl,
       'description': description,
       'requiresPrescription': requiresPrescription,
+      'quantityOptions': quantityOptions,
     };
   }
 
@@ -84,12 +90,15 @@ class Medicine extends Equatable {
       quantity: json['quantity'] as String,
       brand: json['brand'] as String,
       regularPrice: (json['regularPrice'] as num).toDouble(),
-      discountPrice: json['discountPrice'] != null 
-          ? (json['discountPrice'] as num).toDouble() 
+      discountPrice: json['discountPrice'] != null
+          ? (json['discountPrice'] as num).toDouble()
           : null,
       imageUrl: json['imageUrl'] as String?,
       description: json['description'] as String,
       requiresPrescription: json['requiresPrescription'] as bool? ?? false,
+      quantityOptions: json['quantityOptions'] != null
+          ? List<int>.from(json['quantityOptions'] as List)
+          : const [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
     );
   }
 
@@ -104,6 +113,7 @@ class Medicine extends Equatable {
         imageUrl,
         description,
         requiresPrescription,
+        quantityOptions,
       ];
 
   @override

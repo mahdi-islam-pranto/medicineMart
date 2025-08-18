@@ -106,7 +106,8 @@ class ExploreProductsCubit extends Cubit<ExploreProductsState> {
         currentFilter: initialFilter,
       ));
     } catch (e) {
-      emit(ExploreProductsError(message: 'Failed to load products: ${e.toString()}'));
+      emit(ExploreProductsError(
+          message: 'Failed to load products: ${e.toString()}'));
     }
   }
 
@@ -135,7 +136,8 @@ class ExploreProductsCubit extends Cubit<ExploreProductsState> {
   void updateProductCategory(ProductCategory category) {
     final currentState = state;
     if (currentState is ExploreProductsLoaded) {
-      final newFilter = currentState.currentFilter.copyWith(productCategory: category);
+      final newFilter =
+          currentState.currentFilter.copyWith(productCategory: category);
       applyFilter(newFilter);
     }
   }
@@ -199,19 +201,24 @@ class ExploreProductsCubit extends Cubit<ExploreProductsState> {
   }
 
   /// Apply product category filter (All, Trending, Special Offer, New Product)
-  List<Medicine> _applyProductCategoryFilter(List<Medicine> products, ProductCategory category) {
+  List<Medicine> _applyProductCategoryFilter(
+      List<Medicine> products, ProductCategory category) {
     switch (category) {
       case ProductCategory.all:
         return products;
       case ProductCategory.trending:
         // For demo, return products with high discount or popular brands
-        return products.where((p) => p.discountPercentage > 20 || p.brand == 'Square').toList();
+        return products
+            .where((p) => p.discountPercentage > 20 || p.brand == 'Square')
+            .toList();
       case ProductCategory.specialOffer:
         // Return products with discounts
         return products.where((p) => p.hasDiscount).toList();
       case ProductCategory.newProduct:
         // For demo, return last few products as "new"
-        return products.length > 3 ? products.sublist(products.length - 3) : products;
+        return products.length > 3
+            ? products.sublist(products.length - 3)
+            : products;
     }
   }
 
@@ -233,10 +240,12 @@ class ExploreProductsCubit extends Cubit<ExploreProductsState> {
         sorted.sort((a, b) => b.effectivePrice.compareTo(a.effectivePrice));
         break;
       case SortOption.discountHighToLow:
-        sorted.sort((a, b) => b.discountPercentage.compareTo(a.discountPercentage));
+        sorted.sort(
+            (a, b) => b.discountPercentage.compareTo(a.discountPercentage));
         break;
       case SortOption.discountLowToHigh:
-        sorted.sort((a, b) => a.discountPercentage.compareTo(b.discountPercentage));
+        sorted.sort(
+            (a, b) => a.discountPercentage.compareTo(b.discountPercentage));
         break;
       case SortOption.deliveryDate1:
       case SortOption.deliveryDate2:
@@ -254,46 +263,53 @@ class ExploreProductsCubit extends Cubit<ExploreProductsState> {
       const Medicine(
         id: '1',
         name: '3 F 500 (20 Pcs) 500 mg',
-        quantity: '20 Pcs',
+        quantity: 'Strip',
         brand: 'Levofloxacin Hemihydrate Edruc Ltd.',
         regularPrice: 320.00,
         discountPrice: 154.22,
-        imageUrl: 'https://via.placeholder.com/150x150/E3F2FD/1976D2?text=3F500',
+        imageUrl:
+            'https://via.placeholder.com/150x150/E3F2FD/1976D2?text=3F500',
         description: 'Tablet - Levofloxacin Hemihydrate',
         requiresPrescription: false,
+        quantityOptions: [1, 2, 3, 5, 10, 15, 20],
       ),
       const Medicine(
         id: '2',
         name: '3-C 200 (3 C 200) (12 Pcs) 200 mg',
-        quantity: '12 Pcs',
+        quantity: 'Strip',
         brand: 'Cefixime Trihydrate Edruc Ltd.',
         regularPrice: 420.00,
         discountPrice: 203.98,
-        imageUrl: 'https://via.placeholder.com/150x150/FFF3E0/F57C00?text=3C200',
+        imageUrl:
+            'https://via.placeholder.com/150x150/FFF3E0/F57C00?text=3C200',
         description: 'Capsule - Cefixime Trihydrate',
         requiresPrescription: true,
+        quantityOptions: [1, 2, 3, 5, 10],
       ),
       const Medicine(
         id: '3',
         name: '3rd cef 200 (12 pcs) 200mg',
-        quantity: '12 pcs',
+        quantity: 'Strip',
         brand: 'Cefixime Medimet Pharmaceuticals LTD.',
         regularPrice: 324.00,
         discountPrice: 159.2,
-        imageUrl: 'https://via.placeholder.com/150x150/E8F5E8/4CAF50?text=3RDCEF',
+        imageUrl:
+            'https://via.placeholder.com/150x150/E8F5E8/4CAF50?text=3RDCEF',
         description: 'Tablet - Cefixime',
         requiresPrescription: false,
+        quantityOptions: [1, 2, 3, 5, 10, 15],
       ),
       const Medicine(
         id: '4',
         name: 'A B1 100 (100 Pcs) 100 mg',
-        quantity: '100 Pcs',
+        quantity: 'Bottle',
         brand: 'Thiamine Hydrochloride Acme Laboratories LTD.',
         regularPrice: 250.00,
         discountPrice: 215.00,
         imageUrl: 'https://via.placeholder.com/150x150/FFF8E1/FFC107?text=AB1',
         description: 'Tablet - Thiamine Hydrochloride',
         requiresPrescription: false,
+        quantityOptions: [1, 2, 3, 6, 12],
       ),
       // Add more sample products for better demo
       const Medicine(
@@ -305,17 +321,20 @@ class ExploreProductsCubit extends Cubit<ExploreProductsState> {
         imageUrl: 'https://via.placeholder.com/150x150/E1F5FE/0277BD?text=NAPA',
         description: 'Paracetamol for pain and fever',
         requiresPrescription: false,
+        quantityOptions: [1, 3, 5, 10, 20, 30, 50],
       ),
       const Medicine(
         id: '6',
         name: 'Syrup- Reneta-B',
-        quantity: '250ml',
+        quantity: 'Bottle',
         brand: 'Renata',
         regularPrice: 630.00,
         discountPrice: 500.00,
-        imageUrl: 'https://via.placeholder.com/150x150/FCE4EC/E91E63?text=SYRUP',
+        imageUrl:
+            'https://via.placeholder.com/150x150/FCE4EC/E91E63?text=SYRUP',
         description: 'Vitamin B complex syrup',
         requiresPrescription: false,
+        quantityOptions: [1, 2, 3, 4, 5],
       ),
       const Medicine(
         id: '7',

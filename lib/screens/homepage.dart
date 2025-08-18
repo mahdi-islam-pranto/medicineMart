@@ -178,7 +178,7 @@ class _HomePageState extends State<HomePage> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Text(
-                'Shop by Brand',
+                'Menufacturers',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w600,

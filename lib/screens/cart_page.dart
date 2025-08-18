@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../theme/app_colors.dart';
 import '../bloc/bloc.dart';
 import '../models/models.dart';
+import '../widgets/quantity_selector.dart';
 
 /// CartPage - Shopping cart with checkout functionality
 ///
@@ -243,57 +244,56 @@ class CartPage extends StatelessWidget {
                 const SizedBox(height: 8),
 
                 // Quantity controls
-                Container(
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Column(
-                    children: [
-                      Builder(
-                        builder: (context) => GestureDetector(
-                          onTap: () => context
-                              .read<CartCubit>()
-                              .updateQuantity(item.id, item.cartQuantity + 1),
-                          child: Container(
-                            padding: const EdgeInsets.all(4),
-                            child: const Icon(
-                              Icons.add,
+                Builder(
+                  builder: (context) => GestureDetector(
+                    onTap: () => _showQuantitySelector(context, item),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: AppColors.primary.withOpacity(0.3),
+                          width: 1,
+                        ),
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // Current quantity
+                          Text(
+                            '${item.cartQuantity}',
+                            style: const TextStyle(
                               color: AppColors.primary,
-                              size: 16,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
-                        ),
-                      ),
-                      Text(
-                        '${item.cartQuantity}',
-                        style: const TextStyle(
-                          color: AppColors.primary,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      Builder(
-                        builder: (context) => GestureDetector(
-                          onTap: () {
-                            if (item.cartQuantity > 1) {
-                              context.read<CartCubit>().updateQuantity(
-                                  item.id, item.cartQuantity - 1);
-                            }
-                          },
-                          child: Container(
-                            padding: const EdgeInsets.all(4),
-                            child: Icon(
-                              Icons.remove,
-                              color: item.cartQuantity > 1
-                                  ? AppColors.primary
-                                  : AppColors.textSecondary,
-                              size: 16,
+
+                          const SizedBox(height: 2),
+
+                          // Unit name
+                          Text(
+                            item.quantity,
+                            style: const TextStyle(
+                              color: AppColors.primary,
+                              fontSize: 10,
+                              fontWeight: FontWeight.w500,
                             ),
                           ),
-                        ),
+
+                          const SizedBox(height: 2),
+
+                          // Edit icon
+                          const Icon(
+                            Icons.edit,
+                            color: AppColors.primary,
+                            size: 12,
+                          ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
                 ),
               ],
@@ -457,6 +457,22 @@ class CartPage extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  /// Shows the quantity selector bottom sheet for cart items
+  void _showQuantitySelector(BuildContext context, CartItem item) {
+    // Default quantity options for cart items
+    const quantityOptions = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 30, 50];
+
+    showQuantitySelector(
+      context: context,
+      quantityOptions: quantityOptions,
+      selectedQuantity: item.cartQuantity,
+      unitName: item.quantity,
+      onQuantitySelected: (quantity) {
+        context.read<CartCubit>().updateQuantity(item.id, quantity);
+      },
     );
   }
 }

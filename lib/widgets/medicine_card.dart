@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 import '../models/models.dart';
+import 'quantity_selector.dart';
 
 /// MedicineCard - A modern horizontal card widget for displaying medicine information
 ///
@@ -34,8 +35,6 @@ class MedicineCard extends StatefulWidget {
 }
 
 class _MedicineCardState extends State<MedicineCard> {
-  int _selectedQuantity = 1;
-
   @override
   Widget build(BuildContext context) {
     // Get screen dimensions for responsive design
@@ -275,71 +274,60 @@ class _MedicineCardState extends State<MedicineCard> {
   /// Builds cart button with quantity controls or add button
   Widget _buildCartButton() {
     if (widget.cartQuantity > 0) {
-      // Show quantity controls when item is in cart
-      return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-        decoration: BoxDecoration(
-          color: AppColors.primary.withOpacity(0.1),
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: AppColors.primary.withOpacity(0.3),
-            width: 1,
+      // Show quantity display and edit button when item is in cart
+      return GestureDetector(
+        onTap: () => _showQuantitySelector(),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+          decoration: BoxDecoration(
+            color: AppColors.primary.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: AppColors.primary.withOpacity(0.3),
+              width: 1,
+            ),
           ),
-        ),
-        child: Column(
-          children: [
-            // Increase quantity
-            GestureDetector(
-              onTap: () {
-                widget.onAddToCart(widget.medicine, widget.cartQuantity + 1);
-              },
-              child: Container(
-                padding: const EdgeInsets.all(4),
-                child: const Icon(
-                  Icons.add,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Current quantity
+              Text(
+                '${widget.cartQuantity}',
+                style: const TextStyle(
                   color: AppColors.primary,
-                  size: 14,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
-            ),
 
-            // Current quantity
-            Text(
-              '${widget.cartQuantity}',
-              style: const TextStyle(
+              const SizedBox(height: 2),
+
+              // Unit name
+              Text(
+                widget.medicine.quantity,
+                style: const TextStyle(
+                  color: AppColors.primary,
+                  fontSize: 10,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+
+              const SizedBox(height: 2),
+
+              // Edit icon
+              const Icon(
+                Icons.edit,
                 color: AppColors.primary,
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
+                size: 12,
               ),
-            ),
-
-            // Decrease quantity
-            GestureDetector(
-              onTap: () {
-                if (widget.cartQuantity > 1) {
-                  widget.onAddToCart(widget.medicine, widget.cartQuantity - 1);
-                } else {
-                  widget.onAddToCart(widget.medicine, 0); // Remove from cart
-                }
-              },
-              child: Container(
-                padding: const EdgeInsets.all(4),
-                child: Icon(
-                  widget.cartQuantity > 1 ? Icons.remove : Icons.delete_outline,
-                  color: AppColors.primary,
-                  size: 14,
-                ),
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       );
     } else {
       // Show add to cart button when item is not in cart
       return GestureDetector(
-        onTap: () {
-          widget.onAddToCart(widget.medicine, _selectedQuantity);
-        },
+        onTap: () => _showQuantitySelector(),
         child: Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
@@ -361,5 +349,18 @@ class _MedicineCardState extends State<MedicineCard> {
         ),
       );
     }
+  }
+
+  /// Shows the quantity selector bottom sheet
+  void _showQuantitySelector() {
+    showQuantitySelector(
+      context: context,
+      quantityOptions: widget.medicine.quantityOptions,
+      selectedQuantity: widget.cartQuantity > 0 ? widget.cartQuantity : 1,
+      unitName: widget.medicine.quantity,
+      onQuantitySelected: (quantity) {
+        widget.onAddToCart(widget.medicine, quantity);
+      },
+    );
   }
 }
