@@ -7,6 +7,7 @@ import 'explore_products_page.dart';
 import 'cart_page.dart';
 import 'favorites_page.dart';
 import 'profile_page.dart';
+import 'auth/login_screen.dart';
 
 /// MainNavigation - The main navigation wrapper with bottom navigation bar
 ///
@@ -35,6 +36,20 @@ class MainNavigation extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocListener(
       listeners: [
+        // Listen to authentication state changes
+        BlocListener<AuthCubit, AuthState>(
+          listener: (context, state) {
+            if (state is AuthUnauthenticated) {
+              // Navigate to login screen when user logs out
+              Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(
+                  builder: (context) => const LoginScreen(),
+                ),
+                (route) => false, // Remove all previous routes
+              );
+            }
+          },
+        ),
         BlocListener<CartCubit, CartState>(
           listener: (context, state) {
             if (state is CartLoaded) {

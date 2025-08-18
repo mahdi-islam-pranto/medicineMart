@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../theme/app_colors.dart';
+import '../bloc/bloc.dart';
 
 /// ProfilePage - User profile and account management
 ///
@@ -84,67 +86,75 @@ class _ProfilePageState extends State<ProfilePage> {
       ),
       child: Padding(
         padding: const EdgeInsets.fromLTRB(24, 0, 24, 32),
-        child: Column(
-          children: [
-            // Profile picture
-            Container(
-              width: 80,
-              height: 80,
-              decoration: BoxDecoration(
-                color: AppColors.textOnPrimary,
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.shadowMedium.withOpacity(0.3),
-                    offset: const Offset(0, 4),
-                    blurRadius: 12,
-                  ),
-                ],
-              ),
-              child: const Icon(
-                Icons.person,
-                size: 40,
-                color: AppColors.primary,
-              ),
-            ),
+        child: BlocBuilder<AuthCubit, AuthState>(
+          builder: (context, state) {
+            // Get user info from auth state
+            final user = state.user;
+            final userName = user?.fullName ?? 'Pharmacy Owner';
+            final pharmacyName = user?.pharmacyName ?? 'Your Pharmacy';
 
-            const SizedBox(height: 16),
-
-            // User name
-            const Text(
-              'John Doe',
-              style: TextStyle(
-                color: AppColors.textOnPrimary,
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-
-            const SizedBox(height: 4),
-
-            // User email
-            const Text(
-              'john.doe@example.com',
-              style: TextStyle(
-                color: AppColors.textOnPrimary,
-                fontSize: 14,
-                // opacity: 0.8,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-
-            const SizedBox(height: 16),
-
-            // Stats row
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            return Column(
               children: [
-                _buildStatItem('Orders', '12'),
-                _buildStatItem('Favorites', '5'),
-                _buildStatItem('Reviews', '8'),
+                // Profile picture
+                Container(
+                  width: 80,
+                  height: 80,
+                  decoration: BoxDecoration(
+                    color: AppColors.textOnPrimary,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.shadowMedium.withOpacity(0.3),
+                        offset: const Offset(0, 4),
+                        blurRadius: 12,
+                      ),
+                    ],
+                  ),
+                  child: const Icon(
+                    Icons.local_pharmacy,
+                    size: 40,
+                    color: AppColors.primary,
+                  ),
+                ),
+
+                const SizedBox(height: 16),
+
+                // User name
+                Text(
+                  userName,
+                  style: const TextStyle(
+                    color: AppColors.textOnPrimary,
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+
+                const SizedBox(height: 4),
+
+                // Pharmacy name
+                Text(
+                  pharmacyName,
+                  style: const TextStyle(
+                    color: AppColors.textOnPrimary,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+
+                const SizedBox(height: 16),
+
+                // Stats row
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    _buildStatItem('Orders', '12'),
+                    _buildStatItem('Favorites', '5'),
+                    _buildStatItem('Reviews', '8'),
+                  ],
+                ),
               ],
-            ),
-          ],
+            );
+          },
         ),
       ),
     );
@@ -406,6 +416,8 @@ class _ProfilePageState extends State<ProfilePage> {
           ElevatedButton(
             onPressed: () {
               Navigator.pop(context);
+              // Call the AuthCubit logout method
+              context.read<AuthCubit>().logout();
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
                   content: Text('Logged out successfully'),
