@@ -2,6 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../theme/app_colors.dart';
 import '../screens/categories_page.dart';
+import '../screens/drawer_pages/my_orders_page.dart';
+import '../screens/drawer_pages/trending_products_page.dart';
+import '../screens/drawer_pages/offers_discounts_page.dart';
+import '../screens/drawer_pages/notifications_page.dart';
+import '../screens/drawer_pages/help_support_page.dart';
+import '../screens/drawer_pages/feedback_page.dart';
+import '../screens/drawer_pages/about_us_page.dart';
 import '../bloc/bloc.dart';
 import 'drawer_header_widget.dart';
 import 'drawer_item.dart';
@@ -45,46 +52,25 @@ class AppDrawer extends StatelessWidget {
                 _buildSectionHeader('Main Menu'),
 
                 DrawerItem(
-                  icon: Icons.category_outlined,
-                  selectedIcon: Icons.category,
-                  title: 'Categories',
-                  subtitle: 'Browse by medicine categories',
+                  icon: Icons.shopping_bag_outlined,
+                  selectedIcon: Icons.shopping_bag,
+                  title: 'My Orders',
+                  subtitle: 'Track your orders',
                   onTap: () {
                     Navigator.pop(context);
-                    _navigateToCategories(context);
+                    _navigateToMyOrders(context);
                   },
                 ),
 
                 DrawerItem(
-                  icon: Icons.upload_file_outlined,
-                  selectedIcon: Icons.upload_file,
-                  title: 'Upload Prescription',
-                  subtitle: 'Get medicines delivered',
+                  icon: Icons.trending_up_outlined,
+                  selectedIcon: Icons.trending_up,
+                  title: 'Trending Products',
+                  subtitle: 'Popular medicines',
+                  badge: 'Hot',
                   onTap: () {
                     Navigator.pop(context);
-                    // Navigate to upload prescription screen
-                  },
-                ),
-
-                DrawerItem(
-                  icon: Icons.shopping_cart_outlined,
-                  selectedIcon: Icons.shopping_cart,
-                  title: 'Supplements',
-                  subtitle: 'Health & wellness products',
-                  onTap: () {
-                    Navigator.pop(context);
-                    // Navigate to supplements screen
-                  },
-                ),
-
-                DrawerItem(
-                  icon: Icons.person_outline,
-                  selectedIcon: Icons.person,
-                  title: 'My Profile',
-                  subtitle: 'Manage your account',
-                  onTap: () {
-                    Navigator.pop(context);
-                    // Navigate to profile screen
+                    _navigateToTrendingProducts(context);
                   },
                 ),
 
@@ -96,7 +82,19 @@ class AppDrawer extends StatelessWidget {
                   badge: '3 New',
                   onTap: () {
                     Navigator.pop(context);
-                    // Navigate to offers screen
+                    _navigateToOffersDiscounts(context);
+                  },
+                ),
+
+                DrawerItem(
+                  icon: Icons.notifications_outlined,
+                  selectedIcon: Icons.notifications,
+                  title: 'Notifications',
+                  subtitle: 'Stay updated',
+                  badge: '5',
+                  onTap: () {
+                    Navigator.pop(context);
+                    _navigateToNotifications(context);
                   },
                 ),
 
@@ -111,7 +109,18 @@ class AppDrawer extends StatelessWidget {
                   subtitle: '24/7 customer service',
                   onTap: () {
                     Navigator.pop(context);
-                    // Navigate to help screen
+                    _navigateToHelpSupport(context);
+                  },
+                ),
+
+                DrawerItem(
+                  icon: Icons.feedback_outlined,
+                  selectedIcon: Icons.feedback,
+                  title: 'Feedback',
+                  subtitle: 'Share your thoughts',
+                  onTap: () {
+                    Navigator.pop(context);
+                    _navigateToFeedback(context);
                   },
                 ),
 
@@ -122,7 +131,7 @@ class AppDrawer extends StatelessWidget {
                   subtitle: 'Learn more about our app',
                   onTap: () {
                     Navigator.pop(context);
-                    // Navigate to about screen
+                    _navigateToAboutUs(context);
                   },
                 ),
               ],
@@ -283,6 +292,76 @@ class AppDrawer extends StatelessWidget {
           create: (context) => CategoriesCubit()..loadCategories(),
           child: const CategoriesPage(),
         ),
+      ),
+    );
+  }
+
+  /// Navigates to the My Orders page
+  void _navigateToMyOrders(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const MyOrdersPage(),
+      ),
+    );
+  }
+
+  /// Navigates to the Trending Products page
+  void _navigateToTrendingProducts(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const TrendingProductsPage(),
+      ),
+    );
+  }
+
+  /// Navigates to the Offers & Discounts page
+  void _navigateToOffersDiscounts(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const OffersDiscountsPage(),
+      ),
+    );
+  }
+
+  /// Navigates to the Notifications page
+  void _navigateToNotifications(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const NotificationsPage(),
+      ),
+    );
+  }
+
+  /// Navigates to the Help & Support page
+  void _navigateToHelpSupport(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const HelpSupportPage(),
+      ),
+    );
+  }
+
+  /// Navigates to the Feedback page
+  void _navigateToFeedback(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const FeedbackPage(),
+      ),
+    );
+  }
+
+  /// Navigates to the About Us page
+  void _navigateToAboutUs(BuildContext context) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const AboutUsPage(),
       ),
     );
   }
