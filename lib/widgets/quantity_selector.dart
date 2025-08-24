@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../theme/app_colors.dart';
 
 /// QuantitySelector - A modern quantity selection widget with bottom sheet
@@ -6,6 +7,7 @@ import '../theme/app_colors.dart';
 /// This widget provides:
 /// - Modern bottom sheet design similar to the provided screenshot
 /// - Radio button selection for different quantities
+/// - Custom quantity input option
 /// - Apply and Cancel buttons
 /// - Smooth animations and professional styling
 /// - Customizable quantity options
@@ -29,11 +31,166 @@ class QuantitySelector extends StatefulWidget {
 
 class _QuantitySelectorState extends State<QuantitySelector> {
   late int _tempSelectedQuantity;
+  bool _isCustomQuantitySelected = false;
+  final TextEditingController _customQuantityController =
+      TextEditingController();
+  final FocusNode _customQuantityFocusNode = FocusNode();
 
   @override
   void initState() {
     super.initState();
     _tempSelectedQuantity = widget.selectedQuantity;
+
+    // Check if selected quantity is in predefined options
+    if (!widget.quantityOptions.contains(widget.selectedQuantity)) {
+      _isCustomQuantitySelected = true;
+      _customQuantityController.text = widget.selectedQuantity.toString();
+    }
+  }
+
+  @override
+  void dispose() {
+    _customQuantityController.dispose();
+    _customQuantityFocusNode.dispose();
+    super.dispose();
+  }
+
+  /// Builds the custom quantity input option
+  Widget _buildCustomQuantityOption() {
+    return Container(
+      margin: const EdgeInsets.symmetric(
+        horizontal: 20,
+        vertical: 4,
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {
+            setState(() {
+              _isCustomQuantitySelected = true;
+              _customQuantityFocusNode.requestFocus();
+            });
+          },
+          borderRadius: BorderRadius.circular(12),
+          child: Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 16,
+            ),
+            child: Row(
+              children: [
+                // Radio button
+                Container(
+                  width: 20,
+                  height: 20,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: _isCustomQuantitySelected
+                          ? AppColors.primary
+                          : AppColors.textSecondary.withOpacity(0.4),
+                      width: 2,
+                    ),
+                    color: _isCustomQuantitySelected
+                        ? AppColors.primary
+                        : Colors.transparent,
+                  ),
+                  child: _isCustomQuantitySelected
+                      ? const Icon(
+                          Icons.circle,
+                          size: 8,
+                          color: AppColors.textOnPrimary,
+                        )
+                      : null,
+                ),
+
+                const SizedBox(width: 16),
+
+                // Custom quantity input
+                Expanded(
+                  child: Row(
+                    children: [
+                      Text(
+                        'Custom: ',
+                        style: TextStyle(
+                          color: _isCustomQuantitySelected
+                              ? AppColors.primary
+                              : AppColors.textPrimary,
+                          fontSize: 16,
+                          fontWeight: _isCustomQuantitySelected
+                              ? FontWeight.w600
+                              : FontWeight.w400,
+                        ),
+                      ),
+                      Expanded(
+                        child: TextField(
+                          controller: _customQuantityController,
+                          focusNode: _customQuantityFocusNode,
+                          keyboardType: TextInputType.number,
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                          ],
+                          style: TextStyle(
+                            color: _isCustomQuantitySelected
+                                ? AppColors.primary
+                                : AppColors.textPrimary,
+                            fontSize: 16,
+                            fontWeight: _isCustomQuantitySelected
+                                ? FontWeight.w600
+                                : FontWeight.w400,
+                          ),
+                          decoration: InputDecoration(
+                            hintText: 'Enter quantity',
+                            hintStyle: TextStyle(
+                              color: AppColors.textSecondary.withOpacity(0.6),
+                              fontSize: 16,
+                            ),
+                            border: InputBorder.none,
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 0,
+                            ),
+                          ),
+                          onTap: () {
+                            setState(() {
+                              _isCustomQuantitySelected = true;
+                            });
+                          },
+                          onChanged: (value) {
+                            setState(() {
+                              _isCustomQuantitySelected = true;
+                              if (value.isNotEmpty) {
+                                final customQuantity = int.tryParse(value);
+                                if (customQuantity != null &&
+                                    customQuantity > 0) {
+                                  _tempSelectedQuantity = customQuantity;
+                                }
+                              }
+                            });
+                          },
+                        ),
+                      ),
+                      Text(
+                        ' ${widget.unitName}${(_tempSelectedQuantity > 1 && _isCustomQuantitySelected) ? 's' : ''}',
+                        style: TextStyle(
+                          color: _isCustomQuantitySelected
+                              ? AppColors.primary
+                              : AppColors.textPrimary,
+                          fontSize: 16,
+                          fontWeight: _isCustomQuantitySelected
+                              ? FontWeight.w600
+                              : FontWeight.w400,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   @override
@@ -62,9 +219,9 @@ class _QuantitySelectorState extends State<QuantitySelector> {
           const SizedBox(height: 20),
 
           // Title
-          Text(
+          const Text(
             'Select Quantity',
-            style: const TextStyle(
+            style: TextStyle(
               color: AppColors.textPrimary,
               fontSize: 18,
               fontWeight: FontWeight.w600,
@@ -77,81 +234,89 @@ class _QuantitySelectorState extends State<QuantitySelector> {
           Flexible(
             child: Container(
               constraints: const BoxConstraints(maxHeight: 400),
-              child: ListView.builder(
+              child: ListView(
                 shrinkWrap: true,
-                itemCount: widget.quantityOptions.length,
-                itemBuilder: (context, index) {
-                  final quantity = widget.quantityOptions[index];
-                  final isSelected = quantity == _tempSelectedQuantity;
+                children: [
+                  // Predefined quantity options
+                  ...widget.quantityOptions.map((quantity) {
+                    final isSelected = quantity == _tempSelectedQuantity &&
+                        !_isCustomQuantitySelected;
 
-                  return Container(
-                    margin: const EdgeInsets.symmetric(
-                      horizontal: 20,
-                      vertical: 4,
-                    ),
-                    child: Material(
-                      color: Colors.transparent,
-                      child: InkWell(
-                        onTap: () {
-                          setState(() {
-                            _tempSelectedQuantity = quantity;
-                          });
-                        },
-                        borderRadius: BorderRadius.circular(12),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 16,
-                            vertical: 16,
-                          ),
-                          child: Row(
-                            children: [
-                              // Radio button
-                              Container(
-                                width: 20,
-                                height: 20,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  border: Border.all(
+                    return Container(
+                      margin: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 4,
+                      ),
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: () {
+                            setState(() {
+                              _tempSelectedQuantity = quantity;
+                              _isCustomQuantitySelected = false;
+                              _customQuantityFocusNode.unfocus();
+                            });
+                          },
+                          borderRadius: BorderRadius.circular(12),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 16,
+                            ),
+                            child: Row(
+                              children: [
+                                // Radio button
+                                Container(
+                                  width: 20,
+                                  height: 20,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: isSelected
+                                          ? AppColors.primary
+                                          : AppColors.textSecondary
+                                              .withOpacity(0.4),
+                                      width: 2,
+                                    ),
                                     color: isSelected
                                         ? AppColors.primary
-                                        : AppColors.textSecondary.withOpacity(0.4),
-                                    width: 2,
+                                        : Colors.transparent,
                                   ),
-                                  color: isSelected
-                                      ? AppColors.primary
-                                      : Colors.transparent,
+                                  child: isSelected
+                                      ? const Icon(
+                                          Icons.circle,
+                                          size: 8,
+                                          color: AppColors.textOnPrimary,
+                                        )
+                                      : null,
                                 ),
-                                child: isSelected
-                                    ? const Icon(
-                                        Icons.circle,
-                                        size: 8,
-                                        color: AppColors.textOnPrimary,
-                                      )
-                                    : null,
-                              ),
 
-                              const SizedBox(width: 16),
+                                const SizedBox(width: 16),
 
-                              // Quantity text
-                              Text(
-                                '$quantity ${widget.unitName}${quantity > 1 ? 's' : ''}',
-                                style: TextStyle(
-                                  color: isSelected
-                                      ? AppColors.primary
-                                      : AppColors.textPrimary,
-                                  fontSize: 16,
-                                  fontWeight: isSelected
-                                      ? FontWeight.w600
-                                      : FontWeight.w400,
+                                // Quantity text
+                                Text(
+                                  '$quantity ${widget.unitName}${quantity > 1 ? 's' : ''}',
+                                  style: TextStyle(
+                                    color: isSelected
+                                        ? AppColors.primary
+                                        : AppColors.textPrimary,
+                                    fontSize: 16,
+                                    fontWeight: isSelected
+                                        ? FontWeight.w600
+                                        : FontWeight.w400,
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  );
-                },
+                    );
+                  }),
+
+                  // Custom quantity option
+                  _buildCustomQuantityOption(),
+                ],
               ),
             ),
           ),
@@ -168,7 +333,39 @@ class _QuantitySelectorState extends State<QuantitySelector> {
                   width: double.infinity,
                   child: ElevatedButton(
                     onPressed: () {
-                      widget.onQuantitySelected(_tempSelectedQuantity);
+                      int finalQuantity = _tempSelectedQuantity;
+
+                      // If custom quantity is selected, validate the input
+                      if (_isCustomQuantitySelected) {
+                        final customText =
+                            _customQuantityController.text.trim();
+                        if (customText.isEmpty) {
+                          // Show error if custom field is empty
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Please enter a quantity'),
+                              backgroundColor: AppColors.error,
+                            ),
+                          );
+                          return;
+                        }
+
+                        final customQuantity = int.tryParse(customText);
+                        if (customQuantity == null || customQuantity <= 0) {
+                          // Show error if invalid quantity
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Please enter a valid quantity'),
+                              backgroundColor: AppColors.error,
+                            ),
+                          );
+                          return;
+                        }
+
+                        finalQuantity = customQuantity;
+                      }
+
+                      widget.onQuantitySelected(finalQuantity);
                       Navigator.of(context).pop();
                     },
                     style: ElevatedButton.styleFrom(
