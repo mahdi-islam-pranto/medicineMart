@@ -69,21 +69,24 @@ class _HelpSupportPageState extends State<HelpSupportPage> {
                 const SizedBox(height: 16),
                 Row(
                   children: [
-                    Expanded(child: _buildContactOption(
+                    Expanded(
+                        child: _buildContactOption(
                       icon: Icons.phone,
                       title: 'Call Us',
                       subtitle: '24/7 Support',
                       onTap: () => _makePhoneCall(),
                     )),
                     const SizedBox(width: 12),
-                    Expanded(child: _buildContactOption(
+                    Expanded(
+                        child: _buildContactOption(
                       icon: Icons.email,
                       title: 'Email',
                       subtitle: 'support@medicine.com',
                       onTap: () => _sendEmail(),
                     )),
                     const SizedBox(width: 12),
-                    Expanded(child: _buildContactOption(
+                    Expanded(
+                        child: _buildContactOption(
                       icon: Icons.chat,
                       title: 'Live Chat',
                       subtitle: 'Chat with us',
@@ -95,44 +98,6 @@ class _HelpSupportPageState extends State<HelpSupportPage> {
             ),
           ),
 
-          // Search bar
-          Container(
-            padding: const EdgeInsets.all(16),
-            child: TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                hintText: 'Search for help...',
-                prefixIcon: const Icon(Icons.search, color: AppColors.textSecondary),
-                suffixIcon: _searchQuery.isNotEmpty
-                    ? IconButton(
-                        onPressed: () {
-                          _searchController.clear();
-                          setState(() {
-                            _searchQuery = '';
-                          });
-                        },
-                        icon: const Icon(Icons.clear, color: AppColors.textSecondary),
-                      )
-                    : null,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: AppColors.borderLight),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: AppColors.primary),
-                ),
-                filled: true,
-                fillColor: AppColors.surface,
-              ),
-              onChanged: (value) {
-                setState(() {
-                  _searchQuery = value;
-                });
-              },
-            ),
-          ),
-
           // Content
           Expanded(
             child: SingleChildScrollView(
@@ -141,17 +106,17 @@ class _HelpSupportPageState extends State<HelpSupportPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Help categories
-                  _buildSectionTitle('Quick Help'),
+                  // _buildSectionTitle('Quick Help'),
                   const SizedBox(height: 12),
-                  _buildHelpCategories(),
-                  
+                  // _buildHelpCategories(),
+
                   const SizedBox(height: 24),
-                  
+
                   // FAQ section
                   _buildSectionTitle('Frequently Asked Questions'),
                   const SizedBox(height: 12),
                   _buildFaqSection(),
-                  
+
                   const SizedBox(height: 24),
                 ],
               ),
@@ -220,10 +185,26 @@ class _HelpSupportPageState extends State<HelpSupportPage> {
 
   Widget _buildHelpCategories() {
     final categories = [
-      {'icon': Icons.shopping_cart, 'title': 'Orders & Delivery', 'subtitle': 'Track orders, delivery info'},
-      {'icon': Icons.payment, 'title': 'Payment & Refunds', 'subtitle': 'Payment methods, refund policy'},
-      {'icon': Icons.local_pharmacy, 'title': 'Medicines & Prescriptions', 'subtitle': 'Medicine info, prescriptions'},
-      {'icon': Icons.account_circle, 'title': 'Account & Profile', 'subtitle': 'Manage your account'},
+      {
+        'icon': Icons.shopping_cart,
+        'title': 'Orders & Delivery',
+        'subtitle': 'Track orders, delivery info'
+      },
+      {
+        'icon': Icons.payment,
+        'title': 'Payment & Refunds',
+        'subtitle': 'Payment methods, refund policy'
+      },
+      {
+        'icon': Icons.local_pharmacy,
+        'title': 'Medicines & Prescriptions',
+        'subtitle': 'Medicine info, prescriptions'
+      },
+      {
+        'icon': Icons.account_circle,
+        'title': 'Account & Profile',
+        'subtitle': 'Manage your account'
+      },
     ];
 
     return GridView.builder(
@@ -292,13 +273,13 @@ class _HelpSupportPageState extends State<HelpSupportPage> {
 
   Widget _buildFaqSection() {
     final faqs = _getFilteredFaqs();
-    
+
     return Column(
       children: faqs.asMap().entries.map((entry) {
         final index = entry.key;
         final faq = entry.value;
         final isExpanded = _expandedFaqIndex == index;
-        
+
         return Container(
           margin: const EdgeInsets.only(bottom: 8),
           decoration: BoxDecoration(
@@ -353,35 +334,45 @@ class _HelpSupportPageState extends State<HelpSupportPage> {
     final allFaqs = [
       {
         'question': 'How do I place an order?',
-        'answer': 'You can place an order by browsing our products, adding items to cart, and proceeding to checkout. Make sure to provide accurate delivery information.',
+        'answer':
+            'You can place an order by browsing our products, adding items to cart, and proceeding to checkout. Make sure to provide accurate delivery information.',
       },
       {
         'question': 'What payment methods do you accept?',
-        'answer': 'We accept various payment methods including credit/debit cards, mobile banking (bKash, Nagad, Rocket), and cash on delivery.',
+        'answer':
+            'We accept various payment methods including credit/debit cards, mobile banking (bKash, Nagad, Rocket), and cash on delivery.',
       },
       {
         'question': 'How long does delivery take?',
-        'answer': 'Standard delivery takes 1-3 business days within Dhaka and 3-5 business days outside Dhaka. Express delivery is available for urgent orders.',
+        'answer':
+            'Standard delivery takes 1-3 business days within Dhaka and 3-5 business days outside Dhaka. Express delivery is available for urgent orders.',
       },
       {
         'question': 'Can I return medicines?',
-        'answer': 'Due to safety regulations, medicines cannot be returned once delivered. However, if you receive damaged or wrong items, please contact us immediately.',
+        'answer':
+            'Due to safety regulations, medicines cannot be returned once delivered. However, if you receive damaged or wrong items, please contact us immediately.',
       },
       {
         'question': 'Do I need a prescription for all medicines?',
-        'answer': 'Prescription medicines require a valid prescription from a registered doctor. Over-the-counter medicines can be purchased without prescription.',
+        'answer':
+            'Prescription medicines require a valid prescription from a registered doctor. Over-the-counter medicines can be purchased without prescription.',
       },
       {
         'question': 'How do I track my order?',
-        'answer': 'You can track your order from the "My Orders" section in the app or by using the tracking link sent to your email/SMS.',
+        'answer':
+            'You can track your order from the "My Orders" section in the app or by using the tracking link sent to your email/SMS.',
       },
     ];
 
     if (_searchQuery.isEmpty) return allFaqs;
-    
-    return allFaqs.where((faq) =>
-        faq['question']!.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-        faq['answer']!.toLowerCase().contains(_searchQuery.toLowerCase())).toList();
+
+    return allFaqs
+        .where((faq) =>
+            faq['question']!
+                .toLowerCase()
+                .contains(_searchQuery.toLowerCase()) ||
+            faq['answer']!.toLowerCase().contains(_searchQuery.toLowerCase()))
+        .toList();
   }
 
   void _makePhoneCall() async {
@@ -407,7 +398,8 @@ class _HelpSupportPageState extends State<HelpSupportPage> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Live Chat'),
-        content: const Text('Live chat feature will be available soon. Please use phone or email for immediate assistance.'),
+        content: const Text(
+            'Live chat feature will be available soon. Please use phone or email for immediate assistance.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),

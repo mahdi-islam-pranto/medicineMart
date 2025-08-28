@@ -4,6 +4,7 @@ import '../../theme/app_colors.dart';
 import '../../models/models.dart';
 import '../../bloc/bloc.dart';
 import 'register_screen.dart';
+import '../main_navigation.dart';
 
 /// Login screen for pharmacy owners
 ///
@@ -38,6 +39,10 @@ class _LoginScreenState extends State<LoginScreen> {
         listener: (context, state) {
           if (state is AuthLoginError) {
             _showErrorDialog(state.message);
+          } else if (state is AuthAuthenticated) {
+            // Login successful, navigate to main app
+            _showSuccessMessage('Login successful! Welcome back.');
+            _navigateToMainApp();
           }
         },
         child: SafeArea(
@@ -163,16 +168,16 @@ class _LoginScreenState extends State<LoginScreen> {
                   const SizedBox(height: 32),
 
                   // Divider
-                  Row(
+                  const Row(
                     children: [
-                      const Expanded(
+                      Expanded(
                         child: Divider(
                           color: AppColors.borderLight,
                           thickness: 1,
                         ),
                       ),
                       Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        padding: EdgeInsets.symmetric(horizontal: 16),
                         child: Text(
                           'OR',
                           style: TextStyle(
@@ -182,7 +187,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ),
                       ),
-                      const Expanded(
+                      Expanded(
                         child: Divider(
                           color: AppColors.borderLight,
                           thickness: 1,
@@ -303,10 +308,10 @@ class _LoginScreenState extends State<LoginScreen> {
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: AppColors.borderLight),
         boxShadow: [
-          BoxShadow(
+          const BoxShadow(
             color: AppColors.shadowLight,
             blurRadius: 8,
-            offset: const Offset(0, 2),
+            offset: Offset(0, 2),
           ),
         ],
       ),
@@ -343,12 +348,18 @@ class _LoginScreenState extends State<LoginScreen> {
 
   /// Handles login form submission
   void _handleLogin() {
-    // For demo purposes, skip form validation and login directly
+    // Validate the form first
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    // Create login request with form data
     final request = LoginRequest(
       emailOrPhone: _emailOrPhoneController.text.trim(),
       password: _passwordController.text,
     );
 
+    // Call the login API through AuthCubit
     context.read<AuthCubit>().login(request);
   }
 
@@ -357,7 +368,10 @@ class _LoginScreenState extends State<LoginScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Login Error'),
+        title: const Text(
+          'Login Error',
+          style: TextStyle(color: AppColors.error),
+        ),
         content: Text(message),
         actions: [
           TextButton(
@@ -365,6 +379,26 @@ class _LoginScreenState extends State<LoginScreen> {
             child: const Text('OK'),
           ),
         ],
+      ),
+    );
+  }
+
+  /// Shows success message
+  void _showSuccessMessage(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.green,
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
+  /// Navigate to main app
+  void _navigateToMainApp() {
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder: (context) => const MainNavigation(),
       ),
     );
   }

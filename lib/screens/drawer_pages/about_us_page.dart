@@ -53,7 +53,7 @@ class AboutUsPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
                   const Text(
-                    'Online Medicine',
+                    'Health & Medicine',
                     style: TextStyle(
                       color: AppColors.textPrimary,
                       fontSize: 24,
@@ -131,7 +131,7 @@ class AboutUsPage extends StatelessWidget {
                   _buildContactItem(
                       Icons.email, 'Email', 'info@onlinemedicine.com'),
                   _buildContactItem(
-                      Icons.language, 'Website', 'www.onlinemedicine.com'),
+                      Icons.language, 'Website', 'www.healthandmedicine.com'),
                 ],
               ),
             ),
@@ -192,7 +192,7 @@ class AboutUsPage extends StatelessWidget {
                   width: 1,
                 ),
               ),
-              child: Column(
+              child: const Column(
                 children: [
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,

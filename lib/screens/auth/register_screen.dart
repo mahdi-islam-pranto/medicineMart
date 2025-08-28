@@ -63,6 +63,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
         backgroundColor: AppColors.primary,
         foregroundColor: AppColors.textOnPrimary,
         elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(
+                builder: (context) => const LoginScreen(),
+              ),
+            );
+          },
+        ),
       ),
       body: BlocListener<AuthCubit, AuthState>(
         listener: (context, state) {
@@ -542,7 +552,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     // Mock police stations - in real app, this would be fetched from API
     return [
-      '${_selectedDistrict} Sadar',
+      '$_selectedDistrict Sadar',
       '${_selectedDistrict} Model',
       '${_selectedDistrict} Kotwali',
       'Dhanmondi',
@@ -596,7 +606,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Registration Error'),
+        title: const Text('Registration Error',
+            style: TextStyle(fontSize: 16, color: AppColors.error)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -624,20 +635,29 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
-  /// Shows success dialog
+  /// Shows success dialog and navigates to login
   void _showSuccessDialog(String message) {
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (context) => AlertDialog(
-        title: const Text('Registration Successful'),
+        title: const Text(
+          'Registration Successful',
+          style: TextStyle(color: Colors.green),
+        ),
         content: Text(message),
         actions: [
           TextButton(
             onPressed: () {
               Navigator.of(context).pop();
+              // Navigate to login screen
+              Navigator.of(context).pushReplacement(
+                MaterialPageRoute(
+                  builder: (context) => const LoginScreen(),
+                ),
+              );
             },
-            child: const Text('OK'),
+            child: const Text('Continue to Login'),
           ),
         ],
       ),

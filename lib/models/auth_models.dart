@@ -83,7 +83,7 @@ class RegistrationRequest {
 
   bool _isValidPhoneNumber(String phone) {
     // Basic validation for Bangladeshi phone numbers
-    return RegExp(r'^(\+88)?01[3-9]\d{8}$').hasMatch(phone.replaceAll(' ', ''));
+    return RegExp(r'^(\+88)?01[0-9]\d{8}$').hasMatch(phone.replaceAll(' ', ''));
   }
 
   /// Converts to JSON for API calls
@@ -106,10 +106,12 @@ class RegistrationRequest {
 class LoginRequest {
   final String emailOrPhone;
   final String password;
+  final String? deviceId;
 
   const LoginRequest({
     required this.emailOrPhone,
     required this.password,
+    this.deviceId,
   });
 
   /// Validates the login request
@@ -132,6 +134,8 @@ class LoginRequest {
     return {
       'emailOrPhone': emailOrPhone,
       'password': password,
+      'device_id':
+          deviceId ?? 'flutter_app_${DateTime.now().millisecondsSinceEpoch}',
     };
   }
 }

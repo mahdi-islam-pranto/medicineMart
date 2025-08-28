@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'dart:math';
 import '../../models/models.dart';
 import '../states/auth_state.dart';
+import '../../APIs/auth_api_service.dart';
 
 /// AuthCubit manages authentication state for pharmacy owners
 ///
@@ -16,7 +17,6 @@ import '../states/auth_state.dart';
 class AuthCubit extends Cubit<AuthState> {
   static const String _userKey = 'current_user';
   static const String _tokenKey = 'auth_token';
-  static const String _usersKey = 'registered_users'; // Mock storage
 
   AuthCubit() : super(const AuthInitial());
 
@@ -70,49 +70,29 @@ class AuthCubit extends Cubit<AuthState> {
         return;
       }
 
-      // Check if user already exists (mock check)
-      final existingUser =
-          await _findUserByEmailOrPhone(request.email, request.phoneNumber);
-      if (existingUser != null) {
-        emit(const AuthRegistrationError(
-          message: 'An account with this email or phone number already exists.',
+      // Call the real API
+      final response = await AuthApiService.register(request);
+
+      if (response.success && response.user != null) {
+        // Registration successful
+        final user = response.user!;
+
+        // Save user to local storage for persistence
+        await _saveCurrentUser(user, response.token);
+
+        emit(AuthRegistrationSuccess(
+          user: user,
+          message: response.message ??
+              'Registration successful! Please login to continue.',
         ));
-        return;
+      } else {
+        // Registration failed
+        emit(AuthRegistrationError(
+          message: response.message ?? 'Registration failed. Please try again.',
+        ));
       }
-
-      // For demo purposes, create user with approved status
-      final user = User(
-        id: _generateUserId(),
-        fullName: request.fullName,
-        phoneNumber: request.phoneNumber,
-        pharmacyName: request.pharmacyName,
-        district: request.district,
-        policeStation: request.policeStation,
-        pharmacyFullAddress: request.pharmacyFullAddress,
-        nidImagePath: request.nidImagePath,
-        email: request.email,
-        status: UserStatus.approved, // Auto-approve for demo
-        createdAt: DateTime.now(),
-        approvedAt: DateTime.now(), // Set approval time
-      );
-
-      // Save user to mock storage
-      await _saveUserToStorage(user, request.password);
-
-      // Generate token and save current user for session
-      final token = _generateToken();
-      await _saveCurrentUser(user, token);
-
-      emit(AuthRegistrationSuccess(
-        user: user,
-        message: 'Registration successful! Welcome to the app.',
-      ));
-
-      // Transition to authenticated state (skip approval for demo)
-      await Future.delayed(const Duration(milliseconds: 500));
-      emit(AuthAuthenticated(user: user, token: token));
     } catch (e) {
-      emit(AuthRegistrationError(
+      emit(const AuthRegistrationError(
         message: 'Registration failed. Please try again.',
       ));
     }
@@ -123,50 +103,61 @@ class AuthCubit extends Cubit<AuthState> {
     emit(const AuthLoginLoading());
 
     try {
-      // For demo purposes, skip validation and go directly to homepage
-      // Simulate a short loading time
-      await Future.delayed(const Duration(milliseconds: 500));
+      // Validate the request
+      final validationErrors = request.validate();
+      if (validationErrors.isNotEmpty) {
+        emit(AuthLoginError(
+          message:
+              'Please fix the following errors: ${validationErrors.join(', ')}',
+        ));
+        return;
+      }
 
-      final mockUser = User(
-        id: 'mock_user_${DateTime.now().millisecondsSinceEpoch}',
-        fullName: 'Demo Pharmacy Owner',
-        phoneNumber: request.emailOrPhone.isNotEmpty
-            ? request.emailOrPhone
-            : '01700000000',
-        pharmacyName: 'Demo Pharmacy',
-        district: 'Dhaka',
-        policeStation: 'Dhanmondi',
-        pharmacyFullAddress: 'Demo Address, Dhaka',
-        email: request.emailOrPhone.contains('@')
-            ? request.emailOrPhone
-            : 'demo@pharmacy.com',
-        status: UserStatus.approved, // Always approved for demo
-        createdAt: DateTime.now(),
-        approvedAt: DateTime.now(),
-      );
+      // Call the real API
+      final response = await AuthApiService.login(request);
 
-      final token = _generateToken();
-      await _saveCurrentUser(mockUser, token);
-      emit(AuthAuthenticated(user: mockUser, token: token));
+      if (response.success && response.user != null) {
+        // Login successful
+        final user = response.user!;
+        final token = response.token;
+
+        // Save user to local storage for persistence
+        await _saveCurrentUser(user, token);
+
+        // Check user status and emit appropriate state
+        switch (user.status) {
+          case UserStatus.approved:
+            emit(AuthAuthenticated(user: user, token: token));
+            break;
+          case UserStatus.pending:
+            emit(const AuthLoginError(
+              message:
+                  'Your account is pending approval. Please wait for admin confirmation.',
+            ));
+            break;
+          case UserStatus.rejected:
+            emit(const AuthLoginError(
+              message:
+                  'Your account has been rejected. Please contact support.',
+            ));
+            break;
+          case UserStatus.suspended:
+            emit(const AuthLoginError(
+              message:
+                  'Your account has been suspended. Please contact support.',
+            ));
+            break;
+        }
+      } else {
+        // Login failed
+        emit(AuthLoginError(
+          message: response.message ?? 'Invalid credentials. Please try again.',
+        ));
+      }
     } catch (e) {
-      // Even if there's an error, still login for demo purposes
-      final mockUser = User(
-        id: 'mock_user_${DateTime.now().millisecondsSinceEpoch}',
-        fullName: 'Demo Pharmacy Owner',
-        phoneNumber: '01700000000',
-        pharmacyName: 'Demo Pharmacy',
-        district: 'Dhaka',
-        policeStation: 'Dhanmondi',
-        pharmacyFullAddress: 'Demo Address, Dhaka',
-        email: 'demo@pharmacy.com',
-        status: UserStatus.approved,
-        createdAt: DateTime.now(),
-        approvedAt: DateTime.now(),
-      );
-
-      final token = _generateToken();
-      await _saveCurrentUser(mockUser, token);
-      emit(AuthAuthenticated(user: mockUser, token: token));
+      emit(const AuthLoginError(
+        message: 'Login failed. Please try again.',
+      ));
     }
   }
 
@@ -210,87 +201,15 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
-  // Mock helper methods (to be replaced with real API calls)
-
-  String _generateUserId() {
-    return 'user_${DateTime.now().millisecondsSinceEpoch}';
-  }
+  // Helper methods for token generation and user storage
 
   String _generateToken() {
     return 'token_${DateTime.now().millisecondsSinceEpoch}_${Random().nextInt(10000)}';
   }
 
-  Future<User?> _findUserByEmailOrPhone(String email, String phone) async {
-    final prefs = await SharedPreferences.getInstance();
-    final usersJson = prefs.getString(_usersKey);
-
-    if (usersJson == null) return null;
-
-    final usersList = json.decode(usersJson) as List;
-    for (final userMap in usersList) {
-      final userData = userMap['user'] as Map<String, dynamic>;
-      if (userData['email'] == email || userData['phoneNumber'] == phone) {
-        return User.fromJson(userData);
-      }
-    }
-
-    return null;
-  }
-
-  Future<User?> _authenticateUser(String emailOrPhone, String password) async {
-    final prefs = await SharedPreferences.getInstance();
-    final usersJson = prefs.getString(_usersKey);
-
-    if (usersJson == null) return null;
-
-    final usersList = json.decode(usersJson) as List;
-    for (final userMap in usersList) {
-      final userData = userMap['user'] as Map<String, dynamic>;
-      final storedPassword = userMap['password'] as String;
-
-      if ((userData['email'] == emailOrPhone ||
-              userData['phoneNumber'] == emailOrPhone) &&
-          storedPassword == password) {
-        return User.fromJson(userData);
-      }
-    }
-
-    return null;
-  }
-
-  Future<void> _saveUserToStorage(User user, String password) async {
-    final prefs = await SharedPreferences.getInstance();
-    final usersJson = prefs.getString(_usersKey);
-
-    List<dynamic> usersList = [];
-    if (usersJson != null) {
-      usersList = json.decode(usersJson) as List;
-    }
-
-    usersList.add({
-      'user': user.toJson(),
-      'password': password, // In real app, this would be hashed
-    });
-
-    await prefs.setString(_usersKey, json.encode(usersList));
-  }
-
   Future<void> _updateUserInStorage(User user) async {
-    final prefs = await SharedPreferences.getInstance();
-    final usersJson = prefs.getString(_usersKey);
-
-    if (usersJson == null) return;
-
-    final usersList = json.decode(usersJson) as List;
-    for (int i = 0; i < usersList.length; i++) {
-      final userData = usersList[i]['user'] as Map<String, dynamic>;
-      if (userData['id'] == user.id) {
-        usersList[i]['user'] = user.toJson();
-        break;
-      }
-    }
-
-    await prefs.setString(_usersKey, json.encode(usersList));
+    // Update user in local storage when status changes
+    await _saveCurrentUser(user);
   }
 
   Future<void> _saveCurrentUser(User user, [String? token]) async {
