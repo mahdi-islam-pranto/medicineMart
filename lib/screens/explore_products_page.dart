@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:online_medicine/screens/main_navigation.dart';
 import '../theme/app_colors.dart';
 import '../models/models.dart';
 import '../bloc/bloc.dart';
@@ -143,6 +144,14 @@ class _ExploreProductsPageState extends State<ExploreProductsPage>
     return AppBar(
       backgroundColor: AppColors.primary,
       foregroundColor: AppColors.textOnPrimary,
+      leading: IconButton(
+        onPressed: () {
+          // navigate to homepage
+          Navigator.push(context,
+              MaterialPageRoute(builder: (context) => const MainNavigation()));
+        },
+        icon: const Icon(Icons.arrow_back),
+      ),
       title: const Text(
         'Explore Products',
         style: TextStyle(
@@ -150,16 +159,6 @@ class _ExploreProductsPageState extends State<ExploreProductsPage>
           fontWeight: FontWeight.w600,
         ),
       ),
-      actions: [
-        IconButton(
-          onPressed: () {
-            // Show search functionality
-            _searchController.clear();
-            context.read<ExploreProductsCubit>().updateSearchQuery('');
-          },
-          icon: const Icon(Icons.search),
-        ),
-      ],
     );
   }
 

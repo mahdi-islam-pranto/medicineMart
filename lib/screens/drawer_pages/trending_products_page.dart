@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../theme/app_colors.dart';
 import '../../models/medicine.dart';
 import '../../widgets/medicine_card.dart';
+import '../../APIs/product_api_service.dart';
 
 /// TrendingProductsPage - Display popular and trending medicines
 ///
@@ -136,13 +137,19 @@ class _TrendingProductsPageState extends State<TrendingProductsPage> {
                   size: 20,
                 ),
                 const SizedBox(width: 8),
-                Text(
-                  '${_getFilteredProducts().length} Trending Products',
-                  style: const TextStyle(
-                    color: AppColors.textPrimary,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
+                FutureBuilder<List<Medicine>>(
+                  future: _getFilteredProducts(),
+                  builder: (context, snapshot) {
+                    final count = snapshot.data?.length ?? 0;
+                    return Text(
+                      '$count Trending Products',
+                      style: const TextStyle(
+                        color: AppColors.textPrimary,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    );
+                  },
                 ),
                 const Spacer(),
                 Container(
@@ -175,35 +182,65 @@ class _TrendingProductsPageState extends State<TrendingProductsPage> {
   }
 
   Widget _buildGridView() {
-    final products = _getFilteredProducts();
+    return FutureBuilder<List<Medicine>>(
+      future: _getFilteredProducts(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
 
-    return GridView.builder(
-      padding: const EdgeInsets.all(16),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        childAspectRatio: 0.75,
-        crossAxisSpacing: 12,
-        mainAxisSpacing: 12,
-      ),
-      itemCount: products.length,
-      itemBuilder: (context, index) {
-        final product = products[index];
-        return _buildTrendingProductCard(product, isGrid: true);
+        if (snapshot.hasError) {
+          return Center(
+            child: Text('Error loading products: ${snapshot.error}'),
+          );
+        }
+
+        final products = snapshot.data ?? [];
+
+        return GridView.builder(
+          padding: const EdgeInsets.all(16),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            childAspectRatio: 0.75,
+            crossAxisSpacing: 12,
+            mainAxisSpacing: 12,
+          ),
+          itemCount: products.length,
+          itemBuilder: (context, index) {
+            final product = products[index];
+            return _buildTrendingProductCard(product, isGrid: true);
+          },
+        );
       },
     );
   }
 
   Widget _buildListView() {
-    final products = _getFilteredProducts();
+    return FutureBuilder<List<Medicine>>(
+      future: _getFilteredProducts(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
 
-    return ListView.builder(
-      padding: const EdgeInsets.all(16),
-      itemCount: products.length,
-      itemBuilder: (context, index) {
-        final product = products[index];
-        return Padding(
-          padding: const EdgeInsets.only(bottom: 12),
-          child: _buildTrendingProductCard(product, isGrid: false),
+        if (snapshot.hasError) {
+          return Center(
+            child: Text('Error loading products: ${snapshot.error}'),
+          );
+        }
+
+        final products = snapshot.data ?? [];
+
+        return ListView.builder(
+          padding: const EdgeInsets.all(16),
+          itemCount: products.length,
+          itemBuilder: (context, index) {
+            final product = products[index];
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: _buildTrendingProductCard(product, isGrid: false),
+            );
+          },
         );
       },
     );
@@ -360,8 +397,8 @@ class _TrendingProductsPageState extends State<TrendingProductsPage> {
     );
   }
 
-  List<Medicine> _getFilteredProducts() {
-    List<Medicine> products = _getTrendingProducts();
+  Future<List<Medicine>> _getFilteredProducts() async {
+    List<Medicine> products = await _getTrendingProducts();
 
     // Filter by search query
     if (_searchQuery.isNotEmpty) {
@@ -392,8 +429,33 @@ class _TrendingProductsPageState extends State<TrendingProductsPage> {
     return products;
   }
 
-  List<Medicine> _getTrendingProducts() {
-    // Mock trending products data
+  Future<List<Medicine>> _getTrendingProducts() async {
+    try {
+      // Get products with high discounts as trending
+      final response = await ProductApiService.getAllProducts(limit: 20);
+
+      if (response.success && response.data != null) {
+        final products = response.data!.products;
+        // Filter products with discounts as trending
+        final trendingProducts = products
+            .where((product) =>
+                product.discountPrice != null && product.discountPrice! > 0)
+            .toList();
+
+        // If we have trending products, return them, otherwise return all products
+        return trendingProducts.isNotEmpty ? trendingProducts : products;
+      } else {
+        // Fallback to mock data if API fails
+        return _getMockTrendingProducts();
+      }
+    } catch (e) {
+      // Fallback to mock data if API fails
+      return _getMockTrendingProducts();
+    }
+  }
+
+  List<Medicine> _getMockTrendingProducts() {
+    // Mock trending products data as fallback
     return [
       const Medicine(
         id: 't1',

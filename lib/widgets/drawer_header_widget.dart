@@ -71,7 +71,7 @@ class DrawerHeaderWidget extends StatelessWidget {
 
               const SizedBox(height: 12), // Reduced spacing
 
-              // User name
+              // User name (from auth state)
               const Text(
                 'Jesika Sabrina',
                 style: TextStyle(

@@ -7,3 +7,5 @@ export 'product_filter.dart';
 export 'sort_option.dart';
 export 'user.dart';
 export 'auth_models.dart';
+export 'product_api_models.dart';
+export 'brand_models.dart';

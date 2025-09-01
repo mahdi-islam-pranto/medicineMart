@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../states/medicine_state.dart';
 import '../../models/models.dart';
+import '../../APIs/product_api_service.dart';
 
 /// Cubit for managing medicine list, search, and filtering
 class MedicineCubit extends Cubit<MedicineState> {
@@ -11,10 +12,29 @@ class MedicineCubit extends Cubit<MedicineState> {
     emit(const MedicineLoading());
 
     try {
-      // Simulate API call delay
-      await Future.delayed(const Duration(milliseconds: 500));
+      // Call the real API to get all products
+      final response = await ProductApiService.getAllProducts(limit: 50);
 
-      // Sample medicine data - In a real app, this would come from an API
+      if (response.success && response.data != null) {
+        final medicines = response.data!.products;
+        final brands = _extractBrands(medicines);
+
+        emit(MedicineLoaded(
+          medicines: medicines,
+          brands: brands,
+        ));
+      } else {
+        // If API fails, fall back to sample data for development
+        final medicines = _getSampleMedicines();
+        final brands = _extractBrands(medicines);
+
+        emit(MedicineLoaded(
+          medicines: medicines,
+          brands: brands,
+        ));
+      }
+    } catch (e) {
+      // If API fails, fall back to sample data for development
       final medicines = _getSampleMedicines();
       final brands = _extractBrands(medicines);
 
@@ -22,8 +42,6 @@ class MedicineCubit extends Cubit<MedicineState> {
         medicines: medicines,
         brands: brands,
       ));
-    } catch (e) {
-      emit(MedicineError(message: 'Failed to load medicines: ${e.toString()}'));
     }
   }
 
@@ -34,21 +52,25 @@ class MedicineCubit extends Cubit<MedicineState> {
       emit(currentState.copyWith(isRefreshing: true));
 
       try {
-        // Simulate API call delay
-        await Future.delayed(const Duration(milliseconds: 1000));
+        // Call the real API to refresh data
+        final response = await ProductApiService.getAllProducts(limit: 50);
 
-        // Reload data
-        final medicines = _getSampleMedicines();
-        final brands = _extractBrands(medicines);
+        if (response.success && response.data != null) {
+          final medicines = response.data!.products;
+          final brands = _extractBrands(medicines);
 
-        emit(currentState.copyWith(
-          medicines: medicines,
-          brands: brands,
-          isRefreshing: false,
-        ));
+          emit(currentState.copyWith(
+            medicines: medicines,
+            brands: brands,
+            isRefreshing: false,
+          ));
+        } else {
+          // If API fails, keep current data and stop refreshing
+          emit(currentState.copyWith(isRefreshing: false));
+        }
       } catch (e) {
-        emit(MedicineError(
-            message: 'Failed to refresh medicines: ${e.toString()}'));
+        // If API fails, keep current data and stop refreshing
+        emit(currentState.copyWith(isRefreshing: false));
       }
     } else {
       // If not loaded, just load normally
@@ -61,6 +83,63 @@ class MedicineCubit extends Cubit<MedicineState> {
     final currentState = state;
     if (currentState is MedicineLoaded) {
       emit(currentState.copyWith(searchQuery: query));
+    }
+  }
+
+  /// Search medicines by query using API
+  Future<void> searchMedicines(String query) async {
+    final currentState = state;
+    if (currentState is MedicineLoaded) {
+      if (query.isEmpty) {
+        // Reset to all medicines - reload from API
+        await loadMedicines();
+      } else {
+        // Search using API
+        try {
+          final response =
+              await ProductApiService.searchProductsByQuery(query, limit: 50);
+
+          if (response.success && response.data != null) {
+            final medicines = response.data!.products;
+            final brands = _extractBrands(medicines);
+            emit(currentState.copyWith(
+              medicines: medicines,
+              brands: brands,
+              searchQuery: query,
+            ));
+          } else {
+            // If API fails, fall back to local filtering
+            final filtered = currentState.medicines.where((medicine) {
+              return medicine.name
+                      .toLowerCase()
+                      .contains(query.toLowerCase()) ||
+                  medicine.brand.toLowerCase().contains(query.toLowerCase()) ||
+                  medicine.description
+                      .toLowerCase()
+                      .contains(query.toLowerCase());
+            }).toList();
+
+            emit(currentState.copyWith(
+              medicines: filtered,
+              searchQuery: query,
+            ));
+          }
+        } catch (e) {
+          // If API fails, fall back to local filtering
+          final filtered = currentState.medicines.where((medicine) {
+            return medicine.name.toLowerCase().contains(query.toLowerCase()) ||
+                medicine.brand.toLowerCase().contains(query.toLowerCase()) ||
+                medicine.description
+                    .toLowerCase()
+                    .contains(query.toLowerCase());
+          }).toList();
+
+          emit(currentState.copyWith(
+            medicines: filtered,
+            searchQuery: query,
+          ));
+        }
+      }
     }
   }
 

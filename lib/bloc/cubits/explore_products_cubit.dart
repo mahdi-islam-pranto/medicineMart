@@ -1,6 +1,8 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import '../../models/models.dart';
+import '../../APIs/product_api_service.dart';
+import '../../APIs/brand_api_service.dart';
 
 /// States for explore products
 abstract class ExploreProductsState extends Equatable {
@@ -87,48 +89,88 @@ class ExploreProductsCubit extends Cubit<ExploreProductsState> {
     emit(const ExploreProductsLoading());
 
     try {
-      // Simulate API call delay
-      await Future.delayed(const Duration(milliseconds: 500));
+      print('🔄 Loading products from API...');
+      // Call the real API to get all products
+      final response = await ProductApiService.getAllProducts(limit: 1000);
 
-      // Get sample products (using same data as medicine cubit for consistency)
-      final products = _getSampleProducts();
-      final brands = _extractBrands(products);
-      final categories = _extractCategories(products);
-      const initialFilter = ProductFilter();
+      if (response.success && response.data != null) {
+        final products = response.data!.products;
+        print('✅ Successfully loaded ${products.length} products from API');
 
-      final filteredProducts = _applyFilters(products, initialFilter);
+        final brands = await _loadBrandsFromAPI();
+        final categories = _extractCategories(products);
+        const initialFilter = ProductFilter();
 
-      emit(ExploreProductsLoaded(
-        allProducts: products,
-        filteredProducts: filteredProducts,
-        availableBrands: brands,
-        availableCategories: categories,
-        currentFilter: initialFilter,
-      ));
+        final filteredProducts = _applyFilters(products, initialFilter);
+
+        emit(ExploreProductsLoaded(
+          allProducts: products,
+          filteredProducts: filteredProducts,
+          availableBrands: brands,
+          availableCategories: categories,
+          currentFilter: initialFilter,
+        ));
+      } else {
+        // If API fails, show error - no dummy data
+        print('❌ API failed to load products: ${response.message}');
+        emit(ExploreProductsError(message: response.message));
+      }
     } catch (e) {
-      emit(ExploreProductsError(
-          message: 'Failed to load products: ${e.toString()}'));
+      // If API fails, show error - no dummy data
+      print('💥 Error loading products: $e');
+      emit(const ExploreProductsError(
+          message:
+              'Failed to load products. Please check your internet connection and try again.'));
     }
   }
 
   /// Apply filters and update state
-  void applyFilter(ProductFilter filter) {
+  Future<void> applyFilter(ProductFilter filter) async {
     final currentState = state;
     if (currentState is ExploreProductsLoaded) {
-      final filteredProducts = _applyFilters(currentState.allProducts, filter);
-      emit(currentState.copyWith(
-        filteredProducts: filteredProducts,
-        currentFilter: filter,
-      ));
+      try {
+        print('🔄 Applying filters: ${filter.toString()}');
+        // Convert filter to API request and search
+        final request =
+            ProductApiService.convertFilterToRequest(filter, limit: 1000);
+        final response = await ProductApiService.searchProducts(request);
+
+        if (response.success && response.data != null) {
+          final filteredProducts = response.data!.products;
+          print('✅ API filter returned ${filteredProducts.length} products');
+          emit(currentState.copyWith(
+            filteredProducts: filteredProducts,
+            currentFilter: filter,
+          ));
+        } else {
+          // If API fails, fall back to local filtering
+          print('⚠️ API filter failed, applying filters locally');
+          final filteredProducts =
+              _applyFilters(currentState.allProducts, filter);
+          emit(currentState.copyWith(
+            filteredProducts: filteredProducts,
+            currentFilter: filter,
+          ));
+        }
+      } catch (e) {
+        // If API fails, fall back to local filtering
+        print('💥 Error applying filters: $e');
+        final filteredProducts =
+            _applyFilters(currentState.allProducts, filter);
+        emit(currentState.copyWith(
+          filteredProducts: filteredProducts,
+          currentFilter: filter,
+        ));
+      }
     }
   }
 
   /// Update search query
-  void updateSearchQuery(String query) {
+  Future<void> updateSearchQuery(String query) async {
     final currentState = state;
     if (currentState is ExploreProductsLoaded) {
       final newFilter = currentState.currentFilter.copyWith(searchQuery: query);
-      applyFilter(newFilter);
+      await applyFilter(newFilter);
     }
   }
 
@@ -200,25 +242,36 @@ class ExploreProductsCubit extends Cubit<ExploreProductsState> {
     return filtered;
   }
 
-  /// Apply product category filter (All, Trending, Special Offer, New Product)
+  /// Apply product category filter based on productTag from API
   List<Medicine> _applyProductCategoryFilter(
       List<Medicine> products, ProductCategory category) {
     switch (category) {
       case ProductCategory.all:
+        // Show all products regardless of productTag
         return products;
       case ProductCategory.trending:
-        // For demo, return products with high discount or popular brands
-        return products
-            .where((p) => p.discountPercentage > 20 || p.brand == 'Square')
-            .toList();
+        // Filter products with productTag = "trending"
+        return products.where((p) => p.productTag == 'trending').toList();
       case ProductCategory.specialOffer:
-        // Return products with discounts
-        return products.where((p) => p.hasDiscount).toList();
+        // Filter products with productTag = "special_offer"
+        return products.where((p) => p.productTag == 'special_offer').toList();
       case ProductCategory.newProduct:
-        // For demo, return last few products as "new"
-        return products.length > 3
-            ? products.sublist(products.length - 3)
-            : products;
+        // Filter products with productTag = "top_selling"
+        return products.where((p) => p.productTag == 'top_selling').toList();
+    }
+  }
+
+  /// Load brands from API
+  Future<List<String>> _loadBrandsFromAPI() async {
+    try {
+      print('🔄 Loading brands from API...');
+      final brandNames = await BrandApiService.getBrandNames();
+      print('✅ Successfully loaded ${brandNames.length} brands from API');
+      return brandNames;
+    } catch (e) {
+      print('❌ Error loading brands from API: $e');
+      // Return empty list if API fails
+      return [];
     }
   }
 
@@ -255,116 +308,6 @@ class ExploreProductsCubit extends Cubit<ExploreProductsState> {
     }
 
     return sorted;
-  }
-
-  /// Get sample products (extended from medicine cubit)
-  List<Medicine> _getSampleProducts() {
-    return [
-      const Medicine(
-        id: '1',
-        name: '3 F 500 (20 Pcs) 500 mg',
-        quantity: 'Strip',
-        brand: 'Levofloxacin Hemihydrate Edruc Ltd.',
-        regularPrice: 320.00,
-        discountPrice: 154.22,
-        imageUrl:
-            'https://via.placeholder.com/150x150/E3F2FD/1976D2?text=3F500',
-        description: 'Tablet - Levofloxacin Hemihydrate',
-        requiresPrescription: false,
-        quantityOptions: [1, 2, 3, 5, 10, 15, 20],
-      ),
-      const Medicine(
-        id: '2',
-        name: '3-C 200 (3 C 200) (12 Pcs) 200 mg',
-        quantity: 'Strip',
-        brand: 'Cefixime Trihydrate Edruc Ltd.',
-        regularPrice: 420.00,
-        discountPrice: 203.98,
-        imageUrl:
-            'https://via.placeholder.com/150x150/FFF3E0/F57C00?text=3C200',
-        description: 'Capsule - Cefixime Trihydrate',
-        requiresPrescription: true,
-        quantityOptions: [1, 2, 3, 5, 10],
-      ),
-      const Medicine(
-        id: '3',
-        name: '3rd cef 200 (12 pcs) 200mg',
-        quantity: 'Strip',
-        brand: 'Cefixime Medimet Pharmaceuticals LTD.',
-        regularPrice: 324.00,
-        discountPrice: 159.2,
-        imageUrl:
-            'https://via.placeholder.com/150x150/E8F5E8/4CAF50?text=3RDCEF',
-        description: 'Tablet - Cefixime',
-        requiresPrescription: false,
-        quantityOptions: [1, 2, 3, 5, 10, 15],
-      ),
-      const Medicine(
-        id: '4',
-        name: 'A B1 100 (100 Pcs) 100 mg',
-        quantity: 'Bottle',
-        brand: 'Thiamine Hydrochloride Acme Laboratories LTD.',
-        regularPrice: 250.00,
-        discountPrice: 215.00,
-        imageUrl: 'https://via.placeholder.com/150x150/FFF8E1/FFC107?text=AB1',
-        description: 'Tablet - Thiamine Hydrochloride',
-        requiresPrescription: false,
-        quantityOptions: [1, 2, 3, 6, 12],
-      ),
-      // Add more sample products for better demo
-      const Medicine(
-        id: '5',
-        name: 'Tablet- Napa',
-        quantity: 'Box',
-        brand: 'Square',
-        regularPrice: 50.00,
-        imageUrl: 'https://via.placeholder.com/150x150/E1F5FE/0277BD?text=NAPA',
-        description: 'Paracetamol for pain and fever',
-        requiresPrescription: false,
-        quantityOptions: [1, 3, 5, 10, 20, 30, 50],
-      ),
-      const Medicine(
-        id: '6',
-        name: 'Syrup- Reneta-B',
-        quantity: 'Bottle',
-        brand: 'Renata',
-        regularPrice: 630.00,
-        discountPrice: 500.00,
-        imageUrl:
-            'https://via.placeholder.com/150x150/FCE4EC/E91E63?text=SYRUP',
-        description: 'Vitamin B complex syrup',
-        requiresPrescription: false,
-        quantityOptions: [1, 2, 3, 4, 5],
-      ),
-      const Medicine(
-        id: '7',
-        name: 'Tablet- Vitamin D3',
-        quantity: '1000 IU',
-        brand: 'HealthKart',
-        regularPrice: 1250.00,
-        discountPrice: 990.00,
-        imageUrl: 'https://via.placeholder.com/150x150/FFF9C4/F9A825?text=VIT',
-        description: 'Vitamin D3 supplement',
-        requiresPrescription: false,
-      ),
-      const Medicine(
-        id: '8',
-        name: 'Tablet- Ace',
-        quantity: 'Box',
-        brand: 'Square',
-        regularPrice: 410.00,
-        imageUrl: 'https://via.placeholder.com/150x150/F3E5F5/8E24AA?text=ACE',
-        description: 'ACE inhibitor for blood pressure',
-        requiresPrescription: true,
-      ),
-    ];
-  }
-
-  /// Extract unique brands from products list
-  List<String> _extractBrands(List<Medicine> products) {
-    final brands = products.map((product) => product.brand).toSet().toList();
-    brands.sort();
-    return brands;
   }
 
   /// Extract unique categories from products list

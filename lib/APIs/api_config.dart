@@ -10,9 +10,17 @@ class ApiConfig {
   static const String registerEndpoint = 'customers/create';
   static const String loginEndpoint = 'app/login';
 
+  // Product endpoints
+  static const String productsSearchEndpoint = 'products/search';
+
+  // Brand endpoints
+  static const String brandEndpoint = 'brand';
+
   // Full URLs
   static String get registerUrl => '$baseUrl$registerEndpoint';
   static String get loginUrl => '$baseUrl$loginEndpoint';
+  static String get productsSearchUrl => '$baseUrl$productsSearchEndpoint';
+  static String get brandUrl => '$baseUrl$brandEndpoint';
 
   // Request headers
   static Map<String, String> get headers => {

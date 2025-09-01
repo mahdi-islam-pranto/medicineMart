@@ -218,5 +218,7 @@ class AuthCubit extends Cubit<AuthState> {
     if (token != null) {
       await prefs.setString(_tokenKey, token);
     }
+    // print user data log
+    print('User data saved: ${user.toJson()}');
   }
 }

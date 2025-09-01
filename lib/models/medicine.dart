@@ -12,6 +12,7 @@ class Medicine extends Equatable {
   final String description;
   final bool requiresPrescription;
   final List<int> quantityOptions;
+  final String? productTag;
 
   const Medicine({
     required this.id,
@@ -24,6 +25,7 @@ class Medicine extends Equatable {
     required this.description,
     this.requiresPrescription = false,
     this.quantityOptions = const [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+    this.productTag,
   });
 
   /// Calculate discount percentage
@@ -82,7 +84,7 @@ class Medicine extends Equatable {
     };
   }
 
-  /// Create from JSON
+  /// Create from JSON (for local/existing data)
   factory Medicine.fromJson(Map<String, dynamic> json) {
     return Medicine(
       id: json['id'] as String,
@@ -99,6 +101,37 @@ class Medicine extends Equatable {
       quantityOptions: json['quantityOptions'] != null
           ? List<int>.from(json['quantityOptions'] as List)
           : const [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+      productTag: json['productTag'] as String?,
+    );
+  }
+
+  /// Create from API JSON response
+  factory Medicine.fromApiJson(Map<String, dynamic> json) {
+    // Handle null imageUrl with fallback
+    String? imageUrl = json['imageUrl'] as String?;
+    if (imageUrl == null || imageUrl.isEmpty) {
+      // Use a working sample medicine image
+      imageUrl = 'https://via.placeholder.com/150x150/E3F2FD/1976D2?text=MED';
+    }
+
+    return Medicine(
+      id: json['id'].toString(),
+      name: json['name'] as String? ?? '',
+      quantity: json['productType'] as String? ??
+          'Strip', // Use productType as quantity
+      brand: json['manufacturer'] as String? ?? 'Unknown Brand',
+      regularPrice: (json['regularPrice'] as num?)?.toDouble() ?? 0.0,
+      discountPrice: json['discountPrice'] != null
+          ? (json['discountPrice'] as num).toDouble()
+          : null,
+      imageUrl: imageUrl,
+      description:
+          json['description'] as String? ?? json['name'] as String? ?? '',
+      requiresPrescription: json['requiresPrescription'] as bool? ?? false,
+      quantityOptions: json['quantityOptions'] != null
+          ? List<int>.from(json['quantityOptions'] as List)
+          : const [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+      productTag: json['productTag'] as String?,
     );
   }
 
@@ -114,6 +147,7 @@ class Medicine extends Equatable {
         description,
         requiresPrescription,
         quantityOptions,
+        productTag,
       ];
 
   @override
