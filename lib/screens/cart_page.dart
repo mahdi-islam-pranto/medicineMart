@@ -195,7 +195,7 @@ class CartPage extends StatelessWidget {
                     children: [
                       if (item.originalPrice > item.price)
                         Text(
-                          '৳ ${item.originalPrice.toStringAsFixed(0)}',
+                          '৳ ${item.originalPrice.toStringAsFixed(item.originalPrice.truncateToDouble() == item.originalPrice ? 0 : 2)}',
                           style: const TextStyle(
                             color: AppColors.textSecondary,
                             fontSize: 12,
@@ -205,7 +205,7 @@ class CartPage extends StatelessWidget {
                       if (item.originalPrice > item.price)
                         const SizedBox(width: 8),
                       Text(
-                        '৳ ${item.price.toStringAsFixed(0)}',
+                        '৳ ${item.price.toStringAsFixed(item.price.truncateToDouble() == item.price ? 0 : 2)}',
                         style: const TextStyle(
                           color: AppColors.primary,
                           fontSize: 14,

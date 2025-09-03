@@ -75,7 +75,9 @@ class _FavoritesPageState extends State<FavoritesPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: _buildAppBar(),
-      body: _favoriteItems.isEmpty ? _buildEmptyFavorites() : _buildFavoritesContent(),
+      body: _favoriteItems.isEmpty
+          ? _buildEmptyFavorites()
+          : _buildFavoritesContent(),
     );
   }
 
@@ -160,9 +162,9 @@ class _FavoritesPageState extends State<FavoritesPage> {
                 ),
               ),
             ),
-            
+
             const SizedBox(width: 12),
-            
+
             // Product details
             Expanded(
               child: Column(
@@ -178,9 +180,9 @@ class _FavoritesPageState extends State<FavoritesPage> {
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  
+
                   const SizedBox(height: 2),
-                  
+
                   Text(
                     item.brand.toUpperCase(),
                     style: const TextStyle(
@@ -189,27 +191,25 @@ class _FavoritesPageState extends State<FavoritesPage> {
                       fontWeight: FontWeight.w500,
                     ),
                   ),
-                  
+
                   const SizedBox(height: 8),
-                  
+
                   // Price
                   Row(
                     children: [
                       if (item.originalPrice > item.price)
                         Text(
-                          '৳ ${item.originalPrice.toStringAsFixed(0)}',
+                          '৳ ${item.originalPrice.toStringAsFixed(item.originalPrice.truncateToDouble() == item.originalPrice ? 0 : 2)}',
                           style: const TextStyle(
                             color: AppColors.textSecondary,
                             fontSize: 12,
                             decoration: TextDecoration.lineThrough,
                           ),
                         ),
-                      
                       if (item.originalPrice > item.price)
                         const SizedBox(width: 8),
-                      
                       Text(
-                        '৳ ${item.price.toStringAsFixed(0)}',
+                        '৳ ${item.price.toStringAsFixed(item.price.truncateToDouble() == item.price ? 0 : 2)}',
                         style: const TextStyle(
                           color: AppColors.primary,
                           fontSize: 14,
@@ -218,9 +218,9 @@ class _FavoritesPageState extends State<FavoritesPage> {
                       ),
                     ],
                   ),
-                  
+
                   const SizedBox(height: 4),
-                  
+
                   // Added date
                   Text(
                     'Added ${_getTimeAgo(item.addedDate)}',
@@ -232,7 +232,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
                 ],
               ),
             ),
-            
+
             // Action buttons
             Column(
               children: [
@@ -252,9 +252,9 @@ class _FavoritesPageState extends State<FavoritesPage> {
                     ),
                   ),
                 ),
-                
+
                 const SizedBox(height: 8),
-                
+
                 // Add to cart
                 GestureDetector(
                   onTap: () => _addToCart(item),
@@ -304,9 +304,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
               color: AppColors.error,
             ),
           ),
-          
           const SizedBox(height: 24),
-          
           const Text(
             'No favorites yet',
             style: TextStyle(
@@ -315,9 +313,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
               fontWeight: FontWeight.w600,
             ),
           ),
-          
           const SizedBox(height: 8),
-          
           const Text(
             'Start adding medicines to your favorites',
             style: TextStyle(
@@ -336,7 +332,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
     setState(() {
       _favoriteItems.removeAt(index);
     });
-    
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('${item.name} removed from favorites'),
@@ -397,7 +393,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
   String _getTimeAgo(DateTime date) {
     final now = DateTime.now();
     final difference = now.difference(date);
-    
+
     if (difference.inDays > 0) {
       return '${difference.inDays} day${difference.inDays > 1 ? 's' : ''} ago';
     } else if (difference.inHours > 0) {

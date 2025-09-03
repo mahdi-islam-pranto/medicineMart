@@ -28,6 +28,9 @@ class ExploreProductsLoaded extends ExploreProductsState {
   final ProductFilter currentFilter;
   final Map<String, bool> favorites;
   final Map<String, int> cartItems;
+  final int currentPage;
+  final bool hasMorePages;
+  final bool isLoadingMore;
 
   const ExploreProductsLoaded({
     required this.allProducts,
@@ -37,6 +40,9 @@ class ExploreProductsLoaded extends ExploreProductsState {
     required this.currentFilter,
     this.favorites = const {},
     this.cartItems = const {},
+    this.currentPage = 1,
+    this.hasMorePages = true,
+    this.isLoadingMore = false,
   });
 
   ExploreProductsLoaded copyWith({
@@ -47,6 +53,9 @@ class ExploreProductsLoaded extends ExploreProductsState {
     ProductFilter? currentFilter,
     Map<String, bool>? favorites,
     Map<String, int>? cartItems,
+    int? currentPage,
+    bool? hasMorePages,
+    bool? isLoadingMore,
   }) {
     return ExploreProductsLoaded(
       allProducts: allProducts ?? this.allProducts,
@@ -56,6 +65,9 @@ class ExploreProductsLoaded extends ExploreProductsState {
       currentFilter: currentFilter ?? this.currentFilter,
       favorites: favorites ?? this.favorites,
       cartItems: cartItems ?? this.cartItems,
+      currentPage: currentPage ?? this.currentPage,
+      hasMorePages: hasMorePages ?? this.hasMorePages,
+      isLoadingMore: isLoadingMore ?? this.isLoadingMore,
     );
   }
 
@@ -68,6 +80,9 @@ class ExploreProductsLoaded extends ExploreProductsState {
         currentFilter,
         favorites,
         cartItems,
+        currentPage,
+        hasMorePages,
+        isLoadingMore,
       ];
 }
 
@@ -84,31 +99,34 @@ class ExploreProductsError extends ExploreProductsState {
 class ExploreProductsCubit extends Cubit<ExploreProductsState> {
   ExploreProductsCubit() : super(const ExploreProductsInitial());
 
-  /// Load all products
+  /// Load initial products with pagination
   Future<void> loadProducts() async {
     emit(const ExploreProductsLoading());
 
     try {
-      print('🔄 Loading products from API...');
-      // Call the real API to get all products
-      final response = await ProductApiService.getAllProducts(limit: 1000);
+      print('🔄 Loading initial products from API...');
+      // Call the real API to get first page of products (40 products)
+      final response =
+          await ProductApiService.getAllProducts(page: 1, limit: 40);
 
       if (response.success && response.data != null) {
         final products = response.data!.products;
-        print('✅ Successfully loaded ${products.length} products from API');
+        final paginationInfo = response.data!.pagination;
+        print(
+            '✅ Successfully loaded ${products.length} products from API (Page 1)');
 
         final brands = await _loadBrandsFromAPI();
         final categories = _extractCategories(products);
         const initialFilter = ProductFilter();
 
-        final filteredProducts = _applyFilters(products, initialFilter);
-
         emit(ExploreProductsLoaded(
           allProducts: products,
-          filteredProducts: filteredProducts,
+          filteredProducts: products, // Initially show all loaded products
           availableBrands: brands,
           availableCategories: categories,
           currentFilter: initialFilter,
+          currentPage: 1,
+          hasMorePages: paginationInfo.currentPage < paginationInfo.totalPages,
         ));
       } else {
         // If API fails, show error - no dummy data
@@ -124,23 +142,87 @@ class ExploreProductsCubit extends Cubit<ExploreProductsState> {
     }
   }
 
-  /// Apply filters and update state
+  /// Load more products for pagination
+  Future<void> loadMoreProducts() async {
+    final currentState = state;
+    if (currentState is! ExploreProductsLoaded ||
+        currentState.isLoadingMore ||
+        !currentState.hasMorePages) {
+      return;
+    }
+
+    // Set loading more state
+    emit(currentState.copyWith(isLoadingMore: true));
+
+    try {
+      final nextPage = currentState.currentPage + 1;
+      print('🔄 Loading more products from API (Page $nextPage)...');
+
+      // Load next page with current filter applied
+      final request = ProductApiService.convertFilterToRequest(
+        currentState.currentFilter,
+        page: nextPage,
+        limit: 40,
+      );
+      final response = await ProductApiService.searchProducts(request);
+
+      if (response.success && response.data != null) {
+        final newProducts = response.data!.products;
+        final paginationInfo = response.data!.pagination;
+        print(
+            '✅ Successfully loaded ${newProducts.length} more products (Page $nextPage)');
+
+        // Combine existing products with new products
+        final updatedAllProducts = [
+          ...currentState.allProducts,
+          ...newProducts
+        ];
+        final updatedFilteredProducts = [
+          ...currentState.filteredProducts,
+          ...newProducts
+        ];
+
+        emit(currentState.copyWith(
+          allProducts: updatedAllProducts,
+          filteredProducts: updatedFilteredProducts,
+          currentPage: nextPage,
+          hasMorePages: paginationInfo.currentPage < paginationInfo.totalPages,
+          isLoadingMore: false,
+        ));
+      } else {
+        print('❌ Failed to load more products: ${response.message}');
+        emit(currentState.copyWith(isLoadingMore: false));
+      }
+    } catch (e) {
+      print('💥 Error loading more products: $e');
+      emit(currentState.copyWith(isLoadingMore: false));
+    }
+  }
+
+  /// Apply filters and update state (resets pagination)
   Future<void> applyFilter(ProductFilter filter) async {
     final currentState = state;
     if (currentState is ExploreProductsLoaded) {
       try {
         print('🔄 Applying filters: ${filter.toString()}');
-        // Convert filter to API request and search
-        final request =
-            ProductApiService.convertFilterToRequest(filter, limit: 1000);
+        // Convert filter to API request and search (reset to page 1)
+        final request = ProductApiService.convertFilterToRequest(filter,
+            page: 1, limit: 40);
         final response = await ProductApiService.searchProducts(request);
 
         if (response.success && response.data != null) {
           final filteredProducts = response.data!.products;
+          final paginationInfo = response.data!.pagination;
           print('✅ API filter returned ${filteredProducts.length} products');
           emit(currentState.copyWith(
+            allProducts:
+                filteredProducts, // Reset all products to filtered results
             filteredProducts: filteredProducts,
             currentFilter: filter,
+            currentPage: 1, // Reset to page 1
+            hasMorePages:
+                paginationInfo.currentPage < paginationInfo.totalPages,
+            isLoadingMore: false,
           ));
         } else {
           // If API fails, fall back to local filtering
@@ -150,6 +232,9 @@ class ExploreProductsCubit extends Cubit<ExploreProductsState> {
           emit(currentState.copyWith(
             filteredProducts: filteredProducts,
             currentFilter: filter,
+            currentPage: 1, // Reset to page 1
+            hasMorePages: false, // No pagination for local filtering
+            isLoadingMore: false,
           ));
         }
       } catch (e) {
@@ -160,6 +245,9 @@ class ExploreProductsCubit extends Cubit<ExploreProductsState> {
         emit(currentState.copyWith(
           filteredProducts: filteredProducts,
           currentFilter: filter,
+          currentPage: 1, // Reset to page 1
+          hasMorePages: false, // No pagination for local filtering
+          isLoadingMore: false,
         ));
       }
     }

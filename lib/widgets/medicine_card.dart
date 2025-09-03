@@ -208,7 +208,7 @@ class _MedicineCardState extends State<MedicineCard> {
         // Regular price (crossed out if discount available)
         if (widget.medicine.discountPrice != null)
           Text(
-            '৳ ${widget.medicine.regularPrice.toStringAsFixed(0)}.00',
+            '৳ ${widget.medicine.regularPrice.toStringAsFixed(widget.medicine.regularPrice.truncateToDouble() == widget.medicine.regularPrice ? 0 : 2)}',
             style: const TextStyle(
               color: AppColors.textSecondary,
               fontSize: 12,
@@ -221,7 +221,7 @@ class _MedicineCardState extends State<MedicineCard> {
 
         // Current/discount price
         Text(
-          '৳ ${(widget.medicine.discountPrice ?? widget.medicine.regularPrice).toStringAsFixed(0)}.00',
+          '৳ ${(widget.medicine.discountPrice ?? widget.medicine.regularPrice).toStringAsFixed((widget.medicine.discountPrice ?? widget.medicine.regularPrice).truncateToDouble() == (widget.medicine.discountPrice ?? widget.medicine.regularPrice) ? 0 : 2)}',
           style: const TextStyle(
             color: AppColors.primary,
             fontSize: 14,

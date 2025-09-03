@@ -44,7 +44,8 @@ class ProductApiService {
     } on SocketException {
       return const ProductSearchResponse(
         success: false,
-        message: 'No internet connection. Please check your network and try again.',
+        message:
+            'No internet connection. Please check your network and try again.',
       );
     } on http.ClientException {
       return const ProductSearchResponse(
@@ -69,7 +70,7 @@ class ProductApiService {
   /// Convenience method to get all products without any filters applied.
   static Future<ProductSearchResponse> getAllProducts({
     int page = 1,
-    int limit = 20,
+    int limit = 40,
   }) async {
     final request = ProductSearchRequest(
       pagination: Pagination(page: page, limit: limit),
@@ -83,7 +84,7 @@ class ProductApiService {
   static Future<ProductSearchResponse> searchProductsByQuery(
     String query, {
     int page = 1,
-    int limit = 20,
+    int limit = 40,
   }) async {
     final request = ProductSearchRequest(
       searchQuery: query,
@@ -98,7 +99,7 @@ class ProductApiService {
   static Future<ProductSearchResponse> getProductsByBrands(
     List<String> brands, {
     int page = 1,
-    int limit = 20,
+    int limit = 40,
   }) async {
     final request = ProductSearchRequest(
       selectedBrands: brands.join(','),
@@ -128,7 +129,7 @@ class ProductApiService {
   static Future<ProductSearchResponse> getProductsByType(
     String productType, {
     int page = 1,
-    int limit = 20,
+    int limit = 40,
   }) async {
     final request = ProductSearchRequest(
       productType: productType,
@@ -144,7 +145,7 @@ class ProductApiService {
     int minPrice,
     int maxPrice, {
     int page = 1,
-    int limit = 20,
+    int limit = 40,
   }) async {
     final request = ProductSearchRequest(
       priceRange: PriceRange(min: minPrice, max: maxPrice),
@@ -159,7 +160,7 @@ class ProductApiService {
   static Future<ProductSearchResponse> getProductsWithSort(
     String sortOption, {
     int page = 1,
-    int limit = 20,
+    int limit = 40,
   }) async {
     final request = ProductSearchRequest(
       sortOption: sortOption,
@@ -174,7 +175,7 @@ class ProductApiService {
   static ProductSearchRequest convertFilterToRequest(
     ProductFilter filter, {
     int page = 1,
-    int limit = 20,
+    int limit = 40,
   }) {
     return ProductSearchRequest(
       searchQuery: filter.searchQuery ?? '',

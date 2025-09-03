@@ -27,6 +27,7 @@ class _ExploreProductsPageState extends State<ExploreProductsPage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   final TextEditingController _searchController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
@@ -40,6 +41,17 @@ class _ExploreProductsPageState extends State<ExploreProductsPage>
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _updateSearchControllerFromState();
     });
+
+    // Listen to scroll controller for pagination
+    _scrollController.addListener(_onScroll);
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
+      // Load more products when user is near the bottom (200px before end)
+      context.read<ExploreProductsCubit>().loadMoreProducts();
+    }
   }
 
   /// Update search controller text when state changes
@@ -57,6 +69,7 @@ class _ExploreProductsPageState extends State<ExploreProductsPage>
   void dispose() {
     _tabController.dispose();
     _searchController.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
@@ -355,9 +368,20 @@ class _ExploreProductsPageState extends State<ExploreProductsPage>
     }
 
     return ListView.builder(
+      controller: _scrollController,
       padding: const EdgeInsets.only(bottom: 16),
-      itemCount: state.filteredProducts.length,
+      itemCount: state.filteredProducts.length + (state.isLoadingMore ? 1 : 0),
       itemBuilder: (context, index) {
+        // Show loading indicator at the end if loading more
+        if (index == state.filteredProducts.length) {
+          return const Padding(
+            padding: EdgeInsets.all(16.0),
+            child: Center(
+              child: CircularProgressIndicator(),
+            ),
+          );
+        }
+
         final product = state.filteredProducts[index];
         return MedicineCard(
           medicine: product,

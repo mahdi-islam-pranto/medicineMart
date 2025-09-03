@@ -102,7 +102,7 @@ class Pagination extends Equatable {
 
   const Pagination({
     this.page = 1,
-    this.limit = 20,
+    this.limit = 40,
   });
 
   Map<String, dynamic> toJson() {
@@ -115,7 +115,7 @@ class Pagination extends Equatable {
   factory Pagination.fromJson(Map<String, dynamic> json) {
     return Pagination(
       page: json['page'] as int? ?? 1,
-      limit: json['limit'] as int? ?? 20,
+      limit: json['limit'] as int? ?? 40,
     );
   }
 
@@ -164,7 +164,8 @@ class ProductSearchData extends Equatable {
   factory ProductSearchData.fromJson(Map<String, dynamic> json) {
     return ProductSearchData(
       products: (json['products'] as List<dynamic>?)
-              ?.map((item) => Medicine.fromApiJson(item as Map<String, dynamic>))
+              ?.map(
+                  (item) => Medicine.fromApiJson(item as Map<String, dynamic>))
               .toList() ??
           [],
       pagination: PaginationInfo.fromJson(
