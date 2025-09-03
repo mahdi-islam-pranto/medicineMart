@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import '../../models/models.dart';
@@ -31,6 +32,8 @@ class ExploreProductsLoaded extends ExploreProductsState {
   final int currentPage;
   final bool hasMorePages;
   final bool isLoadingMore;
+  final bool isSearching;
+  final String searchText; // Separate from filter for UI display
 
   const ExploreProductsLoaded({
     required this.allProducts,
@@ -43,6 +46,8 @@ class ExploreProductsLoaded extends ExploreProductsState {
     this.currentPage = 1,
     this.hasMorePages = true,
     this.isLoadingMore = false,
+    this.isSearching = false,
+    this.searchText = '',
   });
 
   ExploreProductsLoaded copyWith({
@@ -56,6 +61,8 @@ class ExploreProductsLoaded extends ExploreProductsState {
     int? currentPage,
     bool? hasMorePages,
     bool? isLoadingMore,
+    bool? isSearching,
+    String? searchText,
   }) {
     return ExploreProductsLoaded(
       allProducts: allProducts ?? this.allProducts,
@@ -68,6 +75,8 @@ class ExploreProductsLoaded extends ExploreProductsState {
       currentPage: currentPage ?? this.currentPage,
       hasMorePages: hasMorePages ?? this.hasMorePages,
       isLoadingMore: isLoadingMore ?? this.isLoadingMore,
+      isSearching: isSearching ?? this.isSearching,
+      searchText: searchText ?? this.searchText,
     );
   }
 
@@ -83,6 +92,8 @@ class ExploreProductsLoaded extends ExploreProductsState {
         currentPage,
         hasMorePages,
         isLoadingMore,
+        isSearching,
+        searchText,
       ];
 }
 
@@ -97,7 +108,15 @@ class ExploreProductsError extends ExploreProductsState {
 
 /// Cubit for managing explore products functionality
 class ExploreProductsCubit extends Cubit<ExploreProductsState> {
+  Timer? _searchDebounceTimer;
+
   ExploreProductsCubit() : super(const ExploreProductsInitial());
+
+  @override
+  Future<void> close() {
+    _searchDebounceTimer?.cancel();
+    return super.close();
+  }
 
   /// Load initial products with pagination
   Future<void> loadProducts() async {
@@ -223,6 +242,7 @@ class ExploreProductsCubit extends Cubit<ExploreProductsState> {
             hasMorePages:
                 paginationInfo.currentPage < paginationInfo.totalPages,
             isLoadingMore: false,
+            isSearching: false, // Reset searching state
           ));
         } else {
           // If API fails, fall back to local filtering
@@ -235,6 +255,7 @@ class ExploreProductsCubit extends Cubit<ExploreProductsState> {
             currentPage: 1, // Reset to page 1
             hasMorePages: false, // No pagination for local filtering
             isLoadingMore: false,
+            isSearching: false, // Reset searching state
           ));
         }
       } catch (e) {
@@ -248,17 +269,55 @@ class ExploreProductsCubit extends Cubit<ExploreProductsState> {
           currentPage: 1, // Reset to page 1
           hasMorePages: false, // No pagination for local filtering
           isLoadingMore: false,
+          isSearching: false, // Reset searching state
         ));
       }
     }
   }
 
-  /// Update search query
-  Future<void> updateSearchQuery(String query) async {
+  /// Update search text immediately (for UI display)
+  void updateSearchText(String searchText) {
     final currentState = state;
     if (currentState is ExploreProductsLoaded) {
-      final newFilter = currentState.currentFilter.copyWith(searchQuery: query);
-      await applyFilter(newFilter);
+      emit(currentState.copyWith(searchText: searchText));
+
+      // Cancel previous timer
+      _searchDebounceTimer?.cancel();
+
+      // Start new timer for debounced search
+      _searchDebounceTimer = Timer(const Duration(milliseconds: 800), () {
+        _performSearch(searchText);
+      });
+    }
+  }
+
+  /// Perform the actual search with API call
+  Future<void> _performSearch(String query) async {
+    final currentState = state;
+    if (currentState is ExploreProductsLoaded) {
+      // Set searching state
+      emit(currentState.copyWith(isSearching: true));
+
+      try {
+        final newFilter =
+            currentState.currentFilter.copyWith(searchQuery: query);
+        await applyFilter(newFilter);
+      } catch (e) {
+        print('💥 Error performing search: $e');
+        // Reset searching state on error
+        emit(currentState.copyWith(isSearching: false));
+      }
+    }
+  }
+
+  /// Clear search immediately
+  void clearSearch() {
+    _searchDebounceTimer?.cancel();
+    final currentState = state;
+    if (currentState is ExploreProductsLoaded) {
+      emit(currentState.copyWith(searchText: ''));
+      final newFilter = currentState.currentFilter.copyWith(searchQuery: '');
+      applyFilter(newFilter);
     }
   }
 

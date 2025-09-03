@@ -429,7 +429,7 @@ class _HomePageState extends State<HomePage> {
             cubit.loadProducts().then((_) {
               // Apply filters after products are loaded
               if (searchQuery != null && searchQuery.isNotEmpty) {
-                cubit.updateSearchQuery(searchQuery);
+                cubit.updateSearchText(searchQuery);
               }
               if (selectedBrand != null) {
                 final currentState = cubit.state;

@@ -58,9 +58,10 @@ class _ExploreProductsPageState extends State<ExploreProductsPage>
   void _updateSearchControllerFromState() {
     final state = context.read<ExploreProductsCubit>().state;
     if (state is ExploreProductsLoaded) {
-      final searchQuery = state.currentFilter.searchQuery ?? '';
-      if (_searchController.text != searchQuery) {
-        _searchController.text = searchQuery;
+      // Use searchText for UI display instead of filter searchQuery
+      final searchText = state.searchText;
+      if (_searchController.text != searchText) {
+        _searchController.text = searchText;
       }
     }
   }
@@ -182,12 +183,21 @@ class _ExploreProductsPageState extends State<ExploreProductsPage>
         controller: _searchController,
         decoration: InputDecoration(
           hintText: 'Search medicines, brands...',
-          prefixIcon: const Icon(Icons.search, color: AppColors.textSecondary),
+          prefixIcon: state.isSearching
+              ? const Padding(
+                  padding: EdgeInsets.all(12.0),
+                  child: SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+                )
+              : const Icon(Icons.search, color: AppColors.textSecondary),
           suffixIcon: _searchController.text.isNotEmpty
               ? IconButton(
                   onPressed: () {
                     _searchController.clear();
-                    context.read<ExploreProductsCubit>().updateSearchQuery('');
+                    context.read<ExploreProductsCubit>().clearSearch();
                   },
                   icon: const Icon(Icons.clear, color: AppColors.textSecondary),
                 )
@@ -208,7 +218,7 @@ class _ExploreProductsPageState extends State<ExploreProductsPage>
           fillColor: AppColors.surface,
         ),
         onChanged: (value) {
-          context.read<ExploreProductsCubit>().updateSearchQuery(value);
+          context.read<ExploreProductsCubit>().updateSearchText(value);
         },
       ),
     );
