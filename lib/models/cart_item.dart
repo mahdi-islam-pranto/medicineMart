@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'medicine.dart';
+import 'cart_list_models.dart';
 
 /// Cart item data model with equatable for state comparison
 class CartItem extends Equatable {
@@ -52,6 +53,20 @@ class CartItem extends Equatable {
       originalPrice: medicine.regularPrice,
       cartQuantity: quantity,
       imageUrl: medicine.imageUrl ?? '',
+    );
+  }
+
+  /// Create cart item from API cart item data
+  factory CartItem.fromCartItemData(CartItemData cartItemData) {
+    return CartItem(
+      id: cartItemData.productId.toString(),
+      name: cartItemData.productName,
+      quantity: 'Pcs', // Default unit since API doesn't provide this
+      brand: cartItemData.brand,
+      price: cartItemData.salePriceSingle,
+      originalPrice: cartItemData.mrpPriceSingle,
+      cartQuantity: cartItemData.cartQuantity,
+      imageUrl: cartItemData.imageUrl ?? '',
     );
   }
 

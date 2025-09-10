@@ -55,7 +55,7 @@ class MainNavigation extends StatelessWidget {
             if (state is CartLoaded) {
               context
                   .read<NavigationCubit>()
-                  .updateCartItemCount(state.totalItems);
+                  .updateCartItemCount(state.uniqueProductCount);
             }
           },
         ),

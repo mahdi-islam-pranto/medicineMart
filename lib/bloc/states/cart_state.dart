@@ -29,14 +29,19 @@ class CartLoaded extends CartState {
     this.isUpdating = false,
   });
 
-  /// Get total number of items in cart
+  /// Get total number of items in cart (sum of all quantities)
   int get totalItems => items.fold(0, (sum, item) => sum + item.cartQuantity);
 
+  /// Get number of unique products in cart
+  int get uniqueProductCount => items.length;
+
   /// Get total price of all items in cart
-  double get totalPrice => items.fold(0.0, (sum, item) => sum + item.totalPrice);
+  double get totalPrice =>
+      items.fold(0.0, (sum, item) => sum + item.totalPrice);
 
   /// Get total original price of all items in cart
-  double get totalOriginalPrice => items.fold(0.0, (sum, item) => sum + item.totalOriginalPrice);
+  double get totalOriginalPrice =>
+      items.fold(0.0, (sum, item) => sum + item.totalOriginalPrice);
 
   /// Get total discount amount
   double get totalDiscount => totalOriginalPrice - totalPrice;

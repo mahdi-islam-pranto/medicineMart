@@ -13,8 +13,22 @@ import '../widgets/quantity_selector.dart';
 /// - Checkout functionality
 /// - Empty cart state
 /// - Modern design matching app theme
-class CartPage extends StatelessWidget {
+class CartPage extends StatefulWidget {
   const CartPage({super.key});
+
+  @override
+  State<CartPage> createState() => _CartPageState();
+}
+
+class _CartPageState extends State<CartPage> {
+  @override
+  void initState() {
+    super.initState();
+    // Load cart data when page is initialized
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<CartCubit>().loadCart();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -66,7 +80,7 @@ class CartPage extends StatelessWidget {
       preferredSize: const Size.fromHeight(kToolbarHeight),
       child: BlocBuilder<CartCubit, CartState>(
         builder: (context, state) {
-          final itemCount = state is CartLoaded ? state.totalItems : 0;
+          final itemCount = state is CartLoaded ? state.uniqueProductCount : 0;
           final hasItems = state is CartLoaded && state.isNotEmpty;
 
           return AppBar(
@@ -347,7 +361,7 @@ class CartPage extends StatelessWidget {
   /// Builds checkout section
   Widget _buildCheckoutSection(CartLoaded state) {
     final subtotal = state.totalPrice;
-    const delivery = 50.0;
+    const delivery = 0.0;
     final total = subtotal + delivery;
 
     return Container(

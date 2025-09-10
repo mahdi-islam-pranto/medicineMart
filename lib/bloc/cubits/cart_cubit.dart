@@ -7,18 +7,32 @@ import '../../APIs/cart_api_service.dart';
 class CartCubit extends Cubit<CartState> {
   CartCubit() : super(const CartInitial());
 
-  /// Load cart data
-  Future<void> loadCart() async {
+  /// Load cart data from API
+  Future<void> loadCart({int? customerId}) async {
     emit(const CartLoading());
 
     try {
-      // Simulate loading delay
-      await Future.delayed(const Duration(milliseconds: 300));
+      // Use provided customerId or default to 1 for development
+      final customerIdToUse = customerId ?? 1;
 
-      // Load sample cart data - In a real app, this would come from local storage or API
-      final cartItems = _getSampleCartItems();
+      // Make API call to get cart items
+      final apiResponse = await CartApiService.getCartItems(
+        customerId: customerIdToUse,
+      );
 
-      emit(CartLoaded(items: cartItems));
+      if (apiResponse.success && apiResponse.data != null) {
+        // Convert API cart items to local CartItem models
+        final cartItems = apiResponse.data!.items
+            .where((item) =>
+                item.cartQuantity > 0) // Only include items with quantity > 0
+            .map((item) => CartItem.fromCartItemData(item))
+            .toList();
+
+        emit(CartLoaded(items: cartItems));
+      } else {
+        // API call failed or no data
+        emit(CartError(message: apiResponse.message));
+      }
     } catch (e) {
       emit(CartError(message: 'Failed to load cart: ${e.toString()}'));
     }
@@ -241,41 +255,5 @@ class CartCubit extends Cubit<CartState> {
       return currentState.containsMedicine(medicineId);
     }
     return false;
-  }
-
-  /// Get sample cart items
-  List<CartItem> _getSampleCartItems() {
-    return [
-      const CartItem(
-        id: '1',
-        name: 'Tablet- Acipro',
-        quantity: 'Box',
-        brand: 'Square',
-        price: 410.00,
-        originalPrice: 500.00,
-        cartQuantity: 2,
-        imageUrl: 'https://via.placeholder.com/80x80/E3F2FD/1976D2?text=ACIPRO',
-      ),
-      const CartItem(
-        id: '3',
-        name: 'Syrup- Asthalin',
-        quantity: '100ml',
-        brand: 'Renata',
-        price: 230.00,
-        originalPrice: 360.00,
-        cartQuantity: 1,
-        imageUrl: 'https://via.placeholder.com/80x80/E8F5E8/4CAF50?text=SYRUP',
-      ),
-      const CartItem(
-        id: '4',
-        name: 'Capsule- Amoxicillin',
-        quantity: '500ml',
-        brand: 'Beximco',
-        price: 410.00,
-        originalPrice: 600.00,
-        cartQuantity: 1,
-        imageUrl: 'https://via.placeholder.com/80x80/FFF8E1/FFC107?text=CAPS',
-      ),
-    ];
   }
 }

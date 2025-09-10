@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'api_config.dart';
+import '../models/cart_list_models.dart';
 
 /// Cart API Service
 ///
@@ -19,8 +20,9 @@ class CartApiService {
     required int quantity,
   }) async {
     try {
-      print('🛒 Adding to cart - Product: $productId, Customer: $customerId, Quantity: $quantity');
-      
+      print(
+          '🛒 Adding to cart - Product: $productId, Customer: $customerId, Quantity: $quantity');
+
       // Prepare the request body according to API specification
       final requestBody = {
         'product_id': productId,
@@ -50,7 +52,8 @@ class CartApiService {
         // Success response
         return CartApiResponse(
           success: true,
-          message: responseData['message'] ?? 'Product added to cart successfully',
+          message:
+              responseData['message'] ?? 'Product added to cart successfully',
           statusCode: responseData['status'] ?? 200,
         );
       } else {
@@ -116,6 +119,73 @@ class CartApiService {
       customerId: customerId,
       quantity: 0,
     );
+  }
+
+  /// Get cart items list
+  ///
+  /// Fetches all items in the cart for a specific customer.
+  /// Returns a [CartListResponse] with cart items and summary.
+  static Future<CartListResponse> getCartItems({
+    required int customerId,
+  }) async {
+    try {
+      print('🛒 Fetching cart items for customer: $customerId');
+
+      // Prepare the request body according to API specification
+      final requestBody = {
+        'customer_id': customerId.toString(),
+      };
+
+      print('🔄 Making API call to: ${ApiConfig.cartListUrl}');
+      print('📦 Request body: ${json.encode(requestBody)}');
+
+      // Make the HTTP POST request
+      final response = await http
+          .post(
+            Uri.parse(ApiConfig.cartListUrl),
+            headers: ApiConfig.headers,
+            body: json.encode(requestBody),
+          )
+          .timeout(ApiConfig.requestTimeout);
+
+      print('📡 Response status: ${response.statusCode}');
+      print('📄 Response body: ${response.body}');
+
+      // Parse the response
+      final responseData = json.decode(response.body);
+
+      if (response.statusCode == 200) {
+        // Success response
+        return CartListResponse.fromJson(responseData);
+      } else {
+        // Error response
+        return CartListResponse(
+          success: false,
+          message: responseData['message'] ?? 'Failed to load cart items',
+        );
+      }
+    } on SocketException {
+      return const CartListResponse(
+        success: false,
+        message: 'No internet connection. Please check your network.',
+      );
+    } on HttpException {
+      return const CartListResponse(
+        success: false,
+        message: 'Server error. Please try again later.',
+      );
+    } on FormatException {
+      return const CartListResponse(
+        success: false,
+        message: 'Invalid response from server. Please try again.',
+      );
+    } catch (e) {
+      print('❌ Cart List API Error: $e');
+      return const CartListResponse(
+        success: false,
+        message: 'Failed to load cart items. Please try again.',
+      );
+    }
   }
 }
 
