@@ -16,11 +16,15 @@ class ApiConfig {
   // Brand endpoints
   static const String brandEndpoint = 'brand';
 
+  // Cart endpoints
+  static const String addToCartEndpoint = 'product/add/to/cart';
+
   // Full URLs
   static String get registerUrl => '$baseUrl$registerEndpoint';
   static String get loginUrl => '$baseUrl$loginEndpoint';
   static String get productsSearchUrl => '$baseUrl$productsSearchEndpoint';
   static String get brandUrl => '$baseUrl$brandEndpoint';
+  static String get addToCartUrl => '$baseUrl$addToCartEndpoint';
 
   // Request headers
   static Map<String, String> get headers => {

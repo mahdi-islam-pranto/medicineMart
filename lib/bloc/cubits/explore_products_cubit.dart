@@ -4,6 +4,7 @@ import 'package:equatable/equatable.dart';
 import '../../models/models.dart';
 import '../../APIs/product_api_service.dart';
 import '../../APIs/brand_api_service.dart';
+import '../../APIs/cart_api_service.dart';
 
 /// States for explore products
 abstract class ExploreProductsState extends Equatable {
@@ -349,13 +350,39 @@ class ExploreProductsCubit extends Cubit<ExploreProductsState> {
     }
   }
 
-  /// Add to cart
-  void addToCart(Medicine product, int quantity) {
+  /// Add to cart with API integration
+  Future<void> addToCart(Medicine product, int quantity,
+      {int? customerId}) async {
     final currentState = state;
     if (currentState is ExploreProductsLoaded) {
-      final newCartItems = Map<String, int>.from(currentState.cartItems);
-      newCartItems[product.id] = (newCartItems[product.id] ?? 0) + quantity;
-      emit(currentState.copyWith(cartItems: newCartItems));
+      try {
+        // Use provided customerId or default to 1 for development
+        final customerIdToUse = customerId ?? 1;
+
+        // Parse product ID to int
+        final productId = int.tryParse(product.id) ?? 1;
+
+        // Make API call
+        final apiResponse = await CartApiService.addToCart(
+          productId: productId,
+          customerId: customerIdToUse,
+          quantity: quantity,
+        );
+
+        if (apiResponse.success) {
+          // Update local cart state on successful API call
+          final newCartItems = Map<String, int>.from(currentState.cartItems);
+          // Set the quantity instead of adding to existing quantity
+          newCartItems[product.id] = quantity;
+          emit(currentState.copyWith(cartItems: newCartItems));
+        } else {
+          // API call failed - you might want to show an error message
+          print('❌ Failed to add to cart: ${apiResponse.message}');
+        }
+      } catch (e) {
+        // Handle error - you might want to show an error message
+        print('💥 Error adding to cart: $e');
+      }
     }
   }
 

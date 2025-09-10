@@ -91,6 +91,7 @@ class _ProfilePageState extends State<ProfilePage> {
             // Get user info from auth state
             final user = state.user;
             final userName = user?.fullName ?? 'Pharmacy Owner';
+            final userId = user?.id ?? '1';
             final pharmacyName = user?.pharmacyName ?? 'Your Pharmacy';
 
             return Column(

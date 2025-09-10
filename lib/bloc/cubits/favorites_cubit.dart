@@ -9,17 +9,18 @@ class FavoritesCubit extends Cubit<FavoritesState> {
   /// Load favorites data
   Future<void> loadFavorites() async {
     emit(const FavoritesLoading());
-    
+
     try {
       // Simulate loading delay
       await Future.delayed(const Duration(milliseconds: 300));
-      
+
       // Load sample favorites data - In a real app, this would come from local storage or API
       final favoriteItems = _getSampleFavoriteItems();
-      
+
       emit(FavoritesLoaded(items: favoriteItems));
     } catch (e) {
-      emit(FavoritesError(message: 'Failed to load favorites: ${e.toString()}'));
+      emit(
+          FavoritesError(message: 'Failed to load favorites: ${e.toString()}'));
     }
   }
 
@@ -28,27 +29,28 @@ class FavoritesCubit extends Cubit<FavoritesState> {
     final currentState = state;
     if (currentState is FavoritesLoaded) {
       emit(currentState.copyWith(isUpdating: true));
-      
+
       try {
         final updatedItems = List<FavoriteItem>.from(currentState.items);
-        
+
         // Check if already in favorites
         if (!updatedItems.any((item) => item.id == medicine.id)) {
           final newFavorite = FavoriteItem.fromMedicine(medicine);
           updatedItems.add(newFavorite);
-          
+
           emit(FavoritesOperationSuccess(
             message: '${medicine.name} added to favorites',
             operationType: FavoritesOperationType.add,
             items: updatedItems,
             affectedItem: newFavorite,
           ));
-          
+
           // Return to loaded state
           emit(FavoritesLoaded(items: updatedItems));
         }
       } catch (e) {
-        emit(FavoritesError(message: 'Failed to add to favorites: ${e.toString()}'));
+        emit(FavoritesError(
+            message: 'Failed to add to favorites: ${e.toString()}'));
       }
     }
   }
@@ -58,27 +60,29 @@ class FavoritesCubit extends Cubit<FavoritesState> {
     final currentState = state;
     if (currentState is FavoritesLoaded) {
       emit(currentState.copyWith(isUpdating: true));
-      
+
       try {
         final updatedItems = List<FavoriteItem>.from(currentState.items);
-        final itemIndex = updatedItems.indexWhere((item) => item.id == medicineId);
-        
+        final itemIndex =
+            updatedItems.indexWhere((item) => item.id == medicineId);
+
         if (itemIndex != -1) {
           final removedItem = updatedItems[itemIndex];
           updatedItems.removeAt(itemIndex);
-          
+
           emit(FavoritesOperationSuccess(
             message: '${removedItem.name} removed from favorites',
             operationType: FavoritesOperationType.remove,
             items: updatedItems,
             affectedItem: removedItem,
           ));
-          
+
           // Return to loaded state
           emit(FavoritesLoaded(items: updatedItems));
         }
       } catch (e) {
-        emit(FavoritesError(message: 'Failed to remove from favorites: ${e.toString()}'));
+        emit(FavoritesError(
+            message: 'Failed to remove from favorites: ${e.toString()}'));
       }
     }
   }
@@ -100,18 +104,19 @@ class FavoritesCubit extends Cubit<FavoritesState> {
     final currentState = state;
     if (currentState is FavoritesLoaded) {
       emit(currentState.copyWith(isUpdating: true));
-      
+
       try {
         emit(const FavoritesOperationSuccess(
           message: 'All favorites cleared',
           operationType: FavoritesOperationType.clear,
           items: [],
         ));
-        
+
         // Return to loaded state with empty favorites
         emit(const FavoritesLoaded(items: []));
       } catch (e) {
-        emit(FavoritesError(message: 'Failed to clear favorites: ${e.toString()}'));
+        emit(FavoritesError(
+            message: 'Failed to clear favorites: ${e.toString()}'));
       }
     }
   }
@@ -139,6 +144,16 @@ class FavoritesCubit extends Cubit<FavoritesState> {
     return [
       FavoriteItem(
         id: '1',
+        name: 'Tablet- Acipro',
+        quantity: 'Box',
+        brand: 'Square',
+        price: 410.00,
+        originalPrice: 500.00,
+        imageUrl: 'https://via.placeholder.com/80x80/E3F2FD/1976D2?text=ACIPRO',
+        addedDate: DateTime.now().subtract(const Duration(days: 2)),
+      ),
+      FavoriteItem(
+        id: '12',
         name: 'Tablet- Acipro',
         quantity: 'Box',
         brand: 'Square',
