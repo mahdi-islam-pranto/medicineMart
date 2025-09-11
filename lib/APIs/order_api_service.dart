@@ -45,8 +45,9 @@ class OrderApiService {
         final status = responseData['status']?.toString() ?? '';
         if (status == '200') {
           // Success response - parse order data
-          final orderData = OrderData.fromJson(responseData['data'] ?? {});
-          
+          final orderData =
+              CheckoutOrderData.fromJson(responseData['data'] ?? {});
+
           return OrderResponse.success(
             message: responseData['message'] ?? 'Order placed successfully',
             data: orderData,

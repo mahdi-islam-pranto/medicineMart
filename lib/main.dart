@@ -33,6 +33,9 @@ class MyApp extends StatelessWidget {
         BlocProvider<CategoriesCubit>(
           create: (context) => CategoriesCubit()..loadCategories(),
         ),
+        BlocProvider<OrderCubit>(
+          create: (context) => OrderCubit(),
+        ),
       ],
       child: MaterialApp(
         title: 'Flutter Demo',

@@ -53,18 +53,19 @@ class OrderRequest extends Equatable {
   }
 
   @override
-  List<Object?> get props => [items, customerId, subtotal, discount, totalAmount];
+  List<Object?> get props =>
+      [items, customerId, subtotal, discount, totalAmount];
 }
 
-/// Order data from API response
-class OrderData extends Equatable {
+/// Checkout order data from API response
+class CheckoutOrderData extends Equatable {
   final String orderId;
   final String orderStatus;
   final String estimatedDelivery;
   final double totalAmount;
   final String paymentStatus;
 
-  const OrderData({
+  const CheckoutOrderData({
     required this.orderId,
     required this.orderStatus,
     required this.estimatedDelivery,
@@ -73,8 +74,8 @@ class OrderData extends Equatable {
   });
 
   /// Create from JSON response
-  factory OrderData.fromJson(Map<String, dynamic> json) {
-    return OrderData(
+  factory CheckoutOrderData.fromJson(Map<String, dynamic> json) {
+    return CheckoutOrderData(
       orderId: json['order_id'] ?? '',
       orderStatus: json['order_status'] ?? '',
       estimatedDelivery: json['estimated_delivery'] ?? '',
@@ -98,7 +99,7 @@ class OrderResponse extends Equatable {
   final bool success;
   final String message;
   final int statusCode;
-  final OrderData? data;
+  final CheckoutOrderData? data;
 
   const OrderResponse({
     required this.success,
@@ -110,7 +111,7 @@ class OrderResponse extends Equatable {
   /// Create success response
   factory OrderResponse.success({
     required String message,
-    required OrderData data,
+    required CheckoutOrderData data,
     int statusCode = 200,
   }) {
     return OrderResponse(

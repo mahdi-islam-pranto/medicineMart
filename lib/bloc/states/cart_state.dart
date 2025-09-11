@@ -110,7 +110,7 @@ class CartError extends CartState {
 /// State when checkout is successful
 class CartCheckoutSuccess extends CartState {
   final String message;
-  final OrderData orderData;
+  final CheckoutOrderData orderData;
 
   const CartCheckoutSuccess({
     required this.message,

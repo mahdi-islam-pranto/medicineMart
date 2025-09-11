@@ -22,6 +22,7 @@ class ApiConfig {
 
   // Order endpoints
   static const String createOrderEndpoint = 'invoice/create';
+  static const String orderListEndpoint = 'order/list';
 
   // Full URLs
   static String get registerUrl => '$baseUrl$registerEndpoint';
@@ -31,6 +32,7 @@ class ApiConfig {
   static String get addToCartUrl => '$baseUrl$addToCartEndpoint';
   static String get cartListUrl => '$baseUrl$cartListEndpoint';
   static String get createOrderUrl => '$baseUrl$createOrderEndpoint';
+  static String get orderListUrl => '$baseUrl$orderListEndpoint';
 
   // Request headers
   static Map<String, String> get headers => {
