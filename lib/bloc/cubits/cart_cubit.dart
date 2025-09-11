@@ -2,6 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../states/cart_state.dart';
 import '../../models/models.dart';
 import '../../APIs/cart_api_service.dart';
+import '../../APIs/order_api_service.dart';
 
 /// Cubit for managing cart items and operations
 class CartCubit extends Cubit<CartState> {
@@ -255,5 +256,66 @@ class CartCubit extends Cubit<CartState> {
       return currentState.containsMedicine(medicineId);
     }
     return false;
+  }
+
+  /// Checkout - Create order from cart items
+  Future<void> checkout({int? customerId}) async {
+    final currentState = state;
+    if (currentState is CartLoaded && currentState.isNotEmpty) {
+      emit(currentState.copyWith(isUpdating: true));
+
+      try {
+        // Use provided customerId or default to 1 for development
+        final customerIdToUse = customerId ?? 1;
+
+        // Calculate totals
+        final subtotal = currentState.totalPrice;
+        const discount = 0.0; // No discount for now
+        final totalAmount = subtotal - discount;
+
+        // Convert cart items to order items
+        final orderItems = currentState.items.map((cartItem) {
+          return OrderItem(
+            productId: cartItem.id,
+            quantity: cartItem.cartQuantity,
+            unitPrice: cartItem.price,
+          );
+        }).toList();
+
+        // Create order request
+        final orderRequest = OrderRequest(
+          items: orderItems,
+          customerId: customerIdToUse,
+          subtotal: subtotal,
+          discount: discount,
+          totalAmount: totalAmount,
+        );
+
+        // Make API call to create order
+        final orderResponse = await OrderApiService.createOrder(orderRequest);
+
+        if (orderResponse.success && orderResponse.data != null) {
+          // Order created successfully
+          emit(CartCheckoutSuccess(
+            message: orderResponse.message,
+            orderData: orderResponse.data!,
+          ));
+
+          // Clear cart after successful order
+          emit(const CartLoaded(items: []));
+        } else {
+          // Order creation failed
+          emit(CartError(message: orderResponse.message));
+          // Return to previous state
+          emit(currentState.copyWith(isUpdating: false));
+        }
+      } catch (e) {
+        emit(CartError(message: 'Failed to create order: ${e.toString()}'));
+        // Return to previous state
+        emit(currentState.copyWith(isUpdating: false));
+      }
+    } else {
+      emit(const CartError(message: 'Cart is empty. Add items to checkout.'));
+    }
   }
 }

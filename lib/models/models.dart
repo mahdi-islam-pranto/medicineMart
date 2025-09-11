@@ -10,3 +10,4 @@ export 'user.dart';
 export 'auth_models.dart';
 export 'product_api_models.dart';
 export 'brand_models.dart';
+export 'order_models.dart';

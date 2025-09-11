@@ -34,34 +34,50 @@ class _CartPageState extends State<CartPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: _buildAppBar(),
-      body: BlocBuilder<CartCubit, CartState>(
-        builder: (context, state) {
-          if (state is CartLoading) {
-            return const Center(child: CircularProgressIndicator());
+      body: BlocListener<CartCubit, CartState>(
+        listener: (context, state) {
+          if (state is CartCheckoutSuccess) {
+            _showOrderSuccessDialog(context, state);
           } else if (state is CartError) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.error_outline,
-                      size: 64, color: AppColors.error),
-                  const SizedBox(height: 16),
-                  Text('Error loading cart'),
-                  const SizedBox(height: 8),
-                  Text(state.message),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () => context.read<CartCubit>().loadCart(),
-                    child: const Text('Retry'),
-                  ),
-                ],
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: AppColors.error,
               ),
             );
-          } else if (state is CartLoaded) {
-            return state.isEmpty ? _buildEmptyCart() : _buildCartContent(state);
           }
-          return const SizedBox.shrink();
         },
+        child: BlocBuilder<CartCubit, CartState>(
+          builder: (context, state) {
+            if (state is CartLoading) {
+              return const Center(child: CircularProgressIndicator());
+            } else if (state is CartError) {
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.error_outline,
+                        size: 64, color: AppColors.error),
+                    const SizedBox(height: 16),
+                    const Text('Error loading cart'),
+                    const SizedBox(height: 8),
+                    Text(state.message),
+                    const SizedBox(height: 16),
+                    ElevatedButton(
+                      onPressed: () => context.read<CartCubit>().loadCart(),
+                      child: const Text('Retry'),
+                    ),
+                  ],
+                ),
+              );
+            } else if (state is CartLoaded) {
+              return state.isEmpty
+                  ? _buildEmptyCart()
+                  : _buildCartContent(state);
+            }
+            return const SizedBox.shrink();
+          },
+        ),
       ),
       bottomNavigationBar: BlocBuilder<CartCubit, CartState>(
         builder: (context, state) {
@@ -437,19 +453,13 @@ class _CartPageState extends State<CartPage> {
 
             const SizedBox(height: 16),
 
-            // Checkout button
+            // Checkout/make an order button
             SizedBox(
               width: double.infinity,
               child: Builder(
                 builder: (context) => ElevatedButton(
-                  onPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Checkout functionality coming soon!'),
-                        backgroundColor: AppColors.primary,
-                      ),
-                    );
-                  },
+                  onPressed:
+                      state.isUpdating ? null : () => _handleCheckout(context),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.primary,
                     foregroundColor: AppColors.textOnPrimary,
@@ -458,13 +468,24 @@ class _CartPageState extends State<CartPage> {
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
-                  child: const Text(
-                    'Proceed to Checkout',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
+                  child: state.isUpdating
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              AppColors.textOnPrimary,
+                            ),
+                          ),
+                        )
+                      : const Text(
+                          'Make an Order',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                 ),
               ),
             ),
@@ -487,6 +508,142 @@ class _CartPageState extends State<CartPage> {
       onQuantitySelected: (quantity) {
         context.read<CartCubit>().updateQuantity(item.id, quantity);
       },
+    );
+  }
+
+  /// Handle checkout button press
+  void _handleCheckout(BuildContext context) {
+    // Show confirmation dialog before proceeding
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Confirm Order'),
+          content: const Text('Are you sure you want to place this order?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                // Trigger checkout
+                context.read<CartCubit>().checkout();
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+              ),
+              child: const Text('Confirm'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  /// Show order success dialog
+  void _showOrderSuccessDialog(
+      BuildContext context, CartCheckoutSuccess state) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          icon: const Icon(
+            Icons.check_circle,
+            color: AppColors.success,
+            size: 64,
+          ),
+          title: const Text(
+            'Order Placed Successfully!',
+            style: TextStyle(
+              color: AppColors.textPrimary,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                state.message,
+                style: const TextStyle(
+                  color: AppColors.textSecondary,
+                  fontSize: 14,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildOrderDetailRow('Order ID:', state.orderData.orderId),
+                    _buildOrderDetailRow(
+                        'Status:', state.orderData.orderStatus),
+                    _buildOrderDetailRow('Estimated Delivery:',
+                        state.orderData.estimatedDelivery),
+                    _buildOrderDetailRow('Total Amount:',
+                        '৳ ${state.orderData.totalAmount.toStringAsFixed(0)}'),
+                    _buildOrderDetailRow(
+                        'Payment Status:', state.orderData.paymentStatus),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                // Optionally navigate to orders page or home
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+              ),
+              child: const Text('OK'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  /// Build order detail row
+  Widget _buildOrderDetailRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 2),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 120,
+            child: Text(
+              label,
+              style: const TextStyle(
+                color: AppColors.textSecondary,
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: const TextStyle(
+                color: AppColors.textPrimary,
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

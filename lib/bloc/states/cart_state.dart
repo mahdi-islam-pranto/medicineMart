@@ -107,6 +107,20 @@ class CartError extends CartState {
   List<Object?> get props => [message, errorCode];
 }
 
+/// State when checkout is successful
+class CartCheckoutSuccess extends CartState {
+  final String message;
+  final OrderData orderData;
+
+  const CartCheckoutSuccess({
+    required this.message,
+    required this.orderData,
+  });
+
+  @override
+  List<Object?> get props => [message, orderData];
+}
+
 /// State when cart operation is successful (for showing feedback)
 class CartOperationSuccess extends CartState {
   final String message;

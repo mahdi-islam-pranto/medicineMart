@@ -73,7 +73,7 @@ class _HelpSupportPageState extends State<HelpSupportPage> {
                         child: _buildContactOption(
                       icon: Icons.phone,
                       title: 'Call Us',
-                      subtitle: '24/7 Support',
+                      subtitle: '01746733817',
                       onTap: () => _makePhoneCall(),
                     )),
                     const SizedBox(width: 12),
@@ -81,7 +81,7 @@ class _HelpSupportPageState extends State<HelpSupportPage> {
                         child: _buildContactOption(
                       icon: Icons.email,
                       title: 'Email',
-                      subtitle: 'support@medicine.com',
+                      subtitle: 'mmodumadicenmart@gmail.com',
                       onTap: () => _sendEmail(),
                     )),
                     const SizedBox(width: 12),
@@ -376,7 +376,7 @@ class _HelpSupportPageState extends State<HelpSupportPage> {
   }
 
   void _makePhoneCall() async {
-    const phoneNumber = 'tel:+8801234567890';
+    const phoneNumber = 'tel:+8801746733817';
     if (await canLaunchUrl(Uri.parse(phoneNumber))) {
       await launchUrl(Uri.parse(phoneNumber));
     } else {
@@ -385,7 +385,7 @@ class _HelpSupportPageState extends State<HelpSupportPage> {
   }
 
   void _sendEmail() async {
-    const email = 'mailto:support@medicine.com?subject=Support Request';
+    const email = 'mailto:mmodumadicenmart@gmail.com?subject=Support Request';
     if (await canLaunchUrl(Uri.parse(email))) {
       await launchUrl(Uri.parse(email));
     } else {

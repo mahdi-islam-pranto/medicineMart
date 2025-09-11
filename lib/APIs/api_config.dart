@@ -20,6 +20,9 @@ class ApiConfig {
   static const String addToCartEndpoint = 'product/add/to/cart';
   static const String cartListEndpoint = 'product/add/to/cart/list';
 
+  // Order endpoints
+  static const String createOrderEndpoint = 'invoice/create';
+
   // Full URLs
   static String get registerUrl => '$baseUrl$registerEndpoint';
   static String get loginUrl => '$baseUrl$loginEndpoint';
@@ -27,6 +30,7 @@ class ApiConfig {
   static String get brandUrl => '$baseUrl$brandEndpoint';
   static String get addToCartUrl => '$baseUrl$addToCartEndpoint';
   static String get cartListUrl => '$baseUrl$cartListEndpoint';
+  static String get createOrderUrl => '$baseUrl$createOrderEndpoint';
 
   // Request headers
   static Map<String, String> get headers => {
