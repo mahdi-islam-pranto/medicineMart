@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../theme/app_colors.dart';
 import '../bloc/bloc.dart';
+import 'drawer_pages/about_us_page.dart';
+import 'drawer_pages/feedback_page.dart';
+import 'drawer_pages/help_support_page.dart';
+import 'drawer_pages/my_orders_page.dart';
 
 /// ProfilePage - User profile and account management
 ///
@@ -145,14 +149,14 @@ class _ProfilePageState extends State<ProfilePage> {
                 const SizedBox(height: 16),
 
                 // Stats row
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    _buildStatItem('Orders', '12'),
-                    _buildStatItem('Favorites', '5'),
-                    _buildStatItem('Reviews', '8'),
-                  ],
-                ),
+                // Row(
+                //   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                //   children: [
+                //     _buildStatItem('Orders', '12'),
+                //     _buildStatItem('Favorites', '5'),
+                //     _buildStatItem('Reviews', '8'),
+                //   ],
+                // ),
               ],
             );
           },
@@ -201,12 +205,12 @@ class _ProfilePageState extends State<ProfilePage> {
             subtitle: 'Update your personal information',
             onTap: () => _showComingSoon('Edit Profile'),
           ),
-          _buildMenuItem(
-            icon: Icons.location_on_outlined,
-            title: 'Addresses',
-            subtitle: 'Manage delivery addresses',
-            onTap: () => _showComingSoon('Addresses'),
-          ),
+          // _buildMenuItem(
+          //   icon: Icons.location_on_outlined,
+          //   title: 'Addresses',
+          //   subtitle: 'Manage delivery addresses',
+          //   onTap: () => _showComingSoon('Addresses'),
+          // ),
           _buildMenuItem(
             icon: Icons.payment_outlined,
             title: 'Payment Methods',
@@ -222,20 +226,26 @@ class _ProfilePageState extends State<ProfilePage> {
             icon: Icons.shopping_bag_outlined,
             title: 'Order History',
             subtitle: 'View your past orders',
-            onTap: () => _showComingSoon('Order History'),
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const MyOrdersPage()),
+            ),
           ),
           _buildMenuItem(
             icon: Icons.local_shipping_outlined,
             title: 'Track Orders',
             subtitle: 'Track your current orders',
-            onTap: () => _showComingSoon('Track Orders'),
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const MyOrdersPage()),
+            ),
           ),
-          _buildMenuItem(
-            icon: Icons.receipt_outlined,
-            title: 'Prescriptions',
-            subtitle: 'Manage uploaded prescriptions',
-            onTap: () => _showComingSoon('Prescriptions'),
-          ),
+          // _buildMenuItem(
+          //   icon: Icons.receipt_outlined,
+          //   title: 'Prescriptions',
+          //   subtitle: 'Manage uploaded prescriptions',
+          //   onTap: () => _showComingSoon('Prescriptions'),
+          // ),
 
           const SizedBox(height: 24),
 
@@ -245,19 +255,28 @@ class _ProfilePageState extends State<ProfilePage> {
             icon: Icons.help_outline,
             title: 'Help & Support',
             subtitle: '24/7 customer service',
-            onTap: () => _showComingSoon('Help & Support'),
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const HelpSupportPage()),
+            ),
           ),
           _buildMenuItem(
             icon: Icons.star_outline,
             title: 'Rate App',
             subtitle: 'Share your feedback',
-            onTap: () => _showComingSoon('Rate App'),
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const FeedbackPage()),
+            ),
           ),
           _buildMenuItem(
             icon: Icons.info_outline,
             title: 'About',
             subtitle: 'App version and info',
-            onTap: () => _showComingSoon('About'),
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const AboutUsPage()),
+            ),
           ),
 
           const SizedBox(height: 24),

@@ -4,9 +4,11 @@ import 'package:online_medicine/screens/main_navigation.dart';
 import '../theme/app_colors.dart';
 import '../models/models.dart';
 import '../bloc/bloc.dart';
+import '../widgets/app_drawer.dart';
 import '../widgets/medicine_card.dart';
 import '../widgets/filter_bottom_sheet.dart';
 import '../widgets/sort_bottom_sheet.dart';
+import 'homepage.dart';
 
 /// Explore Products Page - A comprehensive product browsing experience
 ///
@@ -79,6 +81,7 @@ class _ExploreProductsPageState extends State<ExploreProductsPage>
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: _buildAppBar(),
+      drawer: const AppDrawer(),
       body: BlocListener<ExploreProductsCubit, ExploreProductsState>(
         listener: (context, state) {
           // Update search controller when state changes
@@ -158,18 +161,10 @@ class _ExploreProductsPageState extends State<ExploreProductsPage>
     return AppBar(
       backgroundColor: AppColors.primary,
       foregroundColor: AppColors.textOnPrimary,
-      leading: IconButton(
-        onPressed: () {
-          // navigate to homepage
-          Navigator.push(context,
-              MaterialPageRoute(builder: (context) => const MainNavigation()));
-        },
-        icon: const Icon(Icons.arrow_back),
-      ),
       title: const Text(
         'Explore Products',
         style: TextStyle(
-          fontSize: 18,
+          fontSize: 20,
           fontWeight: FontWeight.w600,
         ),
       ),

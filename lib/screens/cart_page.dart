@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../theme/app_colors.dart';
 import '../bloc/bloc.dart';
 import '../models/models.dart';
+import '../widgets/app_drawer.dart';
 import '../widgets/quantity_selector.dart';
 
 /// CartPage - Shopping cart with checkout functionality
@@ -34,6 +35,7 @@ class _CartPageState extends State<CartPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: _buildAppBar(),
+      drawer: const AppDrawer(),
       body: BlocListener<CartCubit, CartState>(
         listener: (context, state) {
           if (state is CartCheckoutSuccess) {

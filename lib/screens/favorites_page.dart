@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
+import '../widgets/app_drawer.dart';
 
 /// FavoritesPage - User's favorite medicines
 ///
@@ -75,6 +76,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: _buildAppBar(),
+      drawer: const AppDrawer(),
       body: _favoriteItems.isEmpty
           ? _buildEmptyFavorites()
           : _buildFavoritesContent(),
