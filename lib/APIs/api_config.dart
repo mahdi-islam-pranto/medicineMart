@@ -27,6 +27,9 @@ class ApiConfig {
   // FAQ endpoints
   static const String faqEndpoint = 'faq';
 
+  // Feedback endpoints
+  static const String feedbackEndpoint = 'feedback';
+
   // Full URLs
   static String get registerUrl => '$baseUrl$registerEndpoint';
   static String get loginUrl => '$baseUrl$loginEndpoint';
@@ -37,6 +40,7 @@ class ApiConfig {
   static String get createOrderUrl => '$baseUrl$createOrderEndpoint';
   static String get orderListUrl => '$baseUrl$orderListEndpoint';
   static String get faqUrl => '$baseUrl$faqEndpoint';
+  static String get feedbackUrl => '$baseUrl$feedbackEndpoint';
 
   // Request headers
   static Map<String, String> get headers => {

@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../theme/app_colors.dart';
+import '../../APIs/feedback_api_service.dart';
+import '../../models/models.dart';
+import '../../bloc/cubits/auth_cubit.dart';
+import '../../bloc/states/auth_state.dart';
 
 /// FeedbackPage - User feedback and rating system
 ///
@@ -240,6 +245,9 @@ class _FeedbackPageState extends State<FeedbackPage> {
                   if (value == null || value.trim().isEmpty) {
                     return 'Please provide your feedback';
                   }
+                  if (value.trim().length < 10) {
+                    return 'Feedback must be at least 10 characters long';
+                  }
                   return null;
                 },
               ),
@@ -323,7 +331,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(
+                    const Icon(
                       Icons.info_outline,
                       color: AppColors.info,
                       size: 20,
@@ -392,18 +400,78 @@ class _FeedbackPageState extends State<FeedbackPage> {
       return;
     }
 
+    // Get current user ID
+    final authState = context.read<AuthCubit>().state;
+    if (authState is! AuthAuthenticated) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please login to submit feedback'),
+          backgroundColor: AppColors.error,
+        ),
+      );
+      return;
+    }
+
     setState(() {
       _isSubmitting = true;
     });
 
-    // Simulate API call
-    await Future.delayed(const Duration(seconds: 2));
+    try {
+      // Get customer ID from user
+      final customerId = int.tryParse(authState.user.id) ?? 1;
 
-    setState(() {
-      _isSubmitting = false;
-    });
+      // Create feedback request
+      final feedbackRequest = FeedbackRequest(
+        customerId: customerId,
+        overallRating: _overallRating,
+        category: _selectedCategory,
+        feedback: _feedbackController.text.trim(),
+        suggestions: _suggestionController.text.trim().isEmpty
+            ? null
+            : _suggestionController.text.trim(),
+      );
 
-    // Show success message
+      // Submit feedback via API
+      final response = await FeedbackApiService.submitFeedback(feedbackRequest);
+
+      if (mounted) {
+        setState(() {
+          _isSubmitting = false;
+        });
+
+        if (response.success) {
+          // Show success message
+          _showSuccessDialog(response.message);
+
+          // Clear form
+          _clearForm();
+        } else {
+          // Show error message
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(response.message),
+              backgroundColor: AppColors.error,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isSubmitting = false;
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Failed to submit feedback. Please try again.'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    }
+  }
+
+  void _showSuccessDialog(String message) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -429,9 +497,9 @@ class _FeedbackPageState extends State<FeedbackPage> {
             ),
           ],
         ),
-        content: const Text(
-          'Your feedback has been submitted successfully. We appreciate your time and input.',
-          style: TextStyle(
+        content: Text(
+          message,
+          style: const TextStyle(
             color: AppColors.textSecondary,
             fontSize: 14,
             height: 1.4,
@@ -454,8 +522,9 @@ class _FeedbackPageState extends State<FeedbackPage> {
         ],
       ),
     );
+  }
 
-    // Clear form
+  void _clearForm() {
     _feedbackController.clear();
     _suggestionController.clear();
     setState(() {
