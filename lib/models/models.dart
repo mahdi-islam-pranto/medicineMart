@@ -12,3 +12,4 @@ export 'product_api_models.dart';
 export 'brand_models.dart';
 export 'order_models.dart';
 export 'order_list_models.dart';
+export 'faq_models.dart';

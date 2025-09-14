@@ -62,7 +62,7 @@ class AboutUsPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Your Health, Our Priority',
+                    'Best Price & Quickly Service',
                     style: TextStyle(
                       color: AppColors.textSecondary.withOpacity(0.8),
                       fontSize: 16,
@@ -109,7 +109,7 @@ class AboutUsPage extends StatelessWidget {
                   _buildFeatureItem(Icons.support_agent, '24/7 Support',
                       'Round-the-clock customer support'),
                   _buildFeatureItem(Icons.security, 'Secure Payments',
-                      'Safe and secure payment processing'),
+                      'Safe and secure payment processing through cash on delivery'),
                   _buildFeatureItem(Icons.discount, 'Best Prices',
                       'Competitive prices and regular discounts'),
                 ],
@@ -129,9 +129,9 @@ class AboutUsPage extends StatelessWidget {
                       Icons.location_on, 'Address', 'Dhaka, Bangladesh'),
                   _buildContactItem(Icons.phone, 'Phone', '+880 1234 567890'),
                   _buildContactItem(
-                      Icons.email, 'Email', 'info@onlinemedicine.com'),
+                      Icons.email, 'Email', 'mmodumadicenmart@gmail.com'),
                   _buildContactItem(
-                      Icons.language, 'Website', 'www.healthandmedicine.com'),
+                      Icons.language, 'Website', 'http://modumadicenmart.com'),
                 ],
               ),
             ),
@@ -139,45 +139,45 @@ class AboutUsPage extends StatelessWidget {
             const SizedBox(height: 24),
 
             // Social media links
-            _buildSection(
-              title: 'Follow Us',
-              content: '',
-              icon: Icons.share,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  // _buildSocialButton(Icons.facebook, 'Facebook',
-                  //     () => _openSocialMedia('facebook')),
-                  // _buildSocialButton(Icons.alternate_email, 'Twitter',
-                  //     () => _openSocialMedia('twitter')),
-                  // _buildSocialButton(Icons.camera_alt, 'Instagram',
-                  //     () => _openSocialMedia('instagram')),
-                  // _buildSocialButton(Icons.video_library, 'YouTube',
-                  //     () => _openSocialMedia('youtube')),
-                ],
-              ),
-            ),
+            // _buildSection(
+            //   title: 'Follow Us',
+            //   content: '',
+            //   icon: Icons.share,
+            //   child: Row(
+            //     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            //     children: [
+            //       // _buildSocialButton(Icons.facebook, 'Facebook',
+            //       //     () => _openSocialMedia('facebook')),
+            //       // _buildSocialButton(Icons.alternate_email, 'Twitter',
+            //       //     () => _openSocialMedia('twitter')),
+            //       // _buildSocialButton(Icons.camera_alt, 'Instagram',
+            //       //     () => _openSocialMedia('instagram')),
+            //       // _buildSocialButton(Icons.video_library, 'YouTube',
+            //       //     () => _openSocialMedia('youtube')),
+            //     ],
+            //   ),
+            // ),
 
             const SizedBox(height: 24),
 
             // Legal links
-            _buildSection(
-              title: 'Legal',
-              content: '',
-              icon: Icons.gavel,
-              child: Column(
-                children: [
-                  // _buildLegalItem(
-                  //     'Terms of Service', () => _openLegalPage('terms')),
-                  // _buildLegalItem(
-                  //     'Privacy Policy', () => _openLegalPage('privacy')),
-                  // _buildLegalItem(
-                  //     'Refund Policy', () => _openLegalPage('refund')),
-                  // _buildLegalItem(
-                  //     'Shipping Policy', () => _openLegalPage('shipping')),
-                ],
-              ),
-            ),
+            // _buildSection(
+            //   title: 'Legal',
+            //   content: '',
+            //   icon: Icons.gavel,
+            //   child: Column(
+            //     children: [
+            //       // _buildLegalItem(
+            //       //     'Terms of Service', () => _openLegalPage('terms')),
+            //       // _buildLegalItem(
+            //       //     'Privacy Policy', () => _openLegalPage('privacy')),
+            //       // _buildLegalItem(
+            //       //     'Refund Policy', () => _openLegalPage('refund')),
+            //       // _buildLegalItem(
+            //       //     'Shipping Policy', () => _openLegalPage('shipping')),
+            //     ],
+            //   ),
+            // ),
 
             const SizedBox(height: 24),
 
@@ -244,7 +244,7 @@ class AboutUsPage extends StatelessWidget {
             // Copyright
             Center(
               child: Text(
-                '© 2024 Online Medicine. All rights reserved.',
+                '© 2025 Health & Medicine. All rights reserved.',
                 style: TextStyle(
                   color: AppColors.textSecondary.withOpacity(0.6),
                   fontSize: 12,

@@ -111,7 +111,7 @@ class Medicine extends Equatable {
     String? imageUrl = json['imageUrl'] as String?;
     if (imageUrl == null || imageUrl.isEmpty) {
       // Use a working sample medicine image
-      imageUrl = 'https://via.placeholder.com/150x150/E3F2FD/1976D2?text=MED';
+      imageUrl = null;
     }
 
     return Medicine(

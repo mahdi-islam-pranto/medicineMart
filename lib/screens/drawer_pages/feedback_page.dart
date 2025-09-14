@@ -20,7 +20,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
   final _formKey = GlobalKey<FormState>();
   final _feedbackController = TextEditingController();
   final _suggestionController = TextEditingController();
-  
+
   int _overallRating = 0;
   String _selectedCategory = 'General';
   bool _isSubmitting = false;
@@ -149,7 +149,9 @@ class _FeedbackPageState extends State<FeedbackPage> {
                           child: Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 4),
                             child: Icon(
-                              index < _overallRating ? Icons.star : Icons.star_border,
+                              index < _overallRating
+                                  ? Icons.star
+                                  : Icons.star_border,
                               color: AppColors.warning,
                               size: 32,
                             ),
@@ -175,7 +177,8 @@ class _FeedbackPageState extends State<FeedbackPage> {
               _buildSectionTitle('Feedback Category'),
               const SizedBox(height: 12),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                 decoration: BoxDecoration(
                   color: AppColors.surface,
                   borderRadius: BorderRadius.circular(12),
@@ -185,7 +188,8 @@ class _FeedbackPageState extends State<FeedbackPage> {
                   child: DropdownButton<String>(
                     value: _selectedCategory,
                     isExpanded: true,
-                    icon: const Icon(Icons.arrow_drop_down, color: AppColors.textSecondary),
+                    icon: const Icon(Icons.arrow_drop_down,
+                        color: AppColors.textSecondary),
                     items: _categories.map((category) {
                       return DropdownMenuItem<String>(
                         value: category,
@@ -289,7 +293,8 @@ class _FeedbackPageState extends State<FeedbackPage> {
                           width: 20,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation<Color>(AppColors.textOnPrimary),
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                                AppColors.textOnPrimary),
                           ),
                         )
                       : const Text(

@@ -206,7 +206,7 @@ class _HomePageState extends State<HomePage> {
               height: 35,
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
-                itemCount: state.brands.length > 5 ? 5 : state.brands.length,
+                itemCount: state.brands.length > 5 ? 10 : state.brands.length,
                 itemBuilder: (context, index) {
                   final brand = state.brands[index];
                   final isSelected = state.selectedBrand == brand;

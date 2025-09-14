@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../bloc/cubits/explore_products_cubit.dart';
+import '../../models/product_filter.dart';
 import '../../theme/app_colors.dart';
+import '../explore_products_page.dart';
 
 /// OffersDiscountsPage - Display available offers and discount coupons
 ///
@@ -17,13 +21,14 @@ class OffersDiscountsPage extends StatefulWidget {
   State<OffersDiscountsPage> createState() => _OffersDiscountsPageState();
 }
 
-class _OffersDiscountsPageState extends State<OffersDiscountsPage> with TickerProviderStateMixin {
+class _OffersDiscountsPageState extends State<OffersDiscountsPage>
+    with TickerProviderStateMixin {
   late TabController _tabController;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 2, vsync: this);
   }
 
   @override
@@ -59,7 +64,7 @@ class _OffersDiscountsPageState extends State<OffersDiscountsPage> with TickerPr
           tabs: const [
             Tab(text: 'All Offers'),
             Tab(text: 'Coupons'),
-            Tab(text: 'Flash Sale'),
+            // Tab(text: 'Flash Sale'),
           ],
         ),
       ),
@@ -68,7 +73,7 @@ class _OffersDiscountsPageState extends State<OffersDiscountsPage> with TickerPr
         children: [
           _buildAllOffers(),
           _buildCoupons(),
-          _buildFlashSale(),
+          // _buildFlashSale(),
         ],
       ),
     );
@@ -76,7 +81,7 @@ class _OffersDiscountsPageState extends State<OffersDiscountsPage> with TickerPr
 
   Widget _buildAllOffers() {
     final offers = _getAllOffers();
-    
+
     return ListView.builder(
       padding: const EdgeInsets.all(16),
       itemCount: offers.length,
@@ -89,7 +94,7 @@ class _OffersDiscountsPageState extends State<OffersDiscountsPage> with TickerPr
 
   Widget _buildCoupons() {
     final coupons = _getCoupons();
-    
+
     return ListView.builder(
       padding: const EdgeInsets.all(16),
       itemCount: coupons.length,
@@ -131,16 +136,20 @@ class _OffersDiscountsPageState extends State<OffersDiscountsPage> with TickerPr
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   _buildTimeUnit('02', 'HOURS'),
-                  const Text(' : ', style: TextStyle(color: AppColors.textOnPrimary, fontSize: 20)),
+                  const Text(' : ',
+                      style: TextStyle(
+                          color: AppColors.textOnPrimary, fontSize: 20)),
                   _buildTimeUnit('45', 'MINS'),
-                  const Text(' : ', style: TextStyle(color: AppColors.textOnPrimary, fontSize: 20)),
+                  const Text(' : ',
+                      style: TextStyle(
+                          color: AppColors.textOnPrimary, fontSize: 20)),
                   _buildTimeUnit('30', 'SECS'),
                 ],
               ),
             ],
           ),
         ),
-        
+
         // Flash sale items
         Expanded(
           child: GridView.builder(
@@ -191,7 +200,8 @@ class _OffersDiscountsPageState extends State<OffersDiscountsPage> with TickerPr
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+              borderRadius:
+                  const BorderRadius.vertical(top: Radius.circular(12)),
             ),
             child: Padding(
               padding: const EdgeInsets.all(16),
@@ -217,7 +227,8 @@ class _OffersDiscountsPageState extends State<OffersDiscountsPage> with TickerPr
                   const Spacer(),
                   if (offer['badge'] != null)
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
                         color: AppColors.textOnPrimary.withOpacity(0.2),
                         borderRadius: BorderRadius.circular(12),
@@ -235,7 +246,7 @@ class _OffersDiscountsPageState extends State<OffersDiscountsPage> with TickerPr
               ),
             ),
           ),
-          
+
           // Offer details
           Padding(
             padding: const EdgeInsets.all(16),
@@ -261,7 +272,7 @@ class _OffersDiscountsPageState extends State<OffersDiscountsPage> with TickerPr
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: () => _useOffer(offer),
+                    onPressed: () => _navigateToExploreProducts(context),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
                       foregroundColor: AppColors.textOnPrimary,
@@ -270,7 +281,7 @@ class _OffersDiscountsPageState extends State<OffersDiscountsPage> with TickerPr
                         borderRadius: BorderRadius.circular(8),
                       ),
                     ),
-                    child: const Text('Shop Now'),
+                    child: Text(offer['buttonText']),
                   ),
                 ),
               ],
@@ -297,6 +308,9 @@ class _OffersDiscountsPageState extends State<OffersDiscountsPage> with TickerPr
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // coming soon badge
+
+            // Coupon title and description
             Row(
               children: [
                 Expanded(
@@ -323,7 +337,8 @@ class _OffersDiscountsPageState extends State<OffersDiscountsPage> with TickerPr
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
                     color: AppColors.primary.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
@@ -339,9 +354,9 @@ class _OffersDiscountsPageState extends State<OffersDiscountsPage> with TickerPr
                 ),
               ],
             ),
-            
+
             const SizedBox(height: 12),
-            
+
             // Coupon code
             Container(
               padding: const EdgeInsets.all(12),
@@ -369,7 +384,8 @@ class _OffersDiscountsPageState extends State<OffersDiscountsPage> with TickerPr
                   GestureDetector(
                     onTap: () => _copyCouponCode(coupon['code']),
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
                         color: AppColors.primary,
                         borderRadius: BorderRadius.circular(6),
@@ -387,9 +403,9 @@ class _OffersDiscountsPageState extends State<OffersDiscountsPage> with TickerPr
                 ],
               ),
             ),
-            
+
             const SizedBox(height: 8),
-            
+
             Text(
               'Valid till: ${coupon['validTill']} • Min order: ৳${coupon['minOrder']}',
               style: const TextStyle(
@@ -458,7 +474,8 @@ class _OffersDiscountsPageState extends State<OffersDiscountsPage> with TickerPr
                 width: double.infinity,
                 decoration: BoxDecoration(
                   color: AppColors.surfaceVariant,
-                  borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+                  borderRadius:
+                      const BorderRadius.vertical(top: Radius.circular(12)),
                 ),
                 child: const Icon(
                   Icons.medication,
@@ -470,7 +487,8 @@ class _OffersDiscountsPageState extends State<OffersDiscountsPage> with TickerPr
                 top: 8,
                 left: 8,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                   decoration: BoxDecoration(
                     color: AppColors.error,
                     borderRadius: BorderRadius.circular(8),
@@ -487,7 +505,7 @@ class _OffersDiscountsPageState extends State<OffersDiscountsPage> with TickerPr
               ),
             ],
           ),
-          
+
           Padding(
             padding: const EdgeInsets.all(12),
             child: Column(
@@ -536,20 +554,23 @@ class _OffersDiscountsPageState extends State<OffersDiscountsPage> with TickerPr
   List<Map<String, dynamic>> _getAllOffers() {
     return [
       {
-        'title': 'MEGA SALE',
-        'subtitle': 'Up to 70% OFF',
-        'description': 'Get huge discounts on all medicines and health products',
-        'validTill': '31 Jan 2024',
-        'badge': 'LIMITED TIME',
-        'color': '0xFF2196F3',
-      },
-      {
         'title': 'FREE DELIVERY',
-        'subtitle': 'On orders above ৳500',
-        'description': 'No delivery charges for orders above ৳500',
-        'validTill': '28 Feb 2024',
+        'subtitle': 'On all orders',
+        'description': 'No delivery charges for all orders ',
+        'validTill': '28 Feb 2026',
         'badge': null,
         'color': '0xFF4CAF50',
+        'buttonText': 'Get Offer',
+      },
+      {
+        'title': 'MEGA SALE',
+        'subtitle': 'Up to 70% OFF',
+        'description':
+            'Get huge discounts on all medicines and health products',
+        'validTill': '31 Jan 2026',
+        'badge': 'LIMITED TIME',
+        'color': '0xFF2196F3',
+        'buttonText': 'Coming Soon!',
       },
     ];
   }
@@ -557,21 +578,21 @@ class _OffersDiscountsPageState extends State<OffersDiscountsPage> with TickerPr
   List<Map<String, dynamic>> _getCoupons() {
     return [
       {
-        'title': 'First Order Discount',
+        'title': 'First Order Discount (Coming Soon!)',
         'description': 'Get 20% off on your first order',
         'discount': '20% OFF',
         'code': 'FIRST20',
-        'validTill': '31 Jan 2024',
+        'validTill': '31 Jan 2026',
         'minOrder': '300',
       },
-      {
-        'title': 'Health Combo Deal',
-        'description': 'Buy 2 get 1 free on vitamins',
-        'discount': 'BUY2GET1',
-        'code': 'VITAMIN3',
-        'validTill': '15 Feb 2024',
-        'minOrder': '500',
-      },
+      // {
+      //   'title': 'Health Combo Deal',
+      //   'description': 'Buy 2 get 1 free on vitamins',
+      //   'discount': 'BUY2GET1',
+      //   'code': 'VITAMIN3',
+      //   'validTill': '15 Feb 2026',
+      //   'minOrder': '500',
+      // },
     ];
   }
 
@@ -580,6 +601,61 @@ class _OffersDiscountsPageState extends State<OffersDiscountsPage> with TickerPr
       SnackBar(
         content: Text('Redirecting to ${offer['title']} products'),
         backgroundColor: AppColors.success,
+      ),
+    );
+    // TODO: Navigate to explore products page with offer filters
+  }
+
+  /// Navigate to explore products page with optional filters
+  void _navigateToExploreProducts(
+    BuildContext context, {
+    String? searchQuery,
+    String? selectedBrand,
+    String? productCategory,
+  }) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => BlocProvider(
+          create: (context) {
+            final cubit = ExploreProductsCubit();
+            // Load products first
+            cubit.loadProducts().then((_) {
+              // Apply filters after products are loaded
+              if (searchQuery != null && searchQuery.isNotEmpty) {
+                cubit.updateSearchText(searchQuery);
+              }
+              if (selectedBrand != null) {
+                final currentState = cubit.state;
+                if (currentState is ExploreProductsLoaded) {
+                  final newFilter = currentState.currentFilter.copyWith(
+                    selectedBrands: [selectedBrand],
+                  );
+                  cubit.applyFilter(newFilter);
+                }
+              }
+              if (productCategory != null) {
+                ProductCategory category;
+                switch (productCategory) {
+                  case 'specialOffer':
+                    category = ProductCategory.specialOffer;
+                    break;
+                  case 'trending':
+                    category = ProductCategory.trending;
+                    break;
+                  case 'newProduct':
+                    category = ProductCategory.newProduct;
+                    break;
+                  default:
+                    category = ProductCategory.all;
+                }
+                cubit.updateProductCategory(category);
+              }
+            });
+            return cubit;
+          },
+          child: const ExploreProductsPage(),
+        ),
       ),
     );
   }

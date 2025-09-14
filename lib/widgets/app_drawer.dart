@@ -62,41 +62,42 @@ class AppDrawer extends StatelessWidget {
                   },
                 ),
 
-                DrawerItem(
-                  icon: Icons.trending_up_outlined,
-                  selectedIcon: Icons.trending_up,
-                  title: 'Trending Products',
-                  subtitle: 'Popular medicines',
-                  badge: 'Hot',
-                  onTap: () {
-                    Navigator.pop(context);
-                    _navigateToTrendingProducts(context);
-                  },
-                ),
+                // DrawerItem(
+                //   icon: Icons.trending_up_outlined,
+                //   selectedIcon: Icons.trending_up,
+                //   title: 'Trending Products',
+                //   subtitle: 'Popular medicines',
+                //   badge: 'Hot',
+                //   onTap: () {
+                //     Navigator.pop(context);
+                //     _navigateToTrendingProducts(context);
+                //   },
+                // ),
 
                 DrawerItem(
                   icon: Icons.local_offer_outlined,
                   selectedIcon: Icons.local_offer,
                   title: 'Offers & Discounts',
                   subtitle: 'Save on your orders',
-                  badge: '3 New',
+                  badge: 'New',
                   onTap: () {
                     Navigator.pop(context);
                     _navigateToOffersDiscounts(context);
                   },
                 ),
 
-                DrawerItem(
-                  icon: Icons.notifications_outlined,
-                  selectedIcon: Icons.notifications,
-                  title: 'Notifications',
-                  subtitle: 'Stay updated',
-                  badge: '5',
-                  onTap: () {
-                    Navigator.pop(context);
-                    _navigateToNotifications(context);
-                  },
-                ),
+// Notifications
+                // DrawerItem(
+                //   icon: Icons.notifications_outlined,
+                //   selectedIcon: Icons.notifications,
+                //   title: 'Notifications',
+                //   subtitle: 'Stay updated',
+                //   badge: '5',
+                //   onTap: () {
+                //     Navigator.pop(context);
+                //     _navigateToNotifications(context);
+                //   },
+                // ),
 
                 // Support section
                 const SizedBox(height: 16),
