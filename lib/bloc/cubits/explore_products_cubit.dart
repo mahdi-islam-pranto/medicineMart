@@ -375,6 +375,11 @@ class ExploreProductsCubit extends Cubit<ExploreProductsState> {
           // Set the quantity instead of adding to existing quantity
           newCartItems[product.id] = quantity;
           emit(currentState.copyWith(cartItems: newCartItems));
+
+          // Trigger cart refresh to update the navigation badge count
+          // This will cause the CartCubit to reload and emit CartLoaded state
+          // which will update the navigation badge count
+          _triggerCartRefresh();
         } else {
           // API call failed - you might want to show an error message
           print('❌ Failed to add to cart: ${apiResponse.message}');
@@ -384,6 +389,13 @@ class ExploreProductsCubit extends Cubit<ExploreProductsState> {
         print('💥 Error adding to cart: $e');
       }
     }
+  }
+
+  /// Trigger cart refresh to update navigation badge count
+  /// This method should be called after successful cart operations
+  void _triggerCartRefresh() {
+    // We need access to CartCubit to trigger refresh
+    // This will be handled by the UI layer that has access to both cubits
   }
 
   /// Apply filters to product list

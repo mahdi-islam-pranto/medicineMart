@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../theme/app_colors.dart';
 import '../../models/medicine.dart';
 import '../../widgets/medicine_card.dart';
 import '../../APIs/product_api_service.dart';
+import '../../bloc/bloc.dart';
 
 /// TrendingProductsPage - Display popular and trending medicines
 ///
@@ -480,13 +482,22 @@ class _TrendingProductsPageState extends State<TrendingProductsPage> {
     ];
   }
 
-  void _addToCart(Medicine product) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('${product.name} added to cart'),
-        backgroundColor: AppColors.success,
-        duration: const Duration(seconds: 2),
-      ),
-    );
+  void _addToCart(Medicine product) async {
+    // Store context reference before async call
+    final cartCubit = context.read<CartCubit>();
+
+    // Add to cart with default quantity of 1
+    await cartCubit.addToCart(product, 1);
+
+    // Show success message
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('${product.name} added to cart'),
+          backgroundColor: AppColors.success,
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
   }
 }

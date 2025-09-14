@@ -1,21 +1,19 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../states/favorites_state.dart';
 import '../../models/models.dart';
+import '../../services/favorites_storage_service.dart';
 
 /// Cubit for managing favorite medicines
 class FavoritesCubit extends Cubit<FavoritesState> {
   FavoritesCubit() : super(const FavoritesInitial());
 
-  /// Load favorites data
+  /// Load favorites data from SharedPreferences
   Future<void> loadFavorites() async {
     emit(const FavoritesLoading());
 
     try {
-      // Simulate loading delay
-      await Future.delayed(const Duration(milliseconds: 300));
-
-      // Load sample favorites data - In a real app, this would come from local storage or API
-      final favoriteItems = _getSampleFavoriteItems();
+      // Load favorites from SharedPreferences
+      final favoriteItems = await FavoritesStorageService.loadFavorites();
 
       emit(FavoritesLoaded(items: favoriteItems));
     } catch (e) {
@@ -24,39 +22,53 @@ class FavoritesCubit extends Cubit<FavoritesState> {
     }
   }
 
-  /// Add medicine to favorites
-  void addToFavorites(Medicine medicine) {
+  /// Add medicine to favorites with SharedPreferences storage
+  Future<void> addToFavorites(Medicine medicine) async {
     final currentState = state;
     if (currentState is FavoritesLoaded) {
       emit(currentState.copyWith(isUpdating: true));
 
       try {
-        final updatedItems = List<FavoriteItem>.from(currentState.items);
-
         // Check if already in favorites
-        if (!updatedItems.any((item) => item.id == medicine.id)) {
+        if (!currentState.isFavorite(medicine.id)) {
           final newFavorite = FavoriteItem.fromMedicine(medicine);
-          updatedItems.add(newFavorite);
 
-          emit(FavoritesOperationSuccess(
-            message: '${medicine.name} added to favorites',
-            operationType: FavoritesOperationType.add,
-            items: updatedItems,
-            affectedItem: newFavorite,
-          ));
+          // Save to SharedPreferences
+          final success =
+              await FavoritesStorageService.addFavorite(newFavorite);
 
-          // Return to loaded state
-          emit(FavoritesLoaded(items: updatedItems));
+          if (success) {
+            final updatedItems = List<FavoriteItem>.from(currentState.items);
+            updatedItems.add(newFavorite);
+
+            emit(FavoritesOperationSuccess(
+              message: '${medicine.name} added to favorites',
+              operationType: FavoritesOperationType.add,
+              items: updatedItems,
+              affectedItem: newFavorite,
+            ));
+
+            // Return to loaded state
+            emit(FavoritesLoaded(items: updatedItems));
+          } else {
+            emit(const FavoritesError(
+                message: 'Failed to save favorite to storage'));
+            emit(currentState.copyWith(isUpdating: false));
+          }
+        } else {
+          // Already in favorites
+          emit(currentState.copyWith(isUpdating: false));
         }
       } catch (e) {
         emit(FavoritesError(
             message: 'Failed to add to favorites: ${e.toString()}'));
+        emit(currentState.copyWith(isUpdating: false));
       }
     }
   }
 
-  /// Remove medicine from favorites
-  void removeFromFavorites(String medicineId) {
+  /// Remove medicine from favorites with SharedPreferences storage
+  Future<void> removeFromFavorites(String medicineId) async {
     final currentState = state;
     if (currentState is FavoritesLoaded) {
       emit(currentState.copyWith(isUpdating: true));
@@ -68,21 +80,36 @@ class FavoritesCubit extends Cubit<FavoritesState> {
 
         if (itemIndex != -1) {
           final removedItem = updatedItems[itemIndex];
-          updatedItems.removeAt(itemIndex);
 
-          emit(FavoritesOperationSuccess(
-            message: '${removedItem.name} removed from favorites',
-            operationType: FavoritesOperationType.remove,
-            items: updatedItems,
-            affectedItem: removedItem,
-          ));
+          // Remove from SharedPreferences
+          final success =
+              await FavoritesStorageService.removeFavorite(medicineId);
 
-          // Return to loaded state
-          emit(FavoritesLoaded(items: updatedItems));
+          if (success) {
+            updatedItems.removeAt(itemIndex);
+
+            emit(FavoritesOperationSuccess(
+              message: '${removedItem.name} removed from favorites',
+              operationType: FavoritesOperationType.remove,
+              items: updatedItems,
+              affectedItem: removedItem,
+            ));
+
+            // Return to loaded state
+            emit(FavoritesLoaded(items: updatedItems));
+          } else {
+            emit(const FavoritesError(
+                message: 'Failed to remove favorite from storage'));
+            emit(currentState.copyWith(isUpdating: false));
+          }
+        } else {
+          // Item not found
+          emit(currentState.copyWith(isUpdating: false));
         }
       } catch (e) {
         emit(FavoritesError(
             message: 'Failed to remove from favorites: ${e.toString()}'));
+        emit(currentState.copyWith(isUpdating: false));
       }
     }
   }
@@ -99,24 +126,34 @@ class FavoritesCubit extends Cubit<FavoritesState> {
     }
   }
 
-  /// Clear all favorites
-  void clearAllFavorites() {
+  /// Clear all favorites with SharedPreferences storage
+  Future<void> clearAllFavorites() async {
     final currentState = state;
     if (currentState is FavoritesLoaded) {
       emit(currentState.copyWith(isUpdating: true));
 
       try {
-        emit(const FavoritesOperationSuccess(
-          message: 'All favorites cleared',
-          operationType: FavoritesOperationType.clear,
-          items: [],
-        ));
+        // Clear from SharedPreferences
+        final success = await FavoritesStorageService.clearAllFavorites();
 
-        // Return to loaded state with empty favorites
-        emit(const FavoritesLoaded(items: []));
+        if (success) {
+          emit(const FavoritesOperationSuccess(
+            message: 'All favorites cleared',
+            operationType: FavoritesOperationType.clear,
+            items: [],
+          ));
+
+          // Return to loaded state with empty favorites
+          emit(const FavoritesLoaded(items: []));
+        } else {
+          emit(const FavoritesError(
+              message: 'Failed to clear favorites from storage'));
+          emit(currentState.copyWith(isUpdating: false));
+        }
       } catch (e) {
         emit(FavoritesError(
             message: 'Failed to clear favorites: ${e.toString()}'));
+        emit(currentState.copyWith(isUpdating: false));
       }
     }
   }
@@ -137,71 +174,5 @@ class FavoritesCubit extends Cubit<FavoritesState> {
       return currentState.totalItems;
     }
     return 0;
-  }
-
-  /// Get sample favorite items
-  List<FavoriteItem> _getSampleFavoriteItems() {
-    return [
-      FavoriteItem(
-        id: '1',
-        name: 'Tablet- Acipro',
-        quantity: 'Box',
-        brand: 'Square',
-        price: 410.00,
-        originalPrice: 500.00,
-        imageUrl: 'https://via.placeholder.com/80x80/E3F2FD/1976D2?text=ACIPRO',
-        addedDate: DateTime.now().subtract(const Duration(days: 2)),
-      ),
-      FavoriteItem(
-        id: '12',
-        name: 'Tablet- Acipro',
-        quantity: 'Box',
-        brand: 'Square',
-        price: 410.00,
-        originalPrice: 500.00,
-        imageUrl: 'https://via.placeholder.com/80x80/E3F2FD/1976D2?text=ACIPRO',
-        addedDate: DateTime.now().subtract(const Duration(days: 2)),
-      ),
-      FavoriteItem(
-        id: '3',
-        name: 'Syrup- Asthalin',
-        quantity: '100ml',
-        brand: 'Renata',
-        price: 230.00,
-        originalPrice: 360.00,
-        imageUrl: 'https://via.placeholder.com/80x80/E8F5E8/4CAF50?text=SYRUP',
-        addedDate: DateTime.now().subtract(const Duration(days: 5)),
-      ),
-      FavoriteItem(
-        id: '4',
-        name: 'Capsule- Amoxicillin',
-        quantity: '500ml',
-        brand: 'Beximco',
-        price: 410.00,
-        originalPrice: 600.00,
-        imageUrl: 'https://via.placeholder.com/80x80/FFF8E1/FFC107?text=CAPS',
-        addedDate: DateTime.now().subtract(const Duration(days: 1)),
-      ),
-      FavoriteItem(
-        id: '6',
-        name: 'Syrup- Reneta-B',
-        quantity: '250ml',
-        brand: 'Renata',
-        price: 500.00,
-        originalPrice: 630.00,
-        imageUrl: 'https://via.placeholder.com/80x80/FCE4EC/E91E63?text=SYRUP',
-        addedDate: DateTime.now().subtract(const Duration(days: 7)),
-      ),
-      FavoriteItem(
-        id: '7',
-        name: 'Tablet- Vitamin D3',
-        quantity: '1000 IU',
-        brand: 'HealthKart',
-        price: 990.00,
-        originalPrice: 1250.00,
-        imageUrl: 'https://via.placeholder.com/80x80/FFF9C4/F9A825?text=VIT',
-        addedDate: DateTime.now().subtract(const Duration(days: 3)),
-      ),
-    ];
   }
 }

@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../theme/app_colors.dart';
 import '../widgets/app_drawer.dart';
+import '../bloc/bloc.dart';
+import '../models/models.dart';
 
 /// FavoritesPage - User's favorite medicines
 ///
@@ -18,105 +21,111 @@ class FavoritesPage extends StatefulWidget {
 }
 
 class _FavoritesPageState extends State<FavoritesPage> {
-  // Sample favorite items
-  List<FavoriteItem> _favoriteItems = [
-    FavoriteItem(
-      id: '1',
-      name: 'Tablet- Acipro',
-      quantity: 'Box',
-      brand: 'Square',
-      price: 410.00,
-      originalPrice: 500.00,
-      imageUrl: 'https://via.placeholder.com/80x80/E3F2FD/1976D2?text=ACIPRO',
-      addedDate: DateTime.now().subtract(const Duration(days: 2)),
-    ),
-    FavoriteItem(
-      id: '2',
-      name: 'Syrup- Asthalin',
-      quantity: '100ml',
-      brand: 'Renata',
-      price: 230.00,
-      originalPrice: 360.00,
-      imageUrl: 'https://via.placeholder.com/80x80/E8F5E8/4CAF50?text=SYRUP',
-      addedDate: DateTime.now().subtract(const Duration(days: 5)),
-    ),
-    FavoriteItem(
-      id: '3',
-      name: 'Capsule- Amoxicillin',
-      quantity: '500ml',
-      brand: 'Beximco',
-      price: 410.00,
-      originalPrice: 600.00,
-      imageUrl: 'https://via.placeholder.com/80x80/FFF8E1/FFC107?text=CAPS',
-      addedDate: DateTime.now().subtract(const Duration(days: 1)),
-    ),
-    FavoriteItem(
-      id: '4',
-      name: 'Syrup- Reneta-B',
-      quantity: '250ml',
-      brand: 'Renata',
-      price: 500.00,
-      originalPrice: 630.00,
-      imageUrl: 'https://via.placeholder.com/80x80/FCE4EC/E91E63?text=SYRUP',
-      addedDate: DateTime.now().subtract(const Duration(days: 7)),
-    ),
-    FavoriteItem(
-      id: '5',
-      name: 'Tablet- Vitamin D3',
-      quantity: '1000 IU',
-      brand: 'HealthKart',
-      price: 990.00,
-      originalPrice: 1250.00,
-      imageUrl: 'https://via.placeholder.com/80x80/FFF9C4/F9A825?text=VIT',
-      addedDate: DateTime.now().subtract(const Duration(days: 3)),
-    ),
-  ];
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: _buildAppBar(),
       drawer: const AppDrawer(),
-      body: _favoriteItems.isEmpty
-          ? _buildEmptyFavorites()
-          : _buildFavoritesContent(),
+      body: BlocListener<FavoritesCubit, FavoritesState>(
+        listener: (context, state) {
+          if (state is FavoritesOperationSuccess) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: AppColors.success,
+                duration: const Duration(seconds: 2),
+              ),
+            );
+          } else if (state is FavoritesError) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: AppColors.error,
+                duration: const Duration(seconds: 2),
+              ),
+            );
+          }
+        },
+        child: BlocBuilder<FavoritesCubit, FavoritesState>(
+          builder: (context, state) {
+            if (state is FavoritesLoading) {
+              return const Center(child: CircularProgressIndicator());
+            } else if (state is FavoritesError) {
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.error_outline,
+                        size: 64, color: AppColors.error),
+                    const SizedBox(height: 16),
+                    const Text('Error loading favorites'),
+                    const SizedBox(height: 8),
+                    Text(state.message),
+                    const SizedBox(height: 16),
+                    ElevatedButton(
+                      onPressed: () =>
+                          context.read<FavoritesCubit>().loadFavorites(),
+                      child: const Text('Retry'),
+                    ),
+                  ],
+                ),
+              );
+            } else if (state is FavoritesLoaded) {
+              return state.isEmpty
+                  ? _buildEmptyFavorites()
+                  : _buildFavoritesContent(state.items);
+            }
+            return const SizedBox.shrink();
+          },
+        ),
+      ),
     );
   }
 
   /// Builds the app bar
   PreferredSizeWidget _buildAppBar() {
-    return AppBar(
-      title: Text(
-        'My Favorites (${_favoriteItems.length})',
-        style: const TextStyle(
-          color: AppColors.textOnPrimary,
-          fontSize: 20,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-      backgroundColor: AppColors.primary,
-      elevation: 0,
-      automaticallyImplyLeading: false,
-      actions: [
-        if (_favoriteItems.isNotEmpty)
-          IconButton(
-            onPressed: _clearAllFavorites,
-            icon: const Icon(
-              Icons.clear_all,
-              color: AppColors.textOnPrimary,
+    return PreferredSize(
+      preferredSize: const Size.fromHeight(kToolbarHeight),
+      child: BlocBuilder<FavoritesCubit, FavoritesState>(
+        builder: (context, state) {
+          final itemCount = state is FavoritesLoaded ? state.totalItems : 0;
+          final hasItems = state is FavoritesLoaded && state.isNotEmpty;
+
+          return AppBar(
+            title: Text(
+              'My Favorites ($itemCount)',
+              style: const TextStyle(
+                color: AppColors.textOnPrimary,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-          ),
-      ],
+            backgroundColor: AppColors.primary,
+            elevation: 0,
+            automaticallyImplyLeading: false,
+            actions: [
+              if (hasItems)
+                IconButton(
+                  onPressed: _clearAllFavorites,
+                  icon: const Icon(
+                    Icons.clear_all,
+                    color: AppColors.textOnPrimary,
+                  ),
+                ),
+            ],
+          );
+        },
+      ),
     );
   }
 
   /// Builds the favorites content
-  Widget _buildFavoritesContent() {
+  Widget _buildFavoritesContent(List<FavoriteItem> favoriteItems) {
     return ListView.builder(
       padding: const EdgeInsets.all(16),
-      itemCount: _favoriteItems.length,
+      itemCount: favoriteItems.length,
       itemBuilder: (context, index) {
-        final item = _favoriteItems[index];
+        final item = favoriteItems[index];
         return _buildFavoriteItemCard(item, index);
       },
     );
@@ -240,7 +249,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
               children: [
                 // Remove from favorites
                 GestureDetector(
-                  onTap: () => _removeFromFavorites(index),
+                  onTap: () => _removeFromFavorites(item),
                   child: Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
@@ -329,37 +338,40 @@ class _FavoritesPageState extends State<FavoritesPage> {
   }
 
   /// Removes item from favorites
-  void _removeFromFavorites(int index) {
-    final item = _favoriteItems[index];
-    setState(() {
-      _favoriteItems.removeAt(index);
-    });
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('${item.name} removed from favorites'),
-        backgroundColor: AppColors.error,
-        action: SnackBarAction(
-          label: 'Undo',
-          textColor: AppColors.textOnPrimary,
-          onPressed: () {
-            setState(() {
-              _favoriteItems.insert(index, item);
-            });
-          },
-        ),
-      ),
-    );
+  void _removeFromFavorites(FavoriteItem item) {
+    context.read<FavoritesCubit>().removeFromFavorites(item.id);
   }
 
   /// Adds item to cart
-  void _addToCart(FavoriteItem item) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('${item.name} added to cart'),
-        backgroundColor: AppColors.primary,
-      ),
+  void _addToCart(FavoriteItem item) async {
+    // Store context reference before async call
+    final cartCubit = context.read<CartCubit>();
+
+    // Convert FavoriteItem to Medicine for cart
+    final medicine = Medicine(
+      id: item.id,
+      name: item.name,
+      quantity: item.quantity,
+      brand: item.brand,
+      regularPrice: item.originalPrice,
+      discountPrice: item.price < item.originalPrice ? item.price : null,
+      description: '', // Description not available in FavoriteItem
+      quantityOptions: const [1, 2, 3, 5, 10], // Default options
     );
+
+    // Add to cart with default quantity of 1
+    await cartCubit.addToCart(medicine, 1);
+
+    // Show success message
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('${item.name} added to cart'),
+          backgroundColor: AppColors.success,
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
   }
 
   /// Clears all favorites
@@ -376,9 +388,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
           ),
           ElevatedButton(
             onPressed: () {
-              setState(() {
-                _favoriteItems.clear();
-              });
+              context.read<FavoritesCubit>().clearAllFavorites();
               Navigator.pop(context);
             },
             style: ElevatedButton.styleFrom(
@@ -404,27 +414,4 @@ class _FavoritesPageState extends State<FavoritesPage> {
       return 'Today';
     }
   }
-}
-
-/// Favorite item data model
-class FavoriteItem {
-  final String id;
-  final String name;
-  final String quantity;
-  final String brand;
-  final double price;
-  final double originalPrice;
-  final String imageUrl;
-  final DateTime addedDate;
-
-  FavoriteItem({
-    required this.id,
-    required this.name,
-    required this.quantity,
-    required this.brand,
-    required this.price,
-    required this.originalPrice,
-    required this.imageUrl,
-    required this.addedDate,
-  });
 }

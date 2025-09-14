@@ -388,15 +388,32 @@ class _ExploreProductsPageState extends State<ExploreProductsPage>
         }
 
         final product = state.filteredProducts[index];
-        return MedicineCard(
-          medicine: product,
-          isFavorite: state.favorites[product.id] ?? false,
-          cartQuantity: state.cartItems[product.id] ?? 0,
-          onFavoriteToggle: (medicine) {
-            context.read<ExploreProductsCubit>().toggleFavorite(medicine);
-          },
-          onAddToCart: (medicine, quantity) {
-            context.read<ExploreProductsCubit>().addToCart(medicine, quantity);
+        return BlocBuilder<FavoritesCubit, FavoritesState>(
+          builder: (context, favoritesState) {
+            final isFavorite = favoritesState is FavoritesLoaded
+                ? favoritesState.isFavorite(product.id)
+                : false;
+
+            return MedicineCard(
+              medicine: product,
+              isFavorite: isFavorite,
+              cartQuantity: state.cartItems[product.id] ?? 0,
+              onFavoriteToggle: (medicine) {
+                context.read<FavoritesCubit>().toggleFavorite(medicine);
+              },
+              onAddToCart: (medicine, quantity) async {
+                // Store context references before async call
+                final exploreProductsCubit =
+                    context.read<ExploreProductsCubit>();
+                final cartCubit = context.read<CartCubit>();
+
+                // Add to cart via ExploreProductsCubit
+                await exploreProductsCubit.addToCart(medicine, quantity);
+
+                // Refresh cart to update navigation badge count immediately
+                cartCubit.loadCart();
+              },
+            );
           },
         );
       },

@@ -474,75 +474,110 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   /// Builds the NID upload section
   Widget _buildNidUploadSection() {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.borderLight),
-      ),
-      child: InkWell(
-        onTap: _pickNidImage,
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            children: [
-              const Icon(
-                Icons.upload_file_outlined,
-                color: AppColors.primary,
-                size: 20,
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      _nidImage != null
-                          ? 'NID Image Selected'
-                          : 'Upload NID Picture',
-                      style: TextStyle(
-                        color: _nidImage != null
-                            ? AppColors.textPrimary
-                            : AppColors.textSecondary,
-                        fontSize: 14,
-                        fontWeight: _nidImage != null
-                            ? FontWeight.w500
-                            : FontWeight.normal,
-                      ),
-                    ),
-                    if (_nidImage != null) ...[
-                      const SizedBox(height: 4),
-                      Text(
-                        _nidImage!.path.split('/').last,
-                        style: const TextStyle(
-                          color: AppColors.textTertiary,
-                          fontSize: 12,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-              if (_nidImage != null)
-                IconButton(
-                  onPressed: () {
-                    setState(() {
-                      _nidImage = null;
-                    });
-                  },
-                  icon: const Icon(
-                    Icons.close,
-                    color: AppColors.error,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Required label
+        // RichText(
+        //   text: const TextSpan(
+        //     text: 'Upload NID Picture',
+        //     style: TextStyle(
+        //       color: AppColors.textPrimary,
+        //       fontSize: 14,
+        //       fontWeight: FontWeight.w500,
+        //     ),
+        //     children: [
+        //       TextSpan(
+        //         text: ' *',
+        //         style: TextStyle(
+        //           color: AppColors.error,
+        //           fontSize: 14,
+        //           fontWeight: FontWeight.w500,
+        //         ),
+        //       ),
+        //     ],
+        //   ),
+        // ),
+        const SizedBox(height: 8),
+        Container(
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color:
+                  _nidImage != null ? AppColors.primary : AppColors.borderLight,
+              width: _nidImage != null ? 2 : 1,
+            ),
+          ),
+          child: InkWell(
+            onTap: _pickNidImage,
+            borderRadius: BorderRadius.circular(12),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  Icon(
+                    _nidImage != null
+                        ? Icons.check_circle
+                        : Icons.upload_file_outlined,
+                    color: _nidImage != null
+                        ? AppColors.primary
+                        : AppColors.textSecondary,
                     size: 20,
                   ),
-                ),
-            ],
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          _nidImage != null
+                              ? 'NID Image Selected'
+                              : 'Tap to upload NID picture (Required)',
+                          style: TextStyle(
+                            color: _nidImage != null
+                                ? AppColors.textPrimary
+                                : AppColors.textSecondary,
+                            fontSize: 14,
+                            fontWeight: _nidImage != null
+                                ? FontWeight.w500
+                                : FontWeight.normal,
+                          ),
+                        ),
+                        if (_nidImage != null) ...[
+                          const SizedBox(height: 4),
+                          Text(
+                            _nidImage!.path.split('/').last,
+                            style: const TextStyle(
+                              color: AppColors.textTertiary,
+                              fontSize: 12,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                  if (_nidImage != null)
+                    IconButton(
+                      onPressed: () {
+                        setState(() {
+                          _nidImage = null;
+                        });
+                      },
+                      icon: const Icon(
+                        Icons.close,
+                        color: AppColors.error,
+                        size: 20,
+                      ),
+                    ),
+                ],
+              ),
+            ),
           ),
         ),
-      ),
+      ],
     );
   }
 
@@ -583,22 +618,33 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   /// Handles registration form submission
   void _handleRegister() {
-    if (_formKey.currentState?.validate() ?? false) {
-      final request = RegistrationRequest(
-        fullName: _fullNameController.text.trim(),
-        phoneNumber: _phoneController.text.trim(),
-        pharmacyName: _pharmacyNameController.text.trim(),
-        district: _selectedDistrict!,
-        policeStation: _selectedPoliceStation!,
-        pharmacyFullAddress: _addressController.text.trim(),
-        email: _emailController.text.trim(),
-        password: _passwordController.text,
-        confirmPassword: _confirmPasswordController.text,
-        nidImagePath: _nidImage?.path,
-      );
-
-      context.read<AuthCubit>().register(request);
+    // Validate form fields first
+    if (!(_formKey.currentState?.validate() ?? false)) {
+      return;
     }
+
+    // Validate NID image is selected (mandatory)
+    if (_nidImage == null) {
+      _showErrorDialog(
+          'Please upload your NID picture to continue registration.');
+      return;
+    }
+
+    // All validations passed, proceed with registration
+    final request = RegistrationRequest(
+      fullName: _fullNameController.text.trim(),
+      phoneNumber: _phoneController.text.trim(),
+      pharmacyName: _pharmacyNameController.text.trim(),
+      district: _selectedDistrict!,
+      policeStation: _selectedPoliceStation!,
+      pharmacyFullAddress: _addressController.text.trim(),
+      email: _emailController.text.trim(),
+      password: _passwordController.text,
+      confirmPassword: _confirmPasswordController.text,
+      nidImagePath: _nidImage!.path, // Now guaranteed to be non-null
+    );
+
+    context.read<AuthCubit>().register(request);
   }
 
   /// Shows error dialog

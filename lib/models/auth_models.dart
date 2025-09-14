@@ -11,7 +11,7 @@ class RegistrationRequest {
   final String email;
   final String password;
   final String confirmPassword;
-  final String? nidImagePath;
+  final String nidImagePath; // Now required (non-nullable)
 
   const RegistrationRequest({
     required this.fullName,
@@ -23,7 +23,7 @@ class RegistrationRequest {
     required this.email,
     required this.password,
     required this.confirmPassword,
-    this.nidImagePath,
+    required this.nidImagePath, // Now required
   });
 
   /// Validates the registration request

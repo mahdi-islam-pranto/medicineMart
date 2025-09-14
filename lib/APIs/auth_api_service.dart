@@ -16,8 +16,15 @@ class AuthApiService {
   /// Returns an [AuthResponse] with success/failure status and user data.
   static Future<AuthResponse> register(RegistrationRequest request) async {
     try {
-      // Prepare the request body according to API specification
-      final requestBody = {
+      // Create multipart request for form data
+      final uri = Uri.parse(ApiConfig.registerUrl);
+      final multipartRequest = http.MultipartRequest('POST', uri);
+
+      // Add headers for multipart request (Content-Type is set automatically)
+      multipartRequest.headers.addAll(ApiConfig.multipartHeaders);
+
+      // Add text fields to the form data
+      multipartRequest.fields.addAll({
         'fullName': request.fullName,
         'phoneNumber': request.phoneNumber,
         'pharmacyName': request.pharmacyName,
@@ -26,18 +33,33 @@ class AuthApiService {
         'pharmacyFullAddress': request.pharmacyFullAddress,
         'email': request.email,
         'password': request.password,
-        'nidImagePath':
-            request.nidImagePath ?? 'string', // Default value as per API
-      };
+      });
 
-      // Make the HTTP POST request
-      final response = await http
-          .post(
-            Uri.parse(ApiConfig.registerUrl),
-            headers: ApiConfig.headers,
-            body: json.encode(requestBody),
-          )
-          .timeout(ApiConfig.requestTimeout);
+      // Add NID image file (now mandatory)
+      if (request.nidImagePath.isNotEmpty) {
+        final file = File(request.nidImagePath);
+        if (await file.exists()) {
+          final multipartFile = await http.MultipartFile.fromPath(
+            'nidImagePath', // Field name for the file
+            file.path,
+          );
+          multipartRequest.files.add(multipartFile);
+        } else {
+          // File doesn't exist, throw an error
+          throw Exception(
+              'NID image file not found at path: ${request.nidImagePath}');
+        }
+      } else {
+        // Empty path, throw an error
+        throw Exception('NID image path is required but was empty');
+      }
+
+      // Send the multipart request
+      final streamedResponse =
+          await multipartRequest.send().timeout(ApiConfig.requestTimeout);
+
+      // Convert streamed response to regular response
+      final response = await http.Response.fromStream(streamedResponse);
 
       // Parse the response
       final responseData = json.decode(response.body);

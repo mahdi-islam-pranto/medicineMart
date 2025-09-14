@@ -14,6 +14,7 @@ import '../widgets/quantity_selector.dart';
 /// - Checkout functionality
 /// - Empty cart state
 /// - Modern design matching app theme
+/// - Auto-refresh when navigating to cart tab
 class CartPage extends StatefulWidget {
   const CartPage({super.key});
 
@@ -36,19 +37,33 @@ class _CartPageState extends State<CartPage> {
     return Scaffold(
       appBar: _buildAppBar(),
       drawer: const AppDrawer(),
-      body: BlocListener<CartCubit, CartState>(
-        listener: (context, state) {
-          if (state is CartCheckoutSuccess) {
-            _showOrderSuccessDialog(context, state);
-          } else if (state is CartError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.message),
-                backgroundColor: AppColors.error,
-              ),
-            );
-          }
-        },
+      body: MultiBlocListener(
+        listeners: [
+          // Listen to cart state changes
+          BlocListener<CartCubit, CartState>(
+            listener: (context, state) {
+              if (state is CartCheckoutSuccess) {
+                _showOrderSuccessDialog(context, state);
+              } else if (state is CartError) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(state.message),
+                    backgroundColor: AppColors.error,
+                  ),
+                );
+              }
+            },
+          ),
+          // Listen to navigation changes to refresh cart when tab becomes active
+          BlocListener<NavigationCubit, NavigationState>(
+            listener: (context, state) {
+              // If cart tab is selected (index 2), refresh cart data
+              if (state.currentIndex == 2) {
+                context.read<CartCubit>().loadCart();
+              }
+            },
+          ),
+        ],
         child: BlocBuilder<CartCubit, CartState>(
           builder: (context, state) {
             if (state is CartLoading) {

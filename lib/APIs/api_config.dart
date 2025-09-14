@@ -42,9 +42,15 @@ class ApiConfig {
   static String get faqUrl => '$baseUrl$faqEndpoint';
   static String get feedbackUrl => '$baseUrl$feedbackEndpoint';
 
-  // Request headers
+  // Request headers for JSON requests
   static Map<String, String> get headers => {
         'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      };
+
+  // Request headers for multipart form data requests
+  // Note: Don't set Content-Type for multipart requests as http package handles it automatically
+  static Map<String, String> get multipartHeaders => {
         'Accept': 'application/json',
       };
 
