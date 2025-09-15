@@ -1,4 +1,26 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Internet permission for API calls and network requests -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <!-- Network state permission to check connectivity -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <!-- Camera permission for taking NID photos -->
+    <uses-permission android:name="android.permission.CAMERA" />
+
+    <!-- Storage permissions for reading/writing images -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="28" />
+
+    <!-- Media permissions for Android 13+ (API 33+) -->
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+
+    <!-- Wake lock permission for background processing -->
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+
+    <!-- Vibrate permission for notifications -->
+    <uses-permission android:name="android.permission.VIBRATE" />
     <application
         android:label="online_medicine"
         android:name="${applicationName}"

@@ -4,10 +4,11 @@ import 'package:online_medicine/widgets/quantity_selector.dart';
 
 void main() {
   group('QuantitySelector Tests', () {
-    testWidgets('should display predefined quantity options', (WidgetTester tester) async {
+    testWidgets('should display predefined quantity options',
+        (WidgetTester tester) async {
       const quantityOptions = [1, 2, 3, 5, 10];
       int selectedQuantity = 1;
-      
+
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -25,7 +26,8 @@ void main() {
 
       // Check if predefined options are displayed
       for (final quantity in quantityOptions) {
-        expect(find.text('$quantity Box${quantity > 1 ? 's' : ''}'), findsOneWidget);
+        expect(find.text('$quantity Box${quantity > 1 ? 's' : ''}'),
+            findsOneWidget);
       }
 
       // Check if custom quantity option is displayed
@@ -33,10 +35,11 @@ void main() {
       expect(find.byType(TextField), findsOneWidget);
     });
 
-    testWidgets('should select predefined quantity option', (WidgetTester tester) async {
+    testWidgets('should select predefined quantity option',
+        (WidgetTester tester) async {
       const quantityOptions = [1, 2, 3, 5, 10];
       int selectedQuantity = 1;
-      
+
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -64,10 +67,11 @@ void main() {
       expect(selectedQuantity, equals(5));
     });
 
-    testWidgets('should handle custom quantity input', (WidgetTester tester) async {
+    testWidgets('should handle custom quantity input',
+        (WidgetTester tester) async {
       const quantityOptions = [1, 2, 3, 5, 10];
       int selectedQuantity = 1;
-      
+
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -99,10 +103,11 @@ void main() {
       expect(selectedQuantity, equals(25));
     });
 
-    testWidgets('should show error for empty custom quantity', (WidgetTester tester) async {
+    testWidgets('should show error for empty custom quantity',
+        (WidgetTester tester) async {
       const quantityOptions = [1, 2, 3, 5, 10];
       int selectedQuantity = 1;
-      
+
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -130,10 +135,11 @@ void main() {
       expect(find.text('Please enter a quantity'), findsOneWidget);
     });
 
-    testWidgets('should show error for invalid custom quantity', (WidgetTester tester) async {
+    testWidgets('should show error for invalid custom quantity',
+        (WidgetTester tester) async {
       const quantityOptions = [1, 2, 3, 5, 10];
       int selectedQuantity = 1;
-      
+
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -165,10 +171,11 @@ void main() {
       expect(find.text('Please enter a valid quantity'), findsOneWidget);
     });
 
-    testWidgets('should handle pre-selected custom quantity', (WidgetTester tester) async {
+    testWidgets('should handle pre-selected custom quantity',
+        (WidgetTester tester) async {
       const quantityOptions = [1, 2, 3, 5, 10];
       const selectedQuantity = 25; // Custom quantity not in predefined options
-      
+
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
