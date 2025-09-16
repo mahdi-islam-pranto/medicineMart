@@ -7,6 +7,7 @@ import '../screens/explore_products_page.dart';
 import '../models/models.dart';
 import '../theme/app_colors.dart';
 import '../bloc/bloc.dart';
+import 'profile_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -139,12 +140,13 @@ class _HomePageState extends State<HomePage> {
           padding: const EdgeInsets.only(right: 8.0),
           child: GestureDetector(
             onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Profile feature coming soon!'),
-                  backgroundColor: AppColors.primary,
-                ),
-              );
+              // ScaffoldMessenger.of(context).showSnackBar(
+              //   const SnackBar(
+              //     content: Text('Profile feature coming soon!'),
+              //     backgroundColor: AppColors.primary,
+              //   ),
+              // );
+              _navigateToExploreProducts(context);
             },
             child: Container(
               width: 32,
@@ -154,7 +156,7 @@ class _HomePageState extends State<HomePage> {
                 borderRadius: BorderRadius.circular(8),
               ),
               child: const Icon(
-                Icons.person_outline,
+                Icons.search,
                 color: AppColors.textOnPrimary,
                 size: 20,
               ),

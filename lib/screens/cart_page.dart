@@ -5,6 +5,7 @@ import '../bloc/bloc.dart';
 import '../models/models.dart';
 import '../widgets/app_drawer.dart';
 import '../widgets/quantity_selector.dart';
+import 'drawer_pages/my_orders_page.dart';
 
 /// CartPage - Shopping cart with checkout functionality
 ///
@@ -601,8 +602,8 @@ class _CartPageState extends State<CartPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _buildOrderDetailRow('Order ID:', state.orderData.orderId),
-                    _buildOrderDetailRow(
-                        'Status:', state.orderData.orderStatus),
+                    // _buildOrderDetailRow(
+                    //     'Status:', state.orderData.orderStatus),
                     _buildOrderDetailRow('Estimated Delivery:',
                         state.orderData.estimatedDelivery),
                     _buildOrderDetailRow('Total Amount:',
@@ -617,8 +618,13 @@ class _CartPageState extends State<CartPage> {
           actions: [
             ElevatedButton(
               onPressed: () {
-                Navigator.of(context).pop();
+                // Close dialog
+
+                // Navigator.of(context).pop();
                 // Optionally navigate to orders page or home
+                Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(builder: (context) => const MyOrdersPage()),
+                );
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,

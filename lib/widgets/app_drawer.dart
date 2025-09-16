@@ -253,8 +253,16 @@ class AppDrawer extends StatelessWidget {
             // Logout button
             ElevatedButton(
               onPressed: () {
-                Navigator.pop(context);
                 // TODO: Implement logout logic here
+                Navigator.pop(context);
+                // Call the AuthCubit logout method
+                context.read<AuthCubit>().logout();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Logged out successfully'),
+                    backgroundColor: AppColors.success,
+                  ),
+                );
                 // Example: AuthService.logout();
                 // Navigate to login screen
               },

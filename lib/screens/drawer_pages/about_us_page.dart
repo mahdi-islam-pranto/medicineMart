@@ -127,7 +127,7 @@ class AboutUsPage extends StatelessWidget {
                 children: [
                   _buildContactItem(
                       Icons.location_on, 'Address', 'Dhaka, Bangladesh'),
-                  _buildContactItem(Icons.phone, 'Phone', '+880 1234 567890'),
+                  _buildContactItem(Icons.phone, 'Phone', '01746733817'),
                   _buildContactItem(
                       Icons.email, 'Email', 'mmodumadicenmart@gmail.com'),
                   _buildContactItem(
@@ -214,27 +214,27 @@ class AboutUsPage extends StatelessWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 8),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        'Build Number',
-                        style: TextStyle(
-                          color: AppColors.textSecondary,
-                          fontSize: 14,
-                        ),
-                      ),
-                      Text(
-                        '100',
-                        style: TextStyle(
-                          color: AppColors.textPrimary,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
+                  // const SizedBox(height: 8),
+                  // Row(
+                  //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  //   children: [
+                  //     const Text(
+                  //       'Build Number',
+                  //       style: TextStyle(
+                  //         color: AppColors.textSecondary,
+                  //         fontSize: 14,
+                  //       ),
+                  //     ),
+                  //     Text(
+                  //       '100',
+                  //       style: TextStyle(
+                  //         color: AppColors.textPrimary,
+                  //         fontSize: 14,
+                  //         fontWeight: FontWeight.w500,
+                  //       ),
+                  //     ),
+                  //   ],
+                  // ),
                 ],
               ),
             ),

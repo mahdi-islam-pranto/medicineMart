@@ -440,11 +440,20 @@ class _FeedbackPageState extends State<FeedbackPage> {
         });
 
         if (response.success) {
-          // Show success message
-          _showSuccessDialog(response.message);
+          // Show success message with a snackbar
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              duration: Duration(seconds: 2),
+              content: Text('Feedback submitted successfully'),
+              backgroundColor: AppColors.success,
+            ),
+          );
 
+          // Show success dialog
+          // _showSuccessDialog(response.message);
           // Clear form
           _clearForm();
+          Navigator.pop(context);
         } else {
           // Show error message
           ScaffoldMessenger.of(context).showSnackBar(
