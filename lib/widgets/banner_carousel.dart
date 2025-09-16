@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../bloc/cubits/explore_products_cubit.dart';
+import '../models/product_filter.dart';
+import '../screens/explore_products_page.dart';
 import '../theme/app_colors.dart';
 
 /// BannerCarousel - A horizontal scrollable banner widget for medicine advertisements
@@ -24,13 +28,13 @@ class _BannerCarouselState extends State<BannerCarousel> {
   final List<BannerData> _banners = [
     BannerData(
       title: 'Free Delivery',
-      subtitle: 'On orders above ৳500',
+      subtitle: 'On All Orders ',
       description: 'Get your medicines delivered to your doorstep for free!',
       color: AppColors.primary,
       icon: Icons.local_shipping,
     ),
     BannerData(
-      title: '20% OFF',
+      title: 'up to 50% OFF',
       subtitle: 'On all supplements',
       description: 'Boost your health with premium supplements at great prices',
       color: AppColors.secondary,
@@ -38,15 +42,16 @@ class _BannerCarouselState extends State<BannerCarousel> {
     ),
     BannerData(
       title: '24/7 Support',
-      subtitle: 'Expert consultation',
-      description: 'Get professional medical advice anytime, anywhere',
+      subtitle: 'Support available anytime in the given phone number',
+      description: 'Get customer support 24/7. Talk to us on 01746733817',
       color: AppColors.primaryLight,
       icon: Icons.support_agent,
     ),
     BannerData(
-      title: 'Quick Refill',
-      subtitle: 'Upload prescription',
-      description: 'Refill your regular medicines with just a photo',
+      title: 'Faster Delivery',
+      subtitle: 'Delivered within a day',
+      description:
+          'Get your medicines delivered to your doorstep within a day!',
       color: AppColors.primaryDark,
       icon: Icons.camera_alt,
     ),
@@ -227,9 +232,14 @@ class _BannerCarouselState extends State<BannerCarousel> {
                 ElevatedButton(
                   onPressed: () {
                     // TODO: Handle banner action
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('${banner.title} clicked!')),
-                    );
+                    // ScaffoldMessenger.of(context).showSnackBar(
+                    //   SnackBar(
+                    //     content: Text('Go to Medicines page'),
+                    //     backgroundColor: AppColors.success,
+                    //   ),
+                    // );
+                    // navigate to explore products page
+                    _navigateToExploreProducts(context);
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.textOnPrimary,
@@ -269,6 +279,59 @@ class _BannerCarouselState extends State<BannerCarousel> {
       decoration: BoxDecoration(
         color: isActive ? AppColors.primary : AppColors.borderLight,
         borderRadius: BorderRadius.circular(4),
+      ),
+    );
+  }
+
+  void _navigateToExploreProducts(
+    BuildContext context, {
+    String? searchQuery,
+    String? selectedBrand,
+    String? productCategory,
+  }) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => BlocProvider(
+          create: (context) {
+            final cubit = ExploreProductsCubit();
+            // Load products first
+            cubit.loadProducts().then((_) {
+              // Apply filters after products are loaded
+              if (searchQuery != null && searchQuery.isNotEmpty) {
+                cubit.updateSearchText(searchQuery);
+              }
+              if (selectedBrand != null) {
+                final currentState = cubit.state;
+                if (currentState is ExploreProductsLoaded) {
+                  final newFilter = currentState.currentFilter.copyWith(
+                    selectedBrands: [selectedBrand],
+                  );
+                  cubit.applyFilter(newFilter);
+                }
+              }
+              if (productCategory != null) {
+                ProductCategory category;
+                switch (productCategory) {
+                  case 'specialOffer':
+                    category = ProductCategory.specialOffer;
+                    break;
+                  case 'trending':
+                    category = ProductCategory.trending;
+                    break;
+                  case 'newProduct':
+                    category = ProductCategory.newProduct;
+                    break;
+                  default:
+                    category = ProductCategory.all;
+                }
+                cubit.updateProductCategory(category);
+              }
+            });
+            return cubit;
+          },
+          child: const ExploreProductsPage(),
+        ),
       ),
     );
   }
