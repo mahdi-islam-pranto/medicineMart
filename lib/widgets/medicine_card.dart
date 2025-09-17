@@ -167,7 +167,7 @@ class _MedicineCardState extends State<MedicineCard> {
       children: [
         // Medicine name with type/form
         Text(
-          '${widget.medicine.name.toUpperCase()} (${widget.medicine.quantity})',
+          '${widget.medicine.name} (${widget.medicine.quantity})',
           style: const TextStyle(
             color: AppColors.textPrimary,
             fontSize: 14,

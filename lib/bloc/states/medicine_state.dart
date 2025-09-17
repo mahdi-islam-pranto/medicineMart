@@ -60,7 +60,7 @@ class MedicineLoaded extends MedicineState {
     // Filter by selected letter
     if (selectedLetter != null) {
       filtered = filtered.where((medicine) {
-        return medicine.name.toUpperCase().startsWith(selectedLetter!);
+        return medicine.name.startsWith(selectedLetter!);
       }).toList();
     }
 
@@ -87,7 +87,8 @@ class MedicineLoaded extends MedicineState {
       brands: brands ?? this.brands,
       searchQuery: searchQuery ?? this.searchQuery,
       selectedBrand: clearBrand ? null : (selectedBrand ?? this.selectedBrand),
-      selectedLetter: clearLetter ? null : (selectedLetter ?? this.selectedLetter),
+      selectedLetter:
+          clearLetter ? null : (selectedLetter ?? this.selectedLetter),
       isRefreshing: isRefreshing ?? this.isRefreshing,
     );
   }
