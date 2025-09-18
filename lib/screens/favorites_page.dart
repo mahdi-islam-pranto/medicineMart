@@ -351,6 +351,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
     final medicine = Medicine(
       id: item.id,
       name: item.name,
+      genericName: item.genericName,
       quantity: item.quantity,
       brand: item.brand,
       regularPrice: item.originalPrice,

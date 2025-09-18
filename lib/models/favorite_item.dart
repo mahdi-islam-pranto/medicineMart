@@ -5,6 +5,7 @@ import 'medicine.dart';
 class FavoriteItem extends Equatable {
   final String id;
   final String name;
+  final String genericName;
   final String quantity;
   final String brand;
   final double price;
@@ -14,6 +15,7 @@ class FavoriteItem extends Equatable {
 
   const FavoriteItem({
     required this.id,
+    required this.genericName,
     required this.name,
     required this.quantity,
     required this.brand,
@@ -26,7 +28,14 @@ class FavoriteItem extends Equatable {
   /// Calculate discount percentage
   int get discountPercentage {
     if (originalPrice <= price) return 0;
-    return ((originalPrice - price) / originalPrice * 100).round();
+    if (originalPrice <= 0) return 0; // Prevent division by zero
+
+    final percentage = ((originalPrice - price) / originalPrice * 100);
+
+    // Check for invalid results (NaN, Infinity)
+    if (percentage.isNaN || percentage.isInfinite) return 0;
+
+    return percentage.round();
   }
 
   /// Check if item has discount
@@ -40,6 +49,7 @@ class FavoriteItem extends Equatable {
     return FavoriteItem(
       id: medicine.id,
       name: medicine.name,
+      genericName: medicine.genericName,
       quantity: medicine.quantity,
       brand: medicine.brand,
       price: medicine.effectivePrice,
@@ -54,6 +64,7 @@ class FavoriteItem extends Equatable {
     return Medicine(
       id: id,
       name: name,
+      genericName: genericName,
       quantity: quantity,
       brand: brand,
       regularPrice: originalPrice,
@@ -78,6 +89,7 @@ class FavoriteItem extends Equatable {
     return FavoriteItem(
       id: id ?? this.id,
       name: name ?? this.name,
+      genericName: genericName ?? this.genericName,
       quantity: quantity ?? this.quantity,
       brand: brand ?? this.brand,
       price: price ?? this.price,
@@ -104,14 +116,17 @@ class FavoriteItem extends Equatable {
   /// Create from JSON
   factory FavoriteItem.fromJson(Map<String, dynamic> json) {
     return FavoriteItem(
-      id: json['id'] as String,
-      name: json['name'] as String,
-      quantity: json['quantity'] as String,
-      brand: json['brand'] as String,
-      price: (json['price'] as num).toDouble(),
-      originalPrice: (json['originalPrice'] as num).toDouble(),
-      imageUrl: json['imageUrl'] as String,
-      addedDate: DateTime.parse(json['addedDate'] as String),
+      id: json['id'] as String? ?? '',
+      name: json['name'] as String? ?? '',
+      genericName: json['generic_name'] as String? ?? '',
+      quantity: json['quantity'] as String? ?? '',
+      brand: json['brand'] as String? ?? '',
+      price: (json['price'] as num?)?.toDouble() ?? 0.0,
+      originalPrice: (json['originalPrice'] as num?)?.toDouble() ?? 0.0,
+      imageUrl: json['imageUrl'] as String? ?? '',
+      addedDate: json['addedDate'] != null
+          ? DateTime.tryParse(json['addedDate'] as String) ?? DateTime.now()
+          : DateTime.now(),
     );
   }
 

@@ -462,6 +462,7 @@ class _TrendingProductsPageState extends State<TrendingProductsPage> {
       const Medicine(
         id: 't1',
         name: 'Paracetamol 500mg',
+        genericName: 'Paracetamol',
         quantity: 'Box',
         brand: 'Square',
         regularPrice: 120.0,
@@ -472,6 +473,7 @@ class _TrendingProductsPageState extends State<TrendingProductsPage> {
       const Medicine(
         id: 't2',
         name: 'Vitamin D3 1000 IU',
+        genericName: 'Vitamin D3',
         quantity: 'Bottle',
         brand: 'Beximco',
         regularPrice: 350.0,

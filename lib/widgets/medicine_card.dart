@@ -43,7 +43,7 @@ class _MedicineCardState extends State<MedicineCard> {
     // Calculate responsive values
     final cardPadding = 12.0;
     final borderRadius = 12.0;
-    final imageSize = 80.0;
+    final imageSize = 100.0;
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
@@ -136,7 +136,7 @@ class _MedicineCardState extends State<MedicineCard> {
                 ],
               ),
               child: Text(
-                '${widget.medicine.discountPercentage.toStringAsFixed(1)}%',
+                '${widget.medicine.discountPercentage.toStringAsFixed(2)}%',
                 style: const TextStyle(
                   color: AppColors.textOnPrimary,
                   fontSize: 9,
@@ -167,7 +167,7 @@ class _MedicineCardState extends State<MedicineCard> {
       children: [
         // Medicine name with type/form
         Text(
-          '${widget.medicine.name} (${widget.medicine.quantity})',
+          '${widget.medicine.name}',
           style: const TextStyle(
             color: AppColors.textPrimary,
             fontSize: 14,
@@ -180,11 +180,24 @@ class _MedicineCardState extends State<MedicineCard> {
 
         const SizedBox(height: 2),
 
+        // Generic name
+        Text(
+          widget.medicine.genericName,
+          style: const TextStyle(
+            color: AppColors.textSecondary,
+            fontSize: 11,
+            fontWeight: FontWeight.w500,
+            letterSpacing: 0.5,
+          ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+
         // Brand name
         Text(
           widget.medicine.brand.toUpperCase(),
           style: const TextStyle(
-            color: AppColors.textSecondary,
+            color: AppColors.textTertiary,
             fontSize: 11,
             fontWeight: FontWeight.w500,
             letterSpacing: 0.5,

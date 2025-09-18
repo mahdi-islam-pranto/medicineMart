@@ -142,8 +142,15 @@ class CartSummary extends Equatable {
 
   /// Get discount percentage
   double get discountPercentage {
-    if (subtotal + discount == 0) return 0.0;
-    return (discount / (subtotal + discount)) * 100;
+    final total = subtotal + discount;
+    if (total <= 0) return 0.0; // Prevent division by zero
+
+    final percentage = (discount / total) * 100;
+
+    // Check for invalid results (NaN, Infinity)
+    if (percentage.isNaN || percentage.isInfinite) return 0.0;
+
+    return percentage;
   }
 
   @override

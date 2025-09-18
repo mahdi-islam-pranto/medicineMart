@@ -36,7 +36,14 @@ class CartItem extends Equatable {
   /// Calculate discount percentage
   int get discountPercentage {
     if (originalPrice <= price) return 0;
-    return ((originalPrice - price) / originalPrice * 100).round();
+    if (originalPrice <= 0) return 0; // Prevent division by zero
+
+    final percentage = ((originalPrice - price) / originalPrice * 100);
+
+    // Check for invalid results (NaN, Infinity)
+    if (percentage.isNaN || percentage.isInfinite) return 0;
+
+    return percentage.round();
   }
 
   /// Check if item has discount

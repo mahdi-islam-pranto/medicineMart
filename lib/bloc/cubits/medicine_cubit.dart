@@ -193,6 +193,7 @@ class MedicineCubit extends Cubit<MedicineState> {
       const Medicine(
         id: '1',
         name: 'Tablet- Acipro',
+        genericName: 'Acetaminophen',
         quantity: 'Box',
         brand: 'Square',
         regularPrice: 500.00,
@@ -206,6 +207,7 @@ class MedicineCubit extends Cubit<MedicineState> {
       const Medicine(
         id: '2',
         name: 'Tablet- Amox',
+        genericName: 'Amoxicillin',
         quantity: 'Box',
         brand: 'Square',
         regularPrice: 630.00,
@@ -218,6 +220,7 @@ class MedicineCubit extends Cubit<MedicineState> {
       const Medicine(
         id: '3',
         name: 'Syrup- Asthalin',
+        genericName: 'Cetirizine',
         quantity: 'Bottle',
         brand: 'Renata',
         regularPrice: 360.00,
@@ -231,6 +234,7 @@ class MedicineCubit extends Cubit<MedicineState> {
       const Medicine(
         id: '4',
         name: 'Capsule- Amoxicillin',
+        genericName: 'Omeprazole',
         quantity: 'Strip',
         brand: 'Beximco',
         regularPrice: 600.00,
@@ -243,6 +247,7 @@ class MedicineCubit extends Cubit<MedicineState> {
       const Medicine(
         id: '5',
         name: 'Tablet- Napa',
+        genericName: 'Paracetamol',
         quantity: 'Box',
         brand: 'Beximco',
         regularPrice: 50.00,
@@ -254,6 +259,7 @@ class MedicineCubit extends Cubit<MedicineState> {
       const Medicine(
         id: '6',
         name: 'Syrup- Reneta-B',
+        genericName: 'Vitamin B Complex',
         quantity: 'Bottle',
         brand: 'Renata',
         regularPrice: 630.00,
@@ -267,6 +273,7 @@ class MedicineCubit extends Cubit<MedicineState> {
       const Medicine(
         id: '7',
         name: 'Tablet- Vitamin D3',
+        genericName: 'Vitamin D3',
         quantity: 'Bottle',
         brand: 'HealthKart',
         regularPrice: 1250.00,
@@ -279,6 +286,7 @@ class MedicineCubit extends Cubit<MedicineState> {
       const Medicine(
         id: '8',
         name: 'Tablet- Ace',
+        genericName: 'Enalapril',
         quantity: 'Box',
         brand: 'Square',
         regularPrice: 410.00,
