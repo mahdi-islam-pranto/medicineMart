@@ -4,6 +4,7 @@ import 'package:equatable/equatable.dart';
 import '../../models/models.dart';
 import '../../APIs/product_api_service.dart';
 import '../../APIs/brand_api_service.dart';
+import '../../APIs/category_api_service.dart';
 import '../../APIs/cart_api_service.dart';
 
 /// States for explore products
@@ -136,7 +137,7 @@ class ExploreProductsCubit extends Cubit<ExploreProductsState> {
             '✅ Successfully loaded ${products.length} products from API (Page 1)');
 
         final brands = await _loadBrandsFromAPI();
-        final categories = _extractCategories(products);
+        final categories = await _loadCategoriesFromAPI();
         const initialFilter = ProductFilter();
 
         emit(ExploreProductsLoaded(
@@ -496,10 +497,18 @@ class ExploreProductsCubit extends Cubit<ExploreProductsState> {
     return sorted;
   }
 
-  /// Extract unique categories from products list
-  List<String> _extractCategories(List<Medicine> products) {
-    // For demo purposes, create categories based on product types
-    final categories = <String>{'Tablet', 'Capsule', 'Syrup', 'Injection'};
-    return categories.toList()..sort();
+  /// Load categories from API
+  Future<List<String>> _loadCategoriesFromAPI() async {
+    try {
+      print('🔄 Loading categories from API...');
+      final categoryNames = await CategoryApiService.getCategoryNames();
+      print(
+          '✅ Successfully loaded ${categoryNames.length} categories from API');
+      return categoryNames;
+    } catch (e) {
+      print('❌ Error loading categories from API: $e');
+      // Return empty list if API fails
+      return [];
+    }
   }
 }

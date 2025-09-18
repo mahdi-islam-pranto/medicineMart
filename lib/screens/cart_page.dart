@@ -185,8 +185,8 @@ class _CartPageState extends State<CartPage> {
           children: [
             // Product image
             Container(
-              width: 60,
-              height: 60,
+              width: 80,
+              height: 80,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(color: AppColors.borderLight),
@@ -215,7 +215,7 @@ class _CartPageState extends State<CartPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    '${item.name} (${item.quantity})',
+                    '${item.name}',
                     style: const TextStyle(
                       color: AppColors.textPrimary,
                       fontSize: 14,
@@ -235,6 +235,19 @@ class _CartPageState extends State<CartPage> {
                       fontWeight: FontWeight.w500,
                     ),
                   ),
+
+                  // const SizedBox(
+                  //   height: 2,
+                  // ),
+
+                  // Text(
+                  //   item.discountPercentage.toString(),
+                  //   style: const TextStyle(
+                  //     color: AppColors.textSecondary,
+                  //     fontSize: 11,
+                  //     fontWeight: FontWeight.w500,
+                  //   ),
+                  // ),
 
                   const SizedBox(height: 8),
 
@@ -423,7 +436,7 @@ class _CartPageState extends State<CartPage> {
                   style: TextStyle(color: AppColors.textSecondary),
                 ),
                 Text(
-                  '৳ ${subtotal.toStringAsFixed(0)}',
+                  '৳ ${subtotal.toStringAsFixed(2)}',
                   style: const TextStyle(color: AppColors.textPrimary),
                 ),
               ],
@@ -431,6 +444,7 @@ class _CartPageState extends State<CartPage> {
 
             const SizedBox(height: 4),
 
+            // delivery
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -440,6 +454,23 @@ class _CartPageState extends State<CartPage> {
                 ),
                 Text(
                   '৳ ${delivery.toStringAsFixed(0)}',
+                  style: const TextStyle(color: AppColors.textPrimary),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 4),
+
+            // Total discount
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Total Discount:',
+                  style: TextStyle(color: AppColors.textSecondary),
+                ),
+                Text(
+                  '৳ ${state.totalDiscount.toStringAsFixed(2)}',
                   style: const TextStyle(color: AppColors.textPrimary),
                 ),
               ],

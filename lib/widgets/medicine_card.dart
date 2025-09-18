@@ -192,6 +192,7 @@ class _MedicineCardState extends State<MedicineCard> {
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
         ),
+        const SizedBox(height: 2),
 
         // Brand name
         Text(

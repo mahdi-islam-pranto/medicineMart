@@ -16,6 +16,9 @@ class ApiConfig {
   // Brand endpoints
   static const String brandEndpoint = 'brand';
 
+  // Category endpoints
+  static const String categoryEndpoint = 'category';
+
   // Cart endpoints
   static const String addToCartEndpoint = 'product/add/to/cart';
   static const String cartListEndpoint = 'product/add/to/cart/list';
@@ -35,6 +38,7 @@ class ApiConfig {
   static String get loginUrl => '$baseUrl$loginEndpoint';
   static String get productsSearchUrl => '$baseUrl$productsSearchEndpoint';
   static String get brandUrl => '$baseUrl$brandEndpoint';
+  static String get categoryUrl => '$baseUrl$categoryEndpoint';
   static String get addToCartUrl => '$baseUrl$addToCartEndpoint';
   static String get cartListUrl => '$baseUrl$cartListEndpoint';
   static String get createOrderUrl => '$baseUrl$createOrderEndpoint';

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:online_medicine/screens/main_navigation.dart';
 import '../theme/app_colors.dart';
 import '../models/models.dart';
 import '../bloc/bloc.dart';
@@ -8,7 +7,6 @@ import '../widgets/app_drawer.dart';
 import '../widgets/medicine_card.dart';
 import '../widgets/filter_bottom_sheet.dart';
 import '../widgets/sort_bottom_sheet.dart';
-import 'homepage.dart';
 
 /// Explore Products Page - A comprehensive product browsing experience
 ///
@@ -288,7 +286,9 @@ class _ExploreProductsPageState extends State<ExploreProductsPage>
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.tune,
+                  const Icon(Icons.filter_alt_outlined,
+                      size: 18, color: AppColors.textSecondary),
+                  const Icon(Icons.keyboard_arrow_down,
                       size: 18, color: AppColors.textSecondary),
                   const SizedBox(width: 4),
                   if (state.currentFilter.hasActiveFilters)
