@@ -237,6 +237,9 @@ class _QuantitySelectorState extends State<QuantitySelector> {
               child: ListView(
                 shrinkWrap: true,
                 children: [
+                  // Custom quantity option (moved to top)
+                  _buildCustomQuantityOption(),
+
                   // Predefined quantity options
                   ...widget.quantityOptions.map((quantity) {
                     final isSelected = quantity == _tempSelectedQuantity &&
@@ -313,9 +316,6 @@ class _QuantitySelectorState extends State<QuantitySelector> {
                       ),
                     );
                   }),
-
-                  // Custom quantity option
-                  _buildCustomQuantityOption(),
                 ],
               ),
             ),

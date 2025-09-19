@@ -7,7 +7,6 @@ import '../screens/explore_products_page.dart';
 import '../models/models.dart';
 import '../theme/app_colors.dart';
 import '../bloc/bloc.dart';
-import 'profile_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -37,16 +36,16 @@ class _HomePageState extends State<HomePage> {
                   // Banner carousel section
                   const BannerCarousel(),
 
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 8),
 
                   if (medicineState is MedicineLoaded) ...[
                     // Brand filters section
-                    _buildBrandFiltersSection(context, medicineState),
+                    // _buildBrandFiltersSection(context, medicineState),
 
-                    const SizedBox(height: 16),
+                    // const SizedBox(height: 16),
 
-                    // Quick access section
-                    _buildQuickAccessSection(context),
+                    // // Quick access section
+                    // _buildQuickAccessSection(context),
 
                     const SizedBox(height: 16),
 

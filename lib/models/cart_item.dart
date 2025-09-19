@@ -12,6 +12,8 @@ class CartItem extends Equatable {
   final double originalPrice;
   final int cartQuantity;
   final String imageUrl;
+  final String?
+      apiDiscountPercentage; // API discount percentage (e.g., "14.97%")
 
   const CartItem({
     required this.id,
@@ -22,6 +24,7 @@ class CartItem extends Equatable {
     required this.originalPrice,
     required this.cartQuantity,
     required this.imageUrl,
+    this.apiDiscountPercentage,
   });
 
   /// Calculate total price for this cart item
@@ -33,21 +36,37 @@ class CartItem extends Equatable {
   /// Calculate discount amount for this cart item
   double get discountAmount => totalOriginalPrice - totalPrice;
 
-  /// Calculate discount percentage
-  int get discountPercentage {
-    if (originalPrice <= price) return 0;
-    if (originalPrice <= 0) return 0; // Prevent division by zero
+  /// Get discount percentage (from API if available, otherwise calculated)
+  String get discountPercentage {
+    // Use API discount percentage if available
+    if (apiDiscountPercentage != null && apiDiscountPercentage!.isNotEmpty) {
+      return apiDiscountPercentage!.replaceAll('%', '');
+    }
+
+    // Fallback to calculated percentage
+    if (originalPrice <= price) return '0';
+    if (originalPrice <= 0) return '0'; // Prevent division by zero
 
     final percentage = ((originalPrice - price) / originalPrice * 100);
 
     // Check for invalid results (NaN, Infinity)
-    if (percentage.isNaN || percentage.isInfinite) return 0;
+    if (percentage.isNaN || percentage.isInfinite) return '0';
 
-    return percentage.round();
+    return percentage.toStringAsFixed(2);
   }
 
   /// Check if item has discount
-  bool get hasDiscount => price < originalPrice;
+  bool get hasDiscount {
+    // Check API discount percentage first
+    if (apiDiscountPercentage != null && apiDiscountPercentage!.isNotEmpty) {
+      final percentageStr = apiDiscountPercentage!.replaceAll('%', '');
+      final percentage = double.tryParse(percentageStr);
+      return percentage != null && percentage > 0;
+    }
+
+    // Fallback to price comparison
+    return price < originalPrice;
+  }
 
   /// Create cart item from medicine
   factory CartItem.fromMedicine(Medicine medicine, int quantity) {
@@ -60,6 +79,7 @@ class CartItem extends Equatable {
       originalPrice: medicine.regularPrice,
       cartQuantity: quantity,
       imageUrl: medicine.imageUrl ?? '',
+      apiDiscountPercentage: medicine.apiDiscountPercentage,
     );
   }
 
@@ -74,6 +94,7 @@ class CartItem extends Equatable {
       originalPrice: cartItemData.mrpPriceSingle,
       cartQuantity: cartItemData.cartQuantity,
       imageUrl: cartItemData.imageUrl ?? '',
+      apiDiscountPercentage: cartItemData.discountPercentage,
     );
   }
 
@@ -87,6 +108,7 @@ class CartItem extends Equatable {
     double? originalPrice,
     int? cartQuantity,
     String? imageUrl,
+    String? apiDiscountPercentage,
   }) {
     return CartItem(
       id: id ?? this.id,
@@ -97,6 +119,8 @@ class CartItem extends Equatable {
       originalPrice: originalPrice ?? this.originalPrice,
       cartQuantity: cartQuantity ?? this.cartQuantity,
       imageUrl: imageUrl ?? this.imageUrl,
+      apiDiscountPercentage:
+          apiDiscountPercentage ?? this.apiDiscountPercentage,
     );
   }
 
@@ -111,6 +135,7 @@ class CartItem extends Equatable {
       'originalPrice': originalPrice,
       'cartQuantity': cartQuantity,
       'imageUrl': imageUrl,
+      'apiDiscountPercentage': apiDiscountPercentage,
     };
   }
 
@@ -125,6 +150,7 @@ class CartItem extends Equatable {
       originalPrice: (json['originalPrice'] as num).toDouble(),
       cartQuantity: json['cartQuantity'] as int,
       imageUrl: json['imageUrl'] as String,
+      apiDiscountPercentage: json['apiDiscountPercentage'] as String?,
     );
   }
 
@@ -138,6 +164,7 @@ class CartItem extends Equatable {
         originalPrice,
         cartQuantity,
         imageUrl,
+        apiDiscountPercentage,
       ];
 
   @override

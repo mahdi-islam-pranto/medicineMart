@@ -81,22 +81,25 @@ class _SortBottomSheetState extends State<SortBottomSheet> {
                     'Sort by price',
                     [SortOption.priceLowToHigh, SortOption.priceHighToLow],
                   ),
-                  _buildSortSection(
-                    'Sort by discount',
-                    [SortOption.discountHighToLow, SortOption.discountLowToHigh],
-                  ),
+                  // _buildSortSection(
+                  //   'Sort by discount',
+                  //   [
+                  //     SortOption.discountHighToLow,
+                  //     SortOption.discountLowToHigh
+                  //   ],
+                  // ),
                   _buildSortSection(
                     'Sort by Alphabet',
                     [SortOption.nameAtoZ, SortOption.nameZtoA],
                   ),
-                  _buildSortSection(
-                    'Sort by delivery date',
-                    [
-                      SortOption.deliveryDate1,
-                      SortOption.deliveryDate2,
-                      SortOption.deliveryDate3,
-                    ],
-                  ),
+                  // _buildSortSection(
+                  //   'Sort by delivery date',
+                  //   [
+                  //     SortOption.deliveryDate1,
+                  //     SortOption.deliveryDate2,
+                  //     SortOption.deliveryDate3,
+                  //   ],
+                  // ),
                 ],
               ),
             ),
@@ -164,11 +167,13 @@ class _SortBottomSheetState extends State<SortBottomSheet> {
 
   Widget _buildSortOption(SortOption option) {
     final isSelected = _selectedOption == option;
-    
+
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
       decoration: BoxDecoration(
-        color: isSelected ? AppColors.primary.withOpacity(0.1) : Colors.transparent,
+        color: isSelected
+            ? AppColors.primary.withOpacity(0.1)
+            : Colors.transparent,
         borderRadius: BorderRadius.circular(8),
       ),
       child: ListTile(

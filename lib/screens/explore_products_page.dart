@@ -437,6 +437,9 @@ class _ExploreProductsPageState extends State<ExploreProductsPage>
   }
 
   void _showSortBottomSheet(ExploreProductsLoaded state) {
+    // Store the cubit reference before showing the bottom sheet
+    final exploreProductsCubit = context.read<ExploreProductsCubit>();
+
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -445,7 +448,7 @@ class _ExploreProductsPageState extends State<ExploreProductsPage>
         onApplySort: (sortOption) {
           final newFilter =
               state.currentFilter.copyWith(sortOption: sortOption);
-          context.read<ExploreProductsCubit>().applyFilter(newFilter);
+          exploreProductsCubit.applyFilter(newFilter);
         },
       ),
     );

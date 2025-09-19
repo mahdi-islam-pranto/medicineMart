@@ -205,13 +205,13 @@ class ProductApiService {
   static String _convertSortOptionToString(SortOption sortOption) {
     switch (sortOption) {
       case SortOption.nameAtoZ:
-        return 'name_asc';
+        return 'name_a_to_z'; // Default case in backend
       case SortOption.nameZtoA:
-        return 'name_desc';
+        return 'name_z_to_a';
       case SortOption.priceLowToHigh:
-        return 'price_asc';
+        return 'price_low_to_high';
       case SortOption.priceHighToLow:
-        return 'price_desc';
+        return 'price_high_to_low';
       case SortOption.discountHighToLow:
         return 'discount_desc';
       case SortOption.discountLowToHigh:

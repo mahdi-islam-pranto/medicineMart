@@ -65,7 +65,7 @@ class _MedicineCardState extends State<MedicineCard> {
       child: Padding(
         padding: EdgeInsets.all(cardPadding),
         child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             // Medicine image section
             _buildImageSection(imageSize, borderRadius),

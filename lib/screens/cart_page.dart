@@ -183,28 +183,62 @@ class _CartPageState extends State<CartPage> {
         padding: const EdgeInsets.all(12),
         child: Row(
           children: [
-            // Product image
-            Container(
-              width: 80,
-              height: 80,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: AppColors.borderLight),
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: Image.network(
-                  item.imageUrl,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return const Icon(
-                      Icons.medication,
-                      color: AppColors.textSecondary,
-                      size: 24,
-                    );
-                  },
+            // Product image with discount badge
+            Stack(
+              children: [
+                Container(
+                  width: 100,
+                  height: 100,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: AppColors.borderLight),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Image.network(
+                      item.imageUrl,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return const Icon(
+                          Icons.medication,
+                          color: AppColors.textSecondary,
+                          size: 24,
+                        );
+                      },
+                    ),
+                  ),
                 ),
-              ),
+
+                // Discount badge (if applicable)
+                if (item.hasDiscount)
+                  Positioned(
+                    top: -2,
+                    left: -2,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: AppColors.error,
+                        borderRadius: BorderRadius.circular(8),
+                        boxShadow: const [
+                          BoxShadow(
+                            color: AppColors.shadowLight,
+                            offset: Offset(0, 1),
+                            blurRadius: 2,
+                          ),
+                        ],
+                      ),
+                      child: Text(
+                        '${item.discountPercentage}%',
+                        style: const TextStyle(
+                          color: AppColors.textOnPrimary,
+                          fontSize: 9,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
             ),
 
             const SizedBox(width: 12),
@@ -215,7 +249,7 @@ class _CartPageState extends State<CartPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    '${item.name}',
+                    item.name,
                     style: const TextStyle(
                       color: AppColors.textPrimary,
                       fontSize: 14,
