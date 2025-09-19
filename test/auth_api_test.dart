@@ -1,8 +1,8 @@
 import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
-import 'package:online_medicine/APIs/auth_api_service.dart';
-import 'package:online_medicine/models/auth_models.dart';
+import 'package:health_and_medicine/APIs/auth_api_service.dart';
+import 'package:health_and_medicine/models/auth_models.dart';
 
 void main() {
   group('AuthApiService Registration Tests', () {

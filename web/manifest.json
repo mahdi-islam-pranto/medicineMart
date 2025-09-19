@@ -1,6 +1,6 @@
 {
-    "name": "online_medicine",
-    "short_name": "online_medicine",
+    "name": "Health and Medicine",
+    "short_name": "Health and Medicine",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#hexcode",

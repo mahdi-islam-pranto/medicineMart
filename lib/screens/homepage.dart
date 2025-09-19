@@ -155,7 +155,7 @@ class _HomePageState extends State<HomePage> {
                 borderRadius: BorderRadius.circular(8),
               ),
               child: const Icon(
-                Icons.search,
+                Icons.medical_services_outlined,
                 color: AppColors.textOnPrimary,
                 size: 20,
               ),

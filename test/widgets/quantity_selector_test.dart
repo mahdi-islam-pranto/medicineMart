@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:online_medicine/widgets/quantity_selector.dart';
+import 'package:health_and_medicine/widgets/quantity_selector.dart';
 
 void main() {
   group('QuantitySelector Tests', () {
