@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 import '../models/models.dart';
 import 'quantity_selector.dart';
+import '../utils/image_preview_utils.dart';
 
 /// MedicineCard - A modern horizontal card widget for displaying medicine information
 ///
@@ -91,30 +92,39 @@ class _MedicineCardState extends State<MedicineCard> {
   Widget _buildImageSection(double imageSize, double borderRadius) {
     return Stack(
       children: [
-        // Medicine image container
-        Container(
-          width: imageSize,
-          height: imageSize,
-          decoration: BoxDecoration(
-            color: AppColors.surfaceVariant,
-            borderRadius: BorderRadius.circular(borderRadius),
-            border: Border.all(
-              color: AppColors.borderLight,
-              width: 1,
-            ),
+        // Medicine image container with long press gesture
+        GestureDetector(
+          onLongPress: () => ImagePreviewUtils.showImagePreview(
+            context,
+            imageUrl: widget.medicine.imageUrl,
+            medicineName: widget.medicine.name,
+            brand: widget.medicine.brand,
+            discountPercentage: widget.medicine.discountPercentage,
           ),
-          child: widget.medicine.imageUrl != null
-              ? ClipRRect(
-                  borderRadius: BorderRadius.circular(borderRadius),
-                  child: Image.network(
-                    widget.medicine.imageUrl!,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      return _buildPlaceholderImage();
-                    },
-                  ),
-                )
-              : _buildPlaceholderImage(),
+          child: Container(
+            width: imageSize,
+            height: imageSize,
+            decoration: BoxDecoration(
+              color: AppColors.surfaceVariant,
+              borderRadius: BorderRadius.circular(borderRadius),
+              border: Border.all(
+                color: AppColors.borderLight,
+                width: 1,
+              ),
+            ),
+            child: widget.medicine.imageUrl != null
+                ? ClipRRect(
+                    borderRadius: BorderRadius.circular(borderRadius),
+                    child: Image.network(
+                      widget.medicine.imageUrl!,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return _buildPlaceholderImage();
+                      },
+                    ),
+                  )
+                : _buildPlaceholderImage(),
+          ),
         ),
 
         // Discount badge (if applicable)

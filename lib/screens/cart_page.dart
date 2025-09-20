@@ -5,6 +5,7 @@ import '../bloc/bloc.dart';
 import '../models/models.dart';
 import '../widgets/app_drawer.dart';
 import '../widgets/quantity_selector.dart';
+import '../utils/image_preview_utils.dart';
 import 'drawer_pages/my_orders_page.dart';
 
 /// CartPage - Shopping cart with checkout functionality
@@ -183,28 +184,38 @@ class _CartPageState extends State<CartPage> {
         padding: const EdgeInsets.all(12),
         child: Row(
           children: [
-            // Product image with discount badge
+            // Product image with discount badge and long press preview
             Stack(
               children: [
-                Container(
-                  width: 100,
-                  height: 100,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: AppColors.borderLight),
+                GestureDetector(
+                  onLongPress: () => ImagePreviewUtils.showImagePreview(
+                    context,
+                    imageUrl: item.imageUrl,
+                    medicineName: item.name,
+                    brand: item.brand,
+                    discountPercentage:
+                        double.tryParse(item.discountPercentage),
                   ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: Image.network(
-                      item.imageUrl,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return const Icon(
-                          Icons.medication,
-                          color: AppColors.textSecondary,
-                          size: 24,
-                        );
-                      },
+                  child: Container(
+                    width: 100,
+                    height: 100,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: AppColors.borderLight),
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: Image.network(
+                        item.imageUrl,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return const Icon(
+                            Icons.medication,
+                            color: AppColors.textSecondary,
+                            size: 24,
+                          );
+                        },
+                      ),
                     ),
                   ),
                 ),
@@ -649,14 +660,14 @@ class _CartPageState extends State<CartPage> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                state.message,
-                style: const TextStyle(
-                  color: AppColors.textSecondary,
-                  fontSize: 14,
-                ),
-              ),
-              const SizedBox(height: 16),
+              // Text(
+              //   state.message,
+              //   style: const TextStyle(
+              //     color: AppColors.textSecondary,
+              //     fontSize: 14,
+              //   ),
+              // ),
+              // const SizedBox(height: 16),
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
@@ -673,8 +684,8 @@ class _CartPageState extends State<CartPage> {
                         state.orderData.estimatedDelivery),
                     _buildOrderDetailRow('Total Amount:',
                         '৳ ${state.orderData.totalAmount.toStringAsFixed(0)}'),
-                    _buildOrderDetailRow(
-                        'Payment Status:', state.orderData.paymentStatus),
+                    // _buildOrderDetailRow(
+                    //     'Payment Status:', state.orderData.paymentStatus),
                   ],
                 ),
               ),

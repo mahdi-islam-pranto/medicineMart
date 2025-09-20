@@ -4,6 +4,7 @@ import '../theme/app_colors.dart';
 import '../widgets/app_drawer.dart';
 import '../bloc/bloc.dart';
 import '../models/models.dart';
+import '../utils/image_preview_utils.dart';
 
 /// FavoritesPage - User's favorite medicines
 ///
@@ -150,26 +151,37 @@ class _FavoritesPageState extends State<FavoritesPage> {
         padding: const EdgeInsets.all(12),
         child: Row(
           children: [
-            // Product image
-            Container(
-              width: 70,
-              height: 70,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: AppColors.borderLight),
+            // Product image with long press preview
+            GestureDetector(
+              onLongPress: () => ImagePreviewUtils.showImagePreview(
+                context,
+                imageUrl: item.imageUrl.isNotEmpty ? item.imageUrl : null,
+                medicineName: item.name,
+                brand: item.brand,
+                discountPercentage: item.hasDiscount
+                    ? item.discountPercentage.toDouble()
+                    : null,
               ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: Image.network(
-                  item.imageUrl,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return const Icon(
-                      Icons.medication,
-                      color: AppColors.textSecondary,
-                      size: 28,
-                    );
-                  },
+              child: Container(
+                width: 70,
+                height: 70,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: AppColors.borderLight),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: Image.network(
+                    item.imageUrl,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return const Icon(
+                        Icons.medication,
+                        color: AppColors.textSecondary,
+                        size: 28,
+                      );
+                    },
+                  ),
                 ),
               ),
             ),
