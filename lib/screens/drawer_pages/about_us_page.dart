@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../theme/app_colors.dart';
+import '../../services/app_settings_storage_service.dart';
 
 /// AboutUsPage - Information about the app and company
 ///
@@ -52,13 +53,18 @@ class AboutUsPage extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  const Text(
-                    'Health & Medicine',
-                    style: TextStyle(
-                      color: AppColors.textPrimary,
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  FutureBuilder<String>(
+                    future: AppSettingsStorageService.getAppName(),
+                    builder: (context, snapshot) {
+                      return Text(
+                        snapshot.data ?? 'Health & Medicine',
+                        style: const TextStyle(
+                          color: AppColors.textPrimary,
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      );
+                    },
                   ),
                   const SizedBox(height: 8),
                   Text(
@@ -123,16 +129,26 @@ class AboutUsPage extends StatelessWidget {
               title: 'Contact Information',
               content: '',
               icon: Icons.contact_phone,
-              child: Column(
-                children: [
-                  _buildContactItem(
-                      Icons.location_on, 'Address', 'Dhaka, Bangladesh'),
-                  _buildContactItem(Icons.phone, 'Phone', '01746733817'),
-                  _buildContactItem(
-                      Icons.email, 'Email', 'mmodumadicenmart@gmail.com'),
-                  _buildContactItem(
-                      Icons.language, 'Website', 'http://modumadicenmart.com'),
-                ],
+              child: FutureBuilder<Map<String, String>>(
+                future: AppSettingsStorageService.getAllSettings(),
+                builder: (context, snapshot) {
+                  final settings = snapshot.data ?? {};
+                  final phoneNumber = settings['phoneNumber'] ?? '01746733817';
+                  final email =
+                      settings['email'] ?? 'mmodumadicenmart@gmail.com';
+                  final website =
+                      settings['domainUrl'] ?? 'http://modumadicenmart.com';
+
+                  return Column(
+                    children: [
+                      _buildContactItem(
+                          Icons.location_on, 'Address', 'Dhaka, Bangladesh'),
+                      _buildContactItem(Icons.phone, 'Phone', phoneNumber),
+                      _buildContactItem(Icons.email, 'Email', email),
+                      _buildContactItem(Icons.language, 'Website', website),
+                    ],
+                  );
+                },
               ),
             ),
 
@@ -192,7 +208,7 @@ class AboutUsPage extends StatelessWidget {
                   width: 1,
                 ),
               ),
-              child: const Column(
+              child: Column(
                 children: [
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -204,13 +220,18 @@ class AboutUsPage extends StatelessWidget {
                           fontSize: 14,
                         ),
                       ),
-                      Text(
-                        '1.0.0',
-                        style: TextStyle(
-                          color: AppColors.textPrimary,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                        ),
+                      FutureBuilder<String>(
+                        future: AppSettingsStorageService.getAppVersion(),
+                        builder: (context, snapshot) {
+                          return Text(
+                            snapshot.data ?? '1.0.0',
+                            style: const TextStyle(
+                              color: AppColors.textPrimary,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          );
+                        },
                       ),
                     ],
                   ),

@@ -3,6 +3,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../theme/app_colors.dart';
 import '../../APIs/faq_api_service.dart';
 import '../../models/models.dart';
+import '../../services/app_settings_storage_service.dart';
 
 /// HelpSupportPage - Customer support and help center
 ///
@@ -111,32 +112,43 @@ class _HelpSupportPageState extends State<HelpSupportPage> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                Row(
-                  children: [
-                    Expanded(
-                        child: _buildContactOption(
-                      icon: Icons.phone,
-                      title: 'Call Us',
-                      subtitle: '01746733817',
-                      onTap: () => _makePhoneCall(),
-                    )),
-                    const SizedBox(width: 12),
-                    Expanded(
-                        child: _buildContactOption(
-                      icon: Icons.email,
-                      title: 'Email',
-                      subtitle: 'mmodumadicenmart@gmail.com',
-                      onTap: () => _sendEmail(),
-                    )),
-                    const SizedBox(width: 12),
-                    Expanded(
-                        child: _buildContactOption(
-                      icon: Icons.chat,
-                      title: 'Live Chat',
-                      subtitle: 'Chat with us',
-                      onTap: () => _startLiveChat(),
-                    )),
-                  ],
+                FutureBuilder<Map<String, String>>(
+                  future: AppSettingsStorageService.getAllSettings(),
+                  builder: (context, snapshot) {
+                    final settings = snapshot.data ?? {};
+                    final phoneNumber =
+                        settings['phoneNumber'] ?? '01746733817';
+                    final email =
+                        settings['email'] ?? 'mmodumadicenmart@gmail.com';
+
+                    return Row(
+                      children: [
+                        Expanded(
+                            child: _buildContactOption(
+                          icon: Icons.phone,
+                          title: 'Call Us',
+                          subtitle: phoneNumber,
+                          onTap: () => _makePhoneCall(phoneNumber),
+                        )),
+                        const SizedBox(width: 12),
+                        Expanded(
+                            child: _buildContactOption(
+                          icon: Icons.email,
+                          title: 'Email',
+                          subtitle: email,
+                          onTap: () => _sendEmail(email),
+                        )),
+                        const SizedBox(width: 12),
+                        Expanded(
+                            child: _buildContactOption(
+                          icon: Icons.chat,
+                          title: 'Live Chat',
+                          subtitle: 'Chat with us',
+                          onTap: () => _startLiveChat(),
+                        )),
+                      ],
+                    );
+                  },
                 ),
               ],
             ),
@@ -457,19 +469,21 @@ class _HelpSupportPageState extends State<HelpSupportPage> {
         .toList();
   }
 
-  void _makePhoneCall() async {
-    const phoneNumber = 'tel:+8801746733817';
-    if (await canLaunchUrl(Uri.parse(phoneNumber))) {
-      await launchUrl(Uri.parse(phoneNumber));
+  void _makePhoneCall([String? phoneNumber]) async {
+    final phone = phoneNumber ?? '01746733817';
+    final phoneUrl = 'tel:+88$phone';
+    if (await canLaunchUrl(Uri.parse(phoneUrl))) {
+      await launchUrl(Uri.parse(phoneUrl));
     } else {
       _showErrorSnackBar('Could not launch phone dialer');
     }
   }
 
-  void _sendEmail() async {
-    const email = 'mailto:mmodumadicenmart@gmail.com?subject=Support Request';
-    if (await canLaunchUrl(Uri.parse(email))) {
-      await launchUrl(Uri.parse(email));
+  void _sendEmail([String? emailAddress]) async {
+    final email = emailAddress ?? 'mmodumadicenmart@gmail.com';
+    final emailUrl = 'mailto:$email?subject=Support Request';
+    if (await canLaunchUrl(Uri.parse(emailUrl))) {
+      await launchUrl(Uri.parse(emailUrl));
     } else {
       _showErrorSnackBar('Could not launch email client');
     }

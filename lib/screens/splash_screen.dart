@@ -114,7 +114,7 @@ class _SplashScreenState extends State<SplashScreen>
           _navigateToMainApp();
         } else if (state is AuthPendingApproval) {
           // User is waiting for approval
-          _navigateToApprovalScreen(state.user);
+          _navigateToLogin();
         } else if (state is AuthRejected || state is AuthSuspended) {
           // User is rejected or suspended, go to login
           _navigateToLogin();

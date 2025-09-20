@@ -163,7 +163,7 @@ class _AdminApprovalScreenState extends State<AdminApprovalScreen>
                 const SizedBox(height: 32),
 
                 // Status Info
-                _buildStatusInfo(),
+                // _buildStatusInfo(),
 
                 const Spacer(),
 

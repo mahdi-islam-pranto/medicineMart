@@ -15,3 +15,4 @@ export 'order_models.dart';
 export 'order_list_models.dart';
 export 'faq_models.dart';
 export 'feedback_models.dart';
+export 'app_settings_models.dart';

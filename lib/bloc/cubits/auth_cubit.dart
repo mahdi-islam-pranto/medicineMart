@@ -5,6 +5,8 @@ import 'dart:math';
 import '../../models/models.dart';
 import '../states/auth_state.dart';
 import '../../APIs/auth_api_service.dart';
+import '../../APIs/app_settings_api_service.dart';
+import '../../services/app_settings_storage_service.dart';
 
 /// AuthCubit manages authentication state for pharmacy owners
 ///
@@ -124,6 +126,9 @@ class AuthCubit extends Cubit<AuthState> {
         // Save user to local storage for persistence
         await _saveCurrentUser(user, token);
 
+        // Fetch and save app settings after successful login
+        await _fetchAndSaveAppSettings();
+
         // Check user status and emit appropriate state
         switch (user.status) {
           case UserStatus.approved:
@@ -169,6 +174,9 @@ class AuthCubit extends Cubit<AuthState> {
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove(_userKey);
       await prefs.remove(_tokenKey);
+
+      // Clear app settings on logout
+      await AppSettingsStorageService.clearAppSettings();
 
       emit(const AuthUnauthenticated());
     } catch (e) {
@@ -220,5 +228,34 @@ class AuthCubit extends Cubit<AuthState> {
     }
     // print user data log
     print('User data saved: ${user.toJson()}');
+  }
+
+  /// Fetch app settings from API and save to SharedPreferences
+  Future<void> _fetchAndSaveAppSettings() async {
+    try {
+      print('🔄 Fetching app settings after login...');
+
+      // Call the app settings API
+      final response = await AppSettingsApiService.getAppSettings();
+
+      if (response.success && response.data != null) {
+        // Save settings to SharedPreferences
+        final saved =
+            await AppSettingsStorageService.saveAppSettings(response.data!);
+
+        if (saved) {
+          print('✅ App settings fetched and saved successfully');
+        } else {
+          print(
+              '⚠️ App settings fetched but failed to save to SharedPreferences');
+        }
+      } else {
+        print('⚠️ Failed to fetch app settings: ${response.error}');
+        // Don't throw error, just log it - app can work with fallback values
+      }
+    } catch (e) {
+      print('⚠️ Error fetching app settings: $e');
+      // Don't throw error, just log it - app can work with fallback values
+    }
   }
 }

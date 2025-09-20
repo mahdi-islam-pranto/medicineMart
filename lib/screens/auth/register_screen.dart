@@ -27,9 +27,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
-
-  String? _selectedDistrict;
-  String? _selectedPoliceStation;
+  final _districtController = TextEditingController();
+  final _policeStationController = TextEditingController();
   File? _nidImage;
   bool _isPasswordVisible = false;
   bool _isConfirmPasswordVisible = false;
@@ -45,6 +44,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
+    _districtController.dispose();
+    _policeStationController.dispose();
     super.dispose();
   }
 
@@ -138,21 +139,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                     const SizedBox(height: 16),
 
-                    // District Dropdown
-                    _buildDropdownField(
-                      value: _selectedDistrict,
+                    // District Text Field
+                    _buildTextField(
+                      controller: _districtController,
                       label: 'District',
                       icon: Icons.location_on_outlined,
-                      items: Districts.all,
-                      onChanged: (value) {
-                        setState(() {
-                          _selectedDistrict = value;
-                          _selectedPoliceStation = null; // Reset police station
-                        });
-                      },
                       validator: (value) {
-                        if (value == null) {
-                          return 'Please select a district';
+                        if (value == null || value.trim().isEmpty) {
+                          return 'Please enter your district';
                         }
                         return null;
                       },
@@ -160,20 +154,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                     const SizedBox(height: 16),
 
-                    // Police Station Dropdown
-                    _buildDropdownField(
-                      value: _selectedPoliceStation,
+                    // Police Station Text Field
+                    _buildTextField(
+                      controller: _policeStationController,
                       label: 'Police Station',
                       icon: Icons.location_on_outlined,
-                      items: _getPoliceStations(),
-                      onChanged: (value) {
-                        setState(() {
-                          _selectedPoliceStation = value;
-                        });
-                      },
                       validator: (value) {
-                        if (value == null) {
-                          return 'Please select a police station';
+                        if (value == null || value.trim().isEmpty) {
+                          return 'Please enter your police station';
                         }
                         return null;
                       },
@@ -417,61 +405,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
-  /// Builds a dropdown field with consistent styling
-  Widget _buildDropdownField({
-    required String? value,
-    required String label,
-    required IconData icon,
-    required List<String> items,
-    required void Function(String?) onChanged,
-    String? Function(String?)? validator,
-  }) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.borderLight),
-      ),
-      child: DropdownButtonFormField<String>(
-        value: value,
-        onChanged: onChanged,
-        validator: validator,
-        decoration: InputDecoration(
-          labelText: label,
-          labelStyle: const TextStyle(
-            color: AppColors.textSecondary,
-            fontSize: 14,
-          ),
-          prefixIcon: Icon(
-            icon,
-            color: AppColors.primary,
-            size: 20,
-          ),
-          border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 16,
-          ),
-        ),
-        dropdownColor: AppColors.surface,
-        style: const TextStyle(
-          color: AppColors.textPrimary,
-          fontSize: 16,
-        ),
-        icon: const Icon(
-          Icons.keyboard_arrow_down,
-          color: AppColors.primary,
-        ),
-        items: items.map((String item) {
-          return DropdownMenuItem<String>(
-            value: item,
-            child: Text(item),
-          );
-        }).toList(),
-      ),
-    );
-  }
-
   /// Builds the NID upload section
   Widget _buildNidUploadSection() {
     return Column(
@@ -581,21 +514,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
-  /// Gets police stations based on selected district (mock data)
-  List<String> _getPoliceStations() {
-    if (_selectedDistrict == null) return [];
-
-    // Mock police stations - in real app, this would be fetched from API
-    return [
-      '$_selectedDistrict Sadar',
-      '${_selectedDistrict} Model',
-      '${_selectedDistrict} Kotwali',
-      'Dhanmondi',
-      'Ramna',
-      'Tejgaon',
-    ];
-  }
-
   /// Picks NID image from gallery or camera
   Future<void> _pickNidImage() async {
     try {
@@ -635,8 +553,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
       fullName: _fullNameController.text.trim(),
       phoneNumber: _phoneController.text.trim(),
       pharmacyName: _pharmacyNameController.text.trim(),
-      district: _selectedDistrict!,
-      policeStation: _selectedPoliceStation!,
+      district: _districtController.text.trim(),
+      policeStation: _policeStationController.text.trim(),
       pharmacyFullAddress: _addressController.text.trim(),
       email: _emailController.text.trim(),
       password: _passwordController.text,

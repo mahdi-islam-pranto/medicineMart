@@ -7,6 +7,7 @@ import '../screens/explore_products_page.dart';
 import '../models/models.dart';
 import '../theme/app_colors.dart';
 import '../bloc/bloc.dart';
+import '../services/app_settings_storage_service.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -98,13 +99,18 @@ class _HomePageState extends State<HomePage> {
   /// Builds the app bar
   PreferredSizeWidget _buildAppBar(BuildContext context) {
     return AppBar(
-      title: const Text(
-        'Health & Medicine',
-        style: TextStyle(
-          color: AppColors.textOnPrimary,
-          fontSize: 20,
-          fontWeight: FontWeight.bold,
-        ),
+      title: FutureBuilder<String>(
+        future: AppSettingsStorageService.getAppName(),
+        builder: (context, snapshot) {
+          return Text(
+            snapshot.data ?? 'Health & Medicine',
+            style: const TextStyle(
+              color: AppColors.textOnPrimary,
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          );
+        },
       ),
       backgroundColor: AppColors.primary,
       elevation: 0,
