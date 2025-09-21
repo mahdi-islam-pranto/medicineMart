@@ -26,6 +26,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
   late TabController _tabController;
   late ProductFilter _tempFilter;
   final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
 
   @override
   void initState() {
@@ -172,6 +173,18 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
               hintText: 'Search Manufacturer',
               prefixIcon:
                   const Icon(Icons.search, color: AppColors.textSecondary),
+              suffixIcon: _searchQuery.isNotEmpty
+                  ? IconButton(
+                      icon: const Icon(Icons.clear,
+                          color: AppColors.textSecondary),
+                      onPressed: () {
+                        setState(() {
+                          _searchController.clear();
+                          _searchQuery = '';
+                        });
+                      },
+                    )
+                  : null,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
                 borderSide: const BorderSide(color: AppColors.borderMedium),
@@ -189,7 +202,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
             ),
             onChanged: (value) {
               setState(() {
-                // Filter brands based on search
+                _searchQuery = value.toLowerCase();
               });
             },
           ),
@@ -197,38 +210,63 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
 
         // Brand list
         Expanded(
-          child: ListView.builder(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            itemCount: widget.availableBrands.length,
-            itemBuilder: (context, index) {
-              final brand = widget.availableBrands[index];
+          child: Builder(
+            builder: (context) {
+              // Filter brands based on search query
+              final filteredBrands = widget.availableBrands.where((brand) {
+                if (_searchQuery.isEmpty) return true;
+                return brand.name.toLowerCase().contains(_searchQuery);
+              }).toList();
 
-              return RadioListTile<String>(
-                title: Text(
-                  brand.name,
-                  style: const TextStyle(
-                    color: AppColors.textPrimary,
-                    fontSize: 14,
+              if (filteredBrands.isEmpty) {
+                return const Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(32.0),
+                    child: Text(
+                      'No companies found',
+                      style: TextStyle(
+                        color: AppColors.textSecondary,
+                        fontSize: 16,
+                      ),
+                    ),
                   ),
-                ),
-                value: brand.id.toString(),
-                groupValue: _tempFilter.selectedBrandId,
-                onChanged: (String? value) {
-                  setState(() {
-                    if (value == _tempFilter.selectedBrandId) {
-                      // Deselect if already selected
-                      _tempFilter = _tempFilter.copyWith(clearBrand: true);
-                    } else {
-                      // Select new brand
-                      _tempFilter = _tempFilter.copyWith(
-                        selectedBrandId: value,
-                      );
-                    }
-                  });
+                );
+              }
+
+              return ListView.builder(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                itemCount: filteredBrands.length,
+                itemBuilder: (context, index) {
+                  final brand = filteredBrands[index];
+
+                  return RadioListTile<String>(
+                    title: Text(
+                      brand.name,
+                      style: const TextStyle(
+                        color: AppColors.textPrimary,
+                        fontSize: 14,
+                      ),
+                    ),
+                    value: brand.id.toString(),
+                    groupValue: _tempFilter.selectedBrandId,
+                    onChanged: (String? value) {
+                      setState(() {
+                        if (value == _tempFilter.selectedBrandId) {
+                          // Deselect if already selected
+                          _tempFilter = _tempFilter.copyWith(clearBrand: true);
+                        } else {
+                          // Select new brand
+                          _tempFilter = _tempFilter.copyWith(
+                            selectedBrandId: value,
+                          );
+                        }
+                      });
+                    },
+                    activeColor: AppColors.primary,
+                    controlAffinity: ListTileControlAffinity.leading,
+                    contentPadding: EdgeInsets.zero,
+                  );
                 },
-                activeColor: AppColors.primary,
-                controlAffinity: ListTileControlAffinity.leading,
-                contentPadding: EdgeInsets.zero,
               );
             },
           ),
@@ -297,6 +335,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
     setState(() {
       _tempFilter = const ProductFilter();
       _searchController.clear();
+      _searchQuery = '';
     });
   }
 
