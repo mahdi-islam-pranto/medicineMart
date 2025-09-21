@@ -1,5 +1,21 @@
 import 'package:equatable/equatable.dart';
 
+/// Helper method to parse string values with commas to double
+double _parseStringToDouble(dynamic value) {
+  if (value == null) return 0.0;
+
+  // If it's already a number, convert to double
+  if (value is num) return value.toDouble();
+
+  // If it's a string, remove commas and parse
+  if (value is String) {
+    final cleanValue = value.replaceAll(',', '');
+    return double.tryParse(cleanValue) ?? 0.0;
+  }
+
+  return 0.0;
+}
+
 /// Response model for cart list API
 class CartListResponse extends Equatable {
   final bool success;
@@ -82,12 +98,12 @@ class CartItemData extends Equatable {
       productId: json['product_id'] ?? 0,
       productName: json['product_name'] ?? '',
       brand: json['brand'] ?? '',
-      mrpPriceSingle: (json['mrp_price_single'] as num?)?.toDouble() ?? 0.0,
-      salePriceSingle: (json['sale_price_single'] as num?)?.toDouble() ?? 0.0,
+      mrpPriceSingle: _parseStringToDouble(json['mrp_price_single']),
+      salePriceSingle: _parseStringToDouble(json['sale_price_single']),
       discountPercentage: json['discount_percentage'] ?? '0%',
       cartQuantity: json['cart_quantity'] ?? 0,
-      mrpPrice: (json['mrp_price'] as num?)?.toDouble() ?? 0.0,
-      salePrice: (json['sale_price'] as num?)?.toDouble() ?? 0.0,
+      mrpPrice: _parseStringToDouble(json['mrp_price']),
+      salePrice: _parseStringToDouble(json['sale_price']),
       imageUrl: json['image_url'],
     );
   }
@@ -134,9 +150,9 @@ class CartSummary extends Equatable {
   factory CartSummary.fromJson(Map<String, dynamic> json) {
     return CartSummary(
       totalItems: json['total_items'] ?? 0,
-      subtotal: (json['subtotal'] as num?)?.toDouble() ?? 0.0,
-      discount: (json['discount'] as num?)?.toDouble() ?? 0.0,
-      totalAmount: (json['total_amount'] as num?)?.toDouble() ?? 0.0,
+      subtotal: _parseStringToDouble(json['subtotal']),
+      discount: _parseStringToDouble(json['discount']),
+      totalAmount: _parseStringToDouble(json['total_amount']),
     );
   }
 

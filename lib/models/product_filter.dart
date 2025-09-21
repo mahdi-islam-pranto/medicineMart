@@ -3,15 +3,15 @@ import 'package:equatable/equatable.dart';
 /// Product filter model for managing filter state in explore products
 class ProductFilter extends Equatable {
   final String? searchQuery;
-  final List<String> selectedBrands;
-  final List<String> selectedCategories;
+  final String? selectedBrandId;
+  final String? selectedCategoryId;
   final SortOption sortOption;
   final ProductCategory productCategory;
 
   const ProductFilter({
     this.searchQuery,
-    this.selectedBrands = const [],
-    this.selectedCategories = const [],
+    this.selectedBrandId,
+    this.selectedCategoryId,
     this.sortOption = SortOption.nameAtoZ,
     this.productCategory = ProductCategory.all,
   });
@@ -19,15 +19,20 @@ class ProductFilter extends Equatable {
   /// Create a copy with updated fields
   ProductFilter copyWith({
     String? searchQuery,
-    List<String>? selectedBrands,
-    List<String>? selectedCategories,
+    String? selectedBrandId,
+    String? selectedCategoryId,
     SortOption? sortOption,
     ProductCategory? productCategory,
+    bool clearBrand = false,
+    bool clearCategory = false,
   }) {
     return ProductFilter(
       searchQuery: searchQuery ?? this.searchQuery,
-      selectedBrands: selectedBrands ?? this.selectedBrands,
-      selectedCategories: selectedCategories ?? this.selectedCategories,
+      selectedBrandId:
+          clearBrand ? null : (selectedBrandId ?? this.selectedBrandId),
+      selectedCategoryId: clearCategory
+          ? null
+          : (selectedCategoryId ?? this.selectedCategoryId),
       sortOption: sortOption ?? this.sortOption,
       productCategory: productCategory ?? this.productCategory,
     );
@@ -41,8 +46,8 @@ class ProductFilter extends Equatable {
   /// Check if any filters are active
   bool get hasActiveFilters {
     return searchQuery?.isNotEmpty == true ||
-        selectedBrands.isNotEmpty ||
-        selectedCategories.isNotEmpty ||
+        selectedBrandId?.isNotEmpty == true ||
+        selectedCategoryId?.isNotEmpty == true ||
         sortOption != SortOption.nameAtoZ ||
         productCategory != ProductCategory.all;
   }
@@ -51,8 +56,8 @@ class ProductFilter extends Equatable {
   int get activeFilterCount {
     int count = 0;
     if (searchQuery?.isNotEmpty == true) count++;
-    if (selectedBrands.isNotEmpty) count++;
-    if (selectedCategories.isNotEmpty) count++;
+    if (selectedBrandId?.isNotEmpty == true) count++;
+    if (selectedCategoryId?.isNotEmpty == true) count++;
     if (sortOption != SortOption.nameAtoZ) count++;
     if (productCategory != ProductCategory.all) count++;
     return count;
@@ -61,11 +66,16 @@ class ProductFilter extends Equatable {
   @override
   List<Object?> get props => [
         searchQuery,
-        selectedBrands,
-        selectedCategories,
+        selectedBrandId,
+        selectedCategoryId,
         sortOption,
         productCategory,
       ];
+
+  @override
+  String toString() {
+    return 'ProductFilter(searchQuery: $searchQuery, selectedBrandId: $selectedBrandId, selectedCategoryId: $selectedCategoryId, sortOption: $sortOption, productCategory: $productCategory)';
+  }
 }
 
 /// Product category enum for filtering

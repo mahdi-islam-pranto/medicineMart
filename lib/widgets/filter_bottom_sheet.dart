@@ -5,8 +5,8 @@ import '../models/models.dart';
 /// Filter bottom sheet widget for explore products
 class FilterBottomSheet extends StatefulWidget {
   final ProductFilter currentFilter;
-  final List<String> availableBrands;
-  final List<String> availableCategories;
+  final List<Brand> availableBrands;
+  final List<Category> availableCategories;
   final Function(ProductFilter) onApplyFilter;
 
   const FilterBottomSheet({
@@ -170,7 +170,8 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
             controller: _searchController,
             decoration: InputDecoration(
               hintText: 'Search Manufacturer',
-              prefixIcon: const Icon(Icons.search, color: AppColors.textSecondary),
+              prefixIcon:
+                  const Icon(Icons.search, color: AppColors.textSecondary),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(8),
                 borderSide: const BorderSide(color: AppColors.borderMedium),
@@ -201,34 +202,31 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
             itemCount: widget.availableBrands.length,
             itemBuilder: (context, index) {
               final brand = widget.availableBrands[index];
-              final isSelected = _tempFilter.selectedBrands.contains(brand);
 
-              return CheckboxListTile(
+              return RadioListTile<String>(
                 title: Text(
-                  brand,
+                  brand.name,
                   style: const TextStyle(
                     color: AppColors.textPrimary,
                     fontSize: 14,
                   ),
                 ),
-                value: isSelected,
-                onChanged: (bool? value) {
+                value: brand.id.toString(),
+                groupValue: _tempFilter.selectedBrandId,
+                onChanged: (String? value) {
                   setState(() {
-                    if (value == true) {
-                      _tempFilter = _tempFilter.copyWith(
-                        selectedBrands: [..._tempFilter.selectedBrands, brand],
-                      );
+                    if (value == _tempFilter.selectedBrandId) {
+                      // Deselect if already selected
+                      _tempFilter = _tempFilter.copyWith(clearBrand: true);
                     } else {
+                      // Select new brand
                       _tempFilter = _tempFilter.copyWith(
-                        selectedBrands: _tempFilter.selectedBrands
-                            .where((b) => b != brand)
-                            .toList(),
+                        selectedBrandId: value,
                       );
                     }
                   });
                 },
                 activeColor: AppColors.primary,
-                checkColor: AppColors.textOnPrimary,
                 controlAffinity: ListTileControlAffinity.leading,
                 contentPadding: EdgeInsets.zero,
               );
@@ -246,7 +244,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            'Select Categories',
+            'Select Category',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w500,
@@ -259,34 +257,31 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
               itemCount: widget.availableCategories.length,
               itemBuilder: (context, index) {
                 final category = widget.availableCategories[index];
-                final isSelected = _tempFilter.selectedCategories.contains(category);
 
-                return CheckboxListTile(
+                return RadioListTile<String>(
                   title: Text(
-                    category,
+                    category.name,
                     style: const TextStyle(
                       color: AppColors.textPrimary,
                       fontSize: 14,
                     ),
                   ),
-                  value: isSelected,
-                  onChanged: (bool? value) {
+                  value: category.id.toString(),
+                  groupValue: _tempFilter.selectedCategoryId,
+                  onChanged: (String? value) {
                     setState(() {
-                      if (value == true) {
-                        _tempFilter = _tempFilter.copyWith(
-                          selectedCategories: [..._tempFilter.selectedCategories, category],
-                        );
+                      if (value == _tempFilter.selectedCategoryId) {
+                        // Deselect if already selected
+                        _tempFilter = _tempFilter.copyWith(clearCategory: true);
                       } else {
+                        // Select new category
                         _tempFilter = _tempFilter.copyWith(
-                          selectedCategories: _tempFilter.selectedCategories
-                              .where((c) => c != category)
-                              .toList(),
+                          selectedCategoryId: value,
                         );
                       }
                     });
                   },
                   activeColor: AppColors.primary,
-                  checkColor: AppColors.textOnPrimary,
                   controlAffinity: ListTileControlAffinity.leading,
                   contentPadding: EdgeInsets.zero,
                 );

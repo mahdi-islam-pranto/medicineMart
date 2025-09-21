@@ -179,8 +179,8 @@ class ProductApiService {
   }) {
     return ProductSearchRequest(
       searchQuery: filter.searchQuery ?? '',
-      selectedBrands: filter.selectedBrands.join(','),
-      selectedCategories: filter.selectedCategories.join(','),
+      selectedBrands: filter.selectedBrandId ?? '',
+      selectedCategories: filter.selectedCategoryId ?? '',
       productType: _convertProductCategoryToType(filter.productCategory),
       sortOption: _convertSortOptionToString(filter.sortOption),
       pagination: Pagination(page: page, limit: limit),

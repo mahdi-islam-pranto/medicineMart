@@ -421,6 +421,9 @@ class _ExploreProductsPageState extends State<ExploreProductsPage>
   }
 
   void _showFilterBottomSheet(ExploreProductsLoaded state) {
+    // Store the cubit reference before showing the bottom sheet
+    final cubit = context.read<ExploreProductsCubit>();
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -430,7 +433,7 @@ class _ExploreProductsPageState extends State<ExploreProductsPage>
         availableBrands: state.availableBrands,
         availableCategories: state.availableCategories,
         onApplyFilter: (filter) {
-          context.read<ExploreProductsCubit>().applyFilter(filter);
+          cubit.applyFilter(filter);
         },
       ),
     );

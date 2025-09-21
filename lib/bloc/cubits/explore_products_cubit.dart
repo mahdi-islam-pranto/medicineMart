@@ -26,8 +26,8 @@ class ExploreProductsLoading extends ExploreProductsState {
 class ExploreProductsLoaded extends ExploreProductsState {
   final List<Medicine> allProducts;
   final List<Medicine> filteredProducts;
-  final List<String> availableBrands;
-  final List<String> availableCategories;
+  final List<Brand> availableBrands;
+  final List<Category> availableCategories;
   final ProductFilter currentFilter;
   final Map<String, bool> favorites;
   final Map<String, int> cartItems;
@@ -55,8 +55,8 @@ class ExploreProductsLoaded extends ExploreProductsState {
   ExploreProductsLoaded copyWith({
     List<Medicine>? allProducts,
     List<Medicine>? filteredProducts,
-    List<String>? availableBrands,
-    List<String>? availableCategories,
+    List<Brand>? availableBrands,
+    List<Category>? availableCategories,
     ProductFilter? currentFilter,
     Map<String, bool>? favorites,
     Map<String, int>? cartItems,
@@ -413,11 +413,20 @@ class ExploreProductsCubit extends Cubit<ExploreProductsState> {
       }).toList();
     }
 
-    // Apply brand filter
-    if (filter.selectedBrands.isNotEmpty) {
-      filtered = filtered.where((product) {
-        return filter.selectedBrands.contains(product.brand);
-      }).toList();
+    // Apply brand filter (using brand name from selected brand ID)
+    if (filter.selectedBrandId?.isNotEmpty == true) {
+      final currentState = state;
+      if (currentState is ExploreProductsLoaded) {
+        // Find the brand name from the brand ID
+        final selectedBrand = currentState.availableBrands
+            .where((brand) => brand.id.toString() == filter.selectedBrandId)
+            .firstOrNull;
+        if (selectedBrand != null) {
+          filtered = filtered.where((product) {
+            return product.brand == selectedBrand.name;
+          }).toList();
+        }
+      }
     }
 
     // Apply product category filter
@@ -449,14 +458,41 @@ class ExploreProductsCubit extends Cubit<ExploreProductsState> {
   }
 
   /// Load brands from API
-  Future<List<String>> _loadBrandsFromAPI() async {
+  Future<List<Brand>> _loadBrandsFromAPI() async {
     try {
       print('🔄 Loading brands from API...');
-      final brandNames = await BrandApiService.getBrandNames();
-      print('✅ Successfully loaded ${brandNames.length} brands from API');
-      return brandNames;
+      final brandResponse = await BrandApiService.getAllBrands();
+      if (brandResponse.isSuccess) {
+        print(
+            '✅ Successfully loaded ${brandResponse.data.length} brands from API');
+        return brandResponse.data;
+      } else {
+        print('❌ Error loading brands from API: ${brandResponse.message}');
+        return [];
+      }
     } catch (e) {
       print('❌ Error loading brands from API: $e');
+      // Return empty list if API fails
+      return [];
+    }
+  }
+
+  /// Load categories from API
+  Future<List<Category>> _loadCategoriesFromAPI() async {
+    try {
+      print('🔄 Loading categories from API...');
+      final categoryResponse = await CategoryApiService.getAllCategories();
+      if (categoryResponse.success) {
+        print(
+            '✅ Successfully loaded ${categoryResponse.categories.length} categories from API');
+        return categoryResponse.categories;
+      } else {
+        print(
+            '❌ Error loading categories from API: ${categoryResponse.message}');
+        return [];
+      }
+    } catch (e) {
+      print('❌ Error loading categories from API: $e');
       // Return empty list if API fails
       return [];
     }
@@ -495,20 +531,5 @@ class ExploreProductsCubit extends Cubit<ExploreProductsState> {
     }
 
     return sorted;
-  }
-
-  /// Load categories from API
-  Future<List<String>> _loadCategoriesFromAPI() async {
-    try {
-      print('🔄 Loading categories from API...');
-      final categoryNames = await CategoryApiService.getCategoryNames();
-      print(
-          '✅ Successfully loaded ${categoryNames.length} categories from API');
-      return categoryNames;
-    } catch (e) {
-      print('❌ Error loading categories from API: $e');
-      // Return empty list if API fails
-      return [];
-    }
   }
 }

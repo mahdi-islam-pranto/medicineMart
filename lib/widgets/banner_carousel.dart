@@ -304,10 +304,16 @@ class _BannerCarouselState extends State<BannerCarousel> {
               if (selectedBrand != null) {
                 final currentState = cubit.state;
                 if (currentState is ExploreProductsLoaded) {
-                  final newFilter = currentState.currentFilter.copyWith(
-                    selectedBrands: [selectedBrand],
-                  );
-                  cubit.applyFilter(newFilter);
+                  // Find the brand ID from the brand name
+                  final brand = currentState.availableBrands
+                      .where((b) => b.name == selectedBrand)
+                      .firstOrNull;
+                  if (brand != null) {
+                    final newFilter = currentState.currentFilter.copyWith(
+                      selectedBrandId: brand.id.toString(),
+                    );
+                    cubit.applyFilter(newFilter);
+                  }
                 }
               }
               if (productCategory != null) {
