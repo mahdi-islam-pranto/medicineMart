@@ -125,6 +125,7 @@ class _FilterBottomSheetState extends State<FilterBottomSheet>
           // Bottom buttons
           Container(
             padding: const EdgeInsets.all(16),
+            margin: EdgeInsets.only(bottom: 30),
             decoration: const BoxDecoration(
               border: Border(
                 top: BorderSide(color: AppColors.borderLight),

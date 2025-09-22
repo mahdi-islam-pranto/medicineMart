@@ -29,7 +29,10 @@ class CartCubit extends Cubit<CartState> {
             .map((item) => CartItem.fromCartItemData(item))
             .toList();
 
-        emit(CartLoaded(items: cartItems));
+        emit(CartLoaded(
+          items: cartItems,
+          apiSummary: apiResponse.data!.summary,
+        ));
       } else {
         // API call failed or no data
         emit(CartError(message: apiResponse.message));
@@ -61,40 +64,16 @@ class CartCubit extends Cubit<CartState> {
         );
 
         if (apiResponse.success) {
-          // Update local cart state on successful API call
-          final updatedItems = List<CartItem>.from(currentState.items);
-          final existingItemIndex =
-              updatedItems.indexWhere((item) => item.id == medicine.id);
-
-          if (existingItemIndex != -1) {
-            if (quantity > 0) {
-              // Update existing item quantity
-              final existingItem = updatedItems[existingItemIndex];
-              updatedItems[existingItemIndex] = existingItem.copyWith(
-                cartQuantity: quantity,
-              );
-            } else {
-              // Remove item if quantity is 0
-              updatedItems.removeAt(existingItemIndex);
-            }
-          } else if (quantity > 0) {
-            // Add new item to cart
-            final newItem = CartItem.fromMedicine(medicine, quantity);
-            updatedItems.add(newItem);
-          }
-
+          // Show operation success message first
           emit(CartOperationSuccess(
             message: apiResponse.message,
-            operationType: existingItemIndex != -1
-                ? (quantity > 0
-                    ? CartOperationType.update
-                    : CartOperationType.remove)
-                : CartOperationType.add,
-            items: updatedItems,
+            operationType:
+                quantity > 0 ? CartOperationType.add : CartOperationType.remove,
+            items: currentState.items, // Keep current items for now
           ));
 
-          // Return to loaded state
-          emit(CartLoaded(items: updatedItems));
+          // Reload entire cart from API to get updated summary data
+          await loadCart(customerId: customerIdToUse);
         } else {
           // API call failed
           emit(CartError(message: apiResponse.message));
@@ -133,24 +112,8 @@ class CartCubit extends Cubit<CartState> {
         );
 
         if (apiResponse.success) {
-          // Update local cart state on successful API call
-          final updatedItems = List<CartItem>.from(currentState.items);
-          final itemIndex =
-              updatedItems.indexWhere((item) => item.id == medicineId);
-
-          if (itemIndex != -1) {
-            if (quantity > 0) {
-              // Update quantity
-              updatedItems[itemIndex] = updatedItems[itemIndex].copyWith(
-                cartQuantity: quantity,
-              );
-            } else {
-              // Remove item if quantity is 0
-              updatedItems.removeAt(itemIndex);
-            }
-
-            emit(CartLoaded(items: updatedItems));
-          }
+          // Reload entire cart from API to get updated summary data
+          await loadCart(customerId: customerIdToUse);
         } else {
           // API call failed
           emit(CartError(message: apiResponse.message));
@@ -186,24 +149,20 @@ class CartCubit extends Cubit<CartState> {
         );
 
         if (apiResponse.success) {
-          // Update local cart state on successful API call
-          final updatedItems = List<CartItem>.from(currentState.items);
+          // Find the item to show success message
           final itemIndex =
-              updatedItems.indexWhere((item) => item.id == medicineId);
+              currentState.items.indexWhere((item) => item.id == medicineId);
+          final itemName =
+              itemIndex != -1 ? currentState.items[itemIndex].name : 'Item';
 
-          if (itemIndex != -1) {
-            final removedItem = updatedItems[itemIndex];
-            updatedItems.removeAt(itemIndex);
+          emit(CartOperationSuccess(
+            message: '$itemName removed from cart',
+            operationType: CartOperationType.remove,
+            items: currentState.items, // Keep current items for now
+          ));
 
-            emit(CartOperationSuccess(
-              message: '${removedItem.name} removed from cart',
-              operationType: CartOperationType.remove,
-              items: updatedItems,
-            ));
-
-            // Return to loaded state
-            emit(CartLoaded(items: updatedItems));
-          }
+          // Reload entire cart from API to get updated summary data
+          await loadCart(customerId: customerIdToUse);
         } else {
           // API call failed
           emit(CartError(message: apiResponse.message));
@@ -268,10 +227,12 @@ class CartCubit extends Cubit<CartState> {
         // Use provided customerId or default to 1 for development
         final customerIdToUse = customerId ?? 1;
 
-        // Calculate totals
-        final subtotal = currentState.totalPrice;
-        const discount = 0.0; // No discount for now
-        final totalAmount = subtotal - discount;
+        // Use API summary values if available, otherwise calculate locally
+        final subtotal =
+            currentState.apiSummary?.subtotal ?? currentState.totalPrice;
+        final discount = currentState.apiSummary?.discount ?? 0.0;
+        final totalAmount =
+            currentState.apiSummary?.totalAmount ?? (subtotal - discount);
 
         // Convert cart items to order items
         final orderItems = currentState.items.map((cartItem) {

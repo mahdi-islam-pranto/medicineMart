@@ -452,9 +452,11 @@ class _CartPageState extends State<CartPage> {
 
   /// Builds checkout section
   Widget _buildCheckoutSection(CartLoaded state) {
-    final subtotal = state.totalPrice;
+    // Use API summary values if available, otherwise fall back to calculated values
+    final subtotal = state.apiSummary?.subtotal ?? state.totalPrice;
+    final discount = state.apiSummary?.discount ?? state.totalDiscount;
+    final total = state.apiSummary?.totalAmount ?? (subtotal - discount);
     const delivery = 0.0;
-    final total = subtotal + delivery;
 
     return Container(
       padding: const EdgeInsets.all(16),
@@ -481,7 +483,7 @@ class _CartPageState extends State<CartPage> {
                   style: TextStyle(color: AppColors.textSecondary),
                 ),
                 Text(
-                  '৳ ${subtotal.toStringAsFixed(2)}',
+                  '৳ ${subtotal.toStringAsFixed(subtotal.truncateToDouble() == subtotal ? 0 : 2)}',
                   style: const TextStyle(color: AppColors.textPrimary),
                 ),
               ],
@@ -515,7 +517,7 @@ class _CartPageState extends State<CartPage> {
                   style: TextStyle(color: AppColors.textSecondary),
                 ),
                 Text(
-                  '৳ ${state.totalDiscount.toStringAsFixed(2)}',
+                  '৳ ${discount.toStringAsFixed(discount.truncateToDouble() == discount ? 0 : 2)}',
                   style: const TextStyle(color: AppColors.textPrimary),
                 ),
               ],
@@ -535,7 +537,7 @@ class _CartPageState extends State<CartPage> {
                   ),
                 ),
                 Text(
-                  '৳ ${total.toStringAsFixed(0)}',
+                  '৳ ${total.toStringAsFixed(total.truncateToDouble() == total ? 0 : 2)}',
                   style: const TextStyle(
                     color: AppColors.primary,
                     fontSize: 18,

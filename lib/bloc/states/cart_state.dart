@@ -23,10 +23,12 @@ class CartLoading extends CartState {
 class CartLoaded extends CartState {
   final List<CartItem> items;
   final bool isUpdating;
+  final CartSummary? apiSummary;
 
   const CartLoaded({
     required this.items,
     this.isUpdating = false,
+    this.apiSummary,
   });
 
   /// Get total number of items in cart (sum of all quantities)
@@ -82,15 +84,17 @@ class CartLoaded extends CartState {
   CartLoaded copyWith({
     List<CartItem>? items,
     bool? isUpdating,
+    CartSummary? apiSummary,
   }) {
     return CartLoaded(
       items: items ?? this.items,
       isUpdating: isUpdating ?? this.isUpdating,
+      apiSummary: apiSummary ?? this.apiSummary,
     );
   }
 
   @override
-  List<Object?> get props => [items, isUpdating];
+  List<Object?> get props => [items, isUpdating, apiSummary];
 }
 
 /// State when there's an error with cart operations
