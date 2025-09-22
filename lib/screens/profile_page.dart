@@ -58,21 +58,21 @@ class _ProfilePageState extends State<ProfilePage> {
       elevation: 0,
       automaticallyImplyLeading: false,
       actions: [
-        IconButton(
-          onPressed: () {
-            // Settings
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Settings coming soon!'),
-                backgroundColor: AppColors.primary,
-              ),
-            );
-          },
-          icon: const Icon(
-            Icons.settings_outlined,
-            color: AppColors.textOnPrimary,
-          ),
-        ),
+        // IconButton(
+        //   onPressed: () {
+        //     // Settings
+        //     ScaffoldMessenger.of(context).showSnackBar(
+        //       const SnackBar(
+        //         content: Text('Settings coming soon!'),
+        //         backgroundColor: AppColors.primary,
+        //       ),
+        //     );
+        //   },
+        //   icon: const Icon(
+        //     Icons.settings_outlined,
+        //     color: AppColors.textOnPrimary,
+        //   ),
+        // ),
       ],
     );
   }
@@ -211,12 +211,14 @@ class _ProfilePageState extends State<ProfilePage> {
           //   subtitle: 'Manage delivery addresses',
           //   onTap: () => _showComingSoon('Addresses'),
           // ),
-          _buildMenuItem(
-            icon: Icons.payment_outlined,
-            title: 'Payment Methods',
-            subtitle: 'Manage payment options',
-            onTap: () => _showComingSoon('Payment Methods'),
-          ),
+
+          // Payment methods
+          // _buildMenuItem(
+          //   icon: Icons.payment_outlined,
+          //   title: 'Payment Methods',
+          //   subtitle: 'Manage payment options',
+          //   onTap: () => _showComingSoon('Payment Methods'),
+          // ),
 
           const SizedBox(height: 24),
 

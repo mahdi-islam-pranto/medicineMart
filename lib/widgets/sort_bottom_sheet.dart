@@ -108,6 +108,7 @@ class _SortBottomSheetState extends State<SortBottomSheet> {
           // Bottom buttons
           Container(
             padding: const EdgeInsets.all(16),
+            margin: const EdgeInsets.only(bottom: 30),
             decoration: const BoxDecoration(
               border: Border(
                 top: BorderSide(color: AppColors.borderLight),

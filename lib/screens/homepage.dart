@@ -125,20 +125,20 @@ class _HomePageState extends State<HomePage> {
       ),
       actions: [
         // Notification icon
-        IconButton(
-          onPressed: () {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Notifications feature coming soon!'),
-                backgroundColor: AppColors.primary,
-              ),
-            );
-          },
-          icon: const Icon(
-            Icons.notifications_outlined,
-            color: AppColors.textOnPrimary,
-          ),
-        ),
+        // IconButton(
+        //   onPressed: () {
+        //     ScaffoldMessenger.of(context).showSnackBar(
+        //       const SnackBar(
+        //         content: Text('Notifications feature coming soon!'),
+        //         backgroundColor: AppColors.primary,
+        //       ),
+        //     );
+        //   },
+        //   icon: const Icon(
+        //     Icons.notifications_outlined,
+        //     color: AppColors.textOnPrimary,
+        //   ),
+        // ),
 
         // Profile avatar
         Padding(
