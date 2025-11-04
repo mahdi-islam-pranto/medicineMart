@@ -3,6 +3,7 @@ import '../states/cart_state.dart';
 import '../../models/models.dart';
 import '../../APIs/cart_api_service.dart';
 import '../../APIs/order_api_service.dart';
+import '../../services/auth_storage_service.dart';
 
 /// Cubit for managing cart items and operations
 class CartCubit extends Cubit<CartState> {
@@ -13,8 +14,16 @@ class CartCubit extends Cubit<CartState> {
     emit(const CartLoading());
 
     try {
-      // Use provided customerId or default to 1 for development
-      final customerIdToUse = customerId ?? 1;
+      // Get logged-in customer ID
+      final customerIdToUse =
+          customerId ?? await AuthStorageService.getCustomerId();
+
+      if (customerIdToUse == null) {
+        emit(const CartError(message: 'Please login to view your cart'));
+        return;
+      }
+
+      print('🛒 Loading cart for customer ID: $customerIdToUse');
 
       // Make API call to get cart items
       final apiResponse = await CartApiService.getCartItems(
@@ -50,8 +59,17 @@ class CartCubit extends Cubit<CartState> {
       emit(currentState.copyWith(isUpdating: true));
 
       try {
-        // Use provided customerId or default to 1 for development
-        final customerIdToUse = customerId ?? 1;
+        // Get logged-in customer ID
+        final customerIdToUse =
+            customerId ?? await AuthStorageService.getCustomerId();
+
+        if (customerIdToUse == null) {
+          emit(const CartError(message: 'Please login to add items to cart'));
+          emit(currentState.copyWith(isUpdating: false));
+          return;
+        }
+
+        print('🛒 Adding to cart for customer ID: $customerIdToUse');
 
         // Parse medicine ID to int
         final productId = int.tryParse(medicine.id) ?? 1;
@@ -98,8 +116,17 @@ class CartCubit extends Cubit<CartState> {
       emit(currentState.copyWith(isUpdating: true));
 
       try {
-        // Use provided customerId or default to 1 for development
-        final customerIdToUse = customerId ?? 1;
+        // Get logged-in customer ID
+        final customerIdToUse =
+            customerId ?? await AuthStorageService.getCustomerId();
+
+        if (customerIdToUse == null) {
+          emit(const CartError(message: 'Please login to update cart'));
+          emit(currentState.copyWith(isUpdating: false));
+          return;
+        }
+
+        print('🛒 Updating cart quantity for customer ID: $customerIdToUse');
 
         // Parse medicine ID to int
         final productId = int.tryParse(medicineId) ?? 1;
@@ -136,8 +163,18 @@ class CartCubit extends Cubit<CartState> {
       emit(currentState.copyWith(isUpdating: true));
 
       try {
-        // Use provided customerId or default to 1 for development
-        final customerIdToUse = customerId ?? 1;
+        // Get logged-in customer ID
+        final customerIdToUse =
+            customerId ?? await AuthStorageService.getCustomerId();
+
+        if (customerIdToUse == null) {
+          emit(const CartError(
+              message: 'Please login to remove items from cart'));
+          emit(currentState.copyWith(isUpdating: false));
+          return;
+        }
+
+        print('🛒 Removing from cart for customer ID: $customerIdToUse');
 
         // Parse medicine ID to int
         final productId = int.tryParse(medicineId) ?? 1;
@@ -224,8 +261,17 @@ class CartCubit extends Cubit<CartState> {
       emit(currentState.copyWith(isUpdating: true));
 
       try {
-        // Use provided customerId or default to 1 for development
-        final customerIdToUse = customerId ?? 1;
+        // Get logged-in customer ID
+        final customerIdToUse =
+            customerId ?? await AuthStorageService.getCustomerId();
+
+        if (customerIdToUse == null) {
+          emit(const CartError(message: 'Please login to checkout'));
+          emit(currentState.copyWith(isUpdating: false));
+          return;
+        }
+
+        print('🛒 Creating order for customer ID: $customerIdToUse');
 
         // Use API summary values if available, otherwise calculate locally
         final subtotal =

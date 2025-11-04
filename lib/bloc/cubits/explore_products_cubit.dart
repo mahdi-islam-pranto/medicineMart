@@ -6,6 +6,7 @@ import '../../APIs/product_api_service.dart';
 import '../../APIs/brand_api_service.dart';
 import '../../APIs/category_api_service.dart';
 import '../../APIs/cart_api_service.dart';
+import '../../services/auth_storage_service.dart';
 
 /// States for explore products
 abstract class ExploreProductsState extends Equatable {
@@ -357,8 +358,16 @@ class ExploreProductsCubit extends Cubit<ExploreProductsState> {
     final currentState = state;
     if (currentState is ExploreProductsLoaded) {
       try {
-        // Use provided customerId or default to 1 for development
-        final customerIdToUse = customerId ?? 1;
+        // Get logged-in customer ID
+        final customerIdToUse =
+            customerId ?? await AuthStorageService.getCustomerId();
+
+        if (customerIdToUse == null) {
+          print('⚠️ Cannot add to cart: User not logged in');
+          return;
+        }
+
+        print('🛒 Adding to cart for customer ID: $customerIdToUse');
 
         // Parse product ID to int
         final productId = int.tryParse(product.id) ?? 1;

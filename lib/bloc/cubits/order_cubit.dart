@@ -2,6 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../states/order_state.dart';
 import '../../models/models.dart';
 import '../../APIs/order_list_api_service.dart';
+import '../../services/auth_storage_service.dart';
 
 /// Cubit for managing orders list and operations
 class OrderCubit extends Cubit<OrderState> {
@@ -15,7 +16,7 @@ class OrderCubit extends Cubit<OrderState> {
     bool isRefresh = false,
   }) async {
     final currentState = state;
-    
+
     // Show appropriate loading state
     if (isRefresh && currentState is OrderLoaded) {
       emit(OrderRefreshing(
@@ -29,8 +30,17 @@ class OrderCubit extends Cubit<OrderState> {
     }
 
     try {
-      // Use provided customerId or default to 1 for development
-      final customerIdToUse = customerId ?? 1;
+      // Get logged-in customer ID
+      final customerIdToUse =
+          customerId ?? await AuthStorageService.getCustomerId();
+
+      if (customerIdToUse == null) {
+        emit(const OrderError(message: 'Please login to view your orders'));
+        return;
+      }
+
+      print(
+          '📦 Loading orders for customer ID: $customerIdToUse (status: $status)');
 
       // Make API call to get orders
       final apiResponse = await OrderListApiService.getOrdersByStatus(
@@ -42,7 +52,7 @@ class OrderCubit extends Cubit<OrderState> {
 
       if (apiResponse.success && apiResponse.data != null) {
         final orderListData = apiResponse.data!;
-        
+
         // Handle pagination - append or replace orders
         List<OrderData> finalOrders;
         if (page == 1 || isRefresh) {
@@ -50,9 +60,8 @@ class OrderCubit extends Cubit<OrderState> {
           finalOrders = orderListData.orders;
         } else {
           // Load more - append to existing orders
-          final existingOrders = currentState is OrderLoaded 
-              ? currentState.orders 
-              : <OrderData>[];
+          final existingOrders =
+              currentState is OrderLoaded ? currentState.orders : <OrderData>[];
           finalOrders = [...existingOrders, ...orderListData.orders];
         }
 
@@ -81,7 +90,8 @@ class OrderCubit extends Cubit<OrderState> {
   }
 
   /// Load pending orders
-  Future<void> loadPendingOrders({int? customerId, bool isRefresh = false}) async {
+  Future<void> loadPendingOrders(
+      {int? customerId, bool isRefresh = false}) async {
     await loadOrders(
       status: '1',
       customerId: customerId,
@@ -90,7 +100,8 @@ class OrderCubit extends Cubit<OrderState> {
   }
 
   /// Load delivered orders
-  Future<void> loadDeliveredOrders({int? customerId, bool isRefresh = false}) async {
+  Future<void> loadDeliveredOrders(
+      {int? customerId, bool isRefresh = false}) async {
     await loadOrders(
       status: '2',
       customerId: customerId,
@@ -99,7 +110,8 @@ class OrderCubit extends Cubit<OrderState> {
   }
 
   /// Load cancelled orders
-  Future<void> loadCancelledOrders({int? customerId, bool isRefresh = false}) async {
+  Future<void> loadCancelledOrders(
+      {int? customerId, bool isRefresh = false}) async {
     await loadOrders(
       status: '3',
       customerId: customerId,
@@ -110,7 +122,9 @@ class OrderCubit extends Cubit<OrderState> {
   /// Load more orders (pagination)
   Future<void> loadMoreOrders({int? customerId}) async {
     final currentState = state;
-    if (currentState is OrderLoaded && currentState.hasMorePages && !currentState.isLoadingMore) {
+    if (currentState is OrderLoaded &&
+        currentState.hasMorePages &&
+        !currentState.isLoadingMore) {
       await loadOrders(
         status: currentState.currentStatus,
         customerId: customerId,

@@ -418,7 +418,24 @@ class _FeedbackPageState extends State<FeedbackPage> {
 
     try {
       // Get customer ID from user
-      final customerId = int.tryParse(authState.user.id) ?? 1;
+      final customerId = int.tryParse(authState.user.id);
+
+      if (customerId == null) {
+        if (mounted) {
+          setState(() {
+            _isSubmitting = false;
+          });
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Invalid user ID. Please login again.'),
+              backgroundColor: AppColors.error,
+            ),
+          );
+        }
+        return;
+      }
+
+      print('📝 Submitting feedback for customer ID: $customerId');
 
       // Create feedback request
       final feedbackRequest = FeedbackRequest(

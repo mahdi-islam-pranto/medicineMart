@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../theme/app_colors.dart';
 import '../../APIs/faq_api_service.dart';
@@ -482,11 +483,15 @@ class _HelpSupportPageState extends State<HelpSupportPage> {
   void _sendEmail([String? emailAddress]) async {
     final email = emailAddress ?? 'mmodumadicenmart@gmail.com';
     final emailUrl = 'mailto:$email?subject=Support Request';
-    if (await canLaunchUrl(Uri.parse(emailUrl))) {
-      await launchUrl(Uri.parse(emailUrl));
-    } else {
-      _showErrorSnackBar('Could not launch email client');
-    }
+
+    // copy email address to clipboard
+    Clipboard.setData(ClipboardData(text: email));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Email address copied to clipboard'),
+        backgroundColor: AppColors.primary,
+      ),
+    );
   }
 
   void _startLiveChat() {
