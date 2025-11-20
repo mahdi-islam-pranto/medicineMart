@@ -26,7 +26,7 @@ class _MyOrdersPageState extends State<MyOrdersPage>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 4, vsync: this);
+    _tabController = TabController(length: 5, vsync: this);
 
     // Load initial orders (all orders)
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -74,6 +74,7 @@ class _MyOrdersPageState extends State<MyOrdersPage>
           tabs: const [
             Tab(text: 'All'),
             Tab(text: 'Pending'),
+            Tab(text: 'Confirmed'),
             Tab(text: 'Delivered'),
             Tab(text: 'Cancelled'),
           ],
@@ -88,6 +89,7 @@ class _MyOrdersPageState extends State<MyOrdersPage>
               _buildOrdersTab('1', state),
               _buildOrdersTab('2', state),
               _buildOrdersTab('3', state),
+              _buildOrdersTab('4', state),
             ],
           );
         },
@@ -100,8 +102,9 @@ class _MyOrdersPageState extends State<MyOrdersPage>
     final statusMap = {
       0: 'all',
       1: '1', // pending
-      2: '2', // delivered
-      3: '3', // cancelled
+      2: '2', // confirmed
+      3: '3', // delivered
+      4: '4', // cancelled
     };
 
     final status = statusMap[index] ?? 'all';
@@ -141,6 +144,7 @@ class _MyOrdersPageState extends State<MyOrdersPage>
           summary: const OrderSummary(
             totalOrders: 0,
             pendingOrders: 0,
+            confirmedOrders: 0,
             deliveredOrders: 0,
             cancelledOrders: 0,
           ),
@@ -302,6 +306,10 @@ class _MyOrdersPageState extends State<MyOrdersPage>
         backgroundColor = AppColors.warning.withOpacity(0.1);
         textColor = AppColors.warning;
         break;
+      case 'confirmed':
+        backgroundColor = AppColors.primary.withOpacity(0.1);
+        textColor = AppColors.primary;
+        break;
       case 'delivered':
         backgroundColor = AppColors.success.withOpacity(0.1);
         textColor = AppColors.success;
@@ -353,9 +361,9 @@ class _MyOrdersPageState extends State<MyOrdersPage>
             ),
           ),
           const SizedBox(height: 8),
-          Text(
+          const Text(
             "Check Your Internet Connection. If the problem persists, please contact support.",
-            style: const TextStyle(
+            style: TextStyle(
               color: AppColors.textSecondary,
               fontSize: 14,
             ),
@@ -383,11 +391,15 @@ class _MyOrdersPageState extends State<MyOrdersPage>
         message = 'No pending orders';
         icon = Icons.hourglass_empty;
         break;
-      case '2': // delivered
+      case '2': // confirmed
+        message = 'No confirmed orders';
+        icon = Icons.check_circle;
+        break;
+      case '3': // delivered
         message = 'No delivered orders';
         icon = Icons.check_circle_outline;
         break;
-      case '3': // cancelled
+      case '4': // cancelled
         message = 'No cancelled orders';
         icon = Icons.cancel_outlined;
         break;

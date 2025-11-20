@@ -99,11 +99,21 @@ class OrderCubit extends Cubit<OrderState> {
     );
   }
 
+  /// Load confirmed orders
+  Future<void> loadConfirmedOrders(
+      {int? customerId, bool isRefresh = false}) async {
+    await loadOrders(
+      status: '2',
+      customerId: customerId,
+      isRefresh: isRefresh,
+    );
+  }
+
   /// Load delivered orders
   Future<void> loadDeliveredOrders(
       {int? customerId, bool isRefresh = false}) async {
     await loadOrders(
-      status: '2',
+      status: '3',
       customerId: customerId,
       isRefresh: isRefresh,
     );
@@ -113,7 +123,7 @@ class OrderCubit extends Cubit<OrderState> {
   Future<void> loadCancelledOrders(
       {int? customerId, bool isRefresh = false}) async {
     await loadOrders(
-      status: '3',
+      status: '4',
       customerId: customerId,
       isRefresh: isRefresh,
     );

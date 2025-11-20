@@ -24,7 +24,8 @@ class OrderLoaded extends OrderState {
   final List<OrderData> orders;
   final OrderPagination pagination;
   final OrderSummary summary;
-  final String currentStatus; // 'all', '1', '2', '3'
+  final String
+      currentStatus; // 'all', '1' (pending), '2' (confirmed), '3' (delivered), '4' (cancelled)
   final bool isLoadingMore;
 
   const OrderLoaded({

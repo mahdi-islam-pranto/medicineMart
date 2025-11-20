@@ -45,8 +45,9 @@ class OrderListApiService {
         final status = responseData['status']?.toString() ?? '';
         if (status == '200') {
           // Success response - parse order list data
-          final orderListData = OrderListData.fromJson(responseData['data'] ?? {});
-          
+          final orderListData =
+              OrderListData.fromJson(responseData['data'] ?? {});
+
           return OrderListResponse.success(
             message: responseData['message'] ?? 'Orders retrieved successfully',
             data: orderListData,
@@ -93,7 +94,7 @@ class OrderListApiService {
   /// Get orders by status
   ///
   /// Convenience method to fetch orders filtered by status.
-  /// Status mapping: 'all', '1' (pending), '2' (delivered), '3' (cancelled)
+  /// Status mapping: 'all', '1' (pending), '2' (confirmed), '3' (delivered), '4' (cancelled)
   static Future<OrderListResponse> getOrdersByStatus({
     required int customerId,
     required String status,
@@ -138,6 +139,20 @@ class OrderListApiService {
     );
   }
 
+  /// Get confirmed orders
+  static Future<OrderListResponse> getConfirmedOrders({
+    required int customerId,
+    int page = 1,
+    int limit = 20,
+  }) async {
+    return getOrdersByStatus(
+      customerId: customerId,
+      status: '2',
+      page: page,
+      limit: limit,
+    );
+  }
+
   /// Get delivered orders
   static Future<OrderListResponse> getDeliveredOrders({
     required int customerId,
@@ -146,7 +161,7 @@ class OrderListApiService {
   }) async {
     return getOrdersByStatus(
       customerId: customerId,
-      status: '2',
+      status: '3',
       page: page,
       limit: limit,
     );
@@ -160,7 +175,7 @@ class OrderListApiService {
   }) async {
     return getOrdersByStatus(
       customerId: customerId,
-      status: '3',
+      status: '4',
       page: page,
       limit: limit,
     );

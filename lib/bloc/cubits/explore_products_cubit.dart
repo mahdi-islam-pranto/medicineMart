@@ -288,7 +288,7 @@ class ExploreProductsCubit extends Cubit<ExploreProductsState> {
       _searchDebounceTimer?.cancel();
 
       // Start new timer for debounced search
-      _searchDebounceTimer = Timer(const Duration(milliseconds: 800), () {
+      _searchDebounceTimer = Timer(const Duration(milliseconds: 1700), () {
         _performSearch(searchText);
       });
     }

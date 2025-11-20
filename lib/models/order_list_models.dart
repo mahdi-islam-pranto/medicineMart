@@ -3,7 +3,8 @@ import 'package:equatable/equatable.dart';
 /// Order list request model
 class OrderListRequest extends Equatable {
   final int customerId;
-  final String status; // 'all', '1' (pending), '2' (delivered), '3' (cancelled)
+  final String
+      status; // 'all', '1' (pending), '2' (confirmed), '3' (delivered), '4' (cancelled)
   final int page;
   final int limit;
 
@@ -86,10 +87,22 @@ class OrderData extends Equatable {
 
   /// Create from JSON response
   factory OrderData.fromJson(Map<String, dynamic> json) {
+    // Parse status - can be either String or Map
+    String statusValue = '';
+    final statusField = json['status'];
+    if (statusField is String) {
+      statusValue = statusField;
+    } else if (statusField is Map) {
+      // If status is a Map like {"1":"Pending","2":"Delivered","3":"Cancelled"}
+      // We can't determine the actual status, so we'll use empty string
+      // The API should provide the actual status as a string
+      statusValue = '';
+    }
+
     return OrderData(
       id: json['id'] ?? 0,
       orderNumber: json['order_number'] ?? '',
-      status: json['status'] ?? '',
+      status: statusValue,
       total: json['total']?.toString() ?? '0',
       paymentStatus: json['payment_status'],
       estimatedDelivery: json['estimated_delivery'] ?? '',
@@ -109,6 +122,8 @@ class OrderData extends Equatable {
     switch (status.toLowerCase()) {
       case 'pending':
         return 'Pending';
+      case 'confirmed':
+        return 'Confirmed';
       case 'delivered':
         return 'Delivered';
       case 'cancelled':
@@ -176,12 +191,14 @@ class OrderPagination extends Equatable {
 class OrderSummary extends Equatable {
   final int totalOrders;
   final int pendingOrders;
+  final int confirmedOrders;
   final int deliveredOrders;
   final int cancelledOrders;
 
   const OrderSummary({
     required this.totalOrders,
     required this.pendingOrders,
+    required this.confirmedOrders,
     required this.deliveredOrders,
     required this.cancelledOrders,
   });
@@ -191,6 +208,7 @@ class OrderSummary extends Equatable {
     return OrderSummary(
       totalOrders: json['total_orders'] ?? 0,
       pendingOrders: json['pending_orders'] ?? 0,
+      confirmedOrders: json['confirmed_orders'] ?? 0,
       deliveredOrders: json['delivered_orders'] ?? 0,
       cancelledOrders: json['cancelled_orders'] ?? 0,
     );
@@ -200,6 +218,7 @@ class OrderSummary extends Equatable {
   List<Object?> get props => [
         totalOrders,
         pendingOrders,
+        confirmedOrders,
         deliveredOrders,
         cancelledOrders,
       ];
