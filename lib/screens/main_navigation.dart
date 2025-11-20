@@ -23,11 +23,11 @@ class MainNavigation extends StatelessWidget {
   // List of pages for navigation
   static final List<Widget> _pages = [
     const HomePage(),
+    const CartPage(),
     BlocProvider(
       create: (context) => ExploreProductsCubit(),
       child: const ExploreProductsPage(),
     ),
-    const CartPage(),
     const FavoritesPage(),
     const ProfilePage(),
   ];
@@ -126,17 +126,7 @@ class MainNavigation extends StatelessWidget {
                 child: _buildNavItem(
                   context: context,
                   state: state,
-                  index: 1,
-                  icon: Icons.medical_services_outlined,
-                  activeIcon: Icons.medical_services,
-                  label: 'Medicines',
-                ),
-              ),
-              Expanded(
-                child: _buildNavItem(
-                  context: context,
-                  state: state,
-                  index: 2,
+                  index: 3,
                   icon: Icons.shopping_cart_outlined,
                   activeIcon: Icons.shopping_cart,
                   label: 'Cart',
@@ -147,7 +137,17 @@ class MainNavigation extends StatelessWidget {
                 child: _buildNavItem(
                   context: context,
                   state: state,
-                  index: 3,
+                  index: 2,
+                  icon: Icons.medical_services_outlined,
+                  activeIcon: Icons.medical_services,
+                  label: 'Medicines',
+                ),
+              ),
+              Expanded(
+                child: _buildNavItem(
+                  context: context,
+                  state: state,
+                  index: 1,
                   icon: Icons.favorite_outline,
                   activeIcon: Icons.favorite,
                   label: 'Favorites',

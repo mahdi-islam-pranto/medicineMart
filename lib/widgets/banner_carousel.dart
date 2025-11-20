@@ -43,7 +43,7 @@ class _BannerCarouselState extends State<BannerCarousel> {
     BannerData(
       title: '24/7 Support',
       subtitle: 'Support available anytime in the given phone number',
-      description: 'Get customer support 24/7. Talk to us on 01746733817',
+      description: 'Get customer support 24/7.',
       color: AppColors.primaryLight,
       icon: Icons.support_agent,
     ),

@@ -204,6 +204,21 @@ class _MedicineCardState extends State<MedicineCard> {
         ),
         const SizedBox(height: 2),
 
+        // Product type
+        Text(
+          widget.medicine.quantity,
+          style: const TextStyle(
+            color: AppColors.textTertiary,
+            fontSize: 11,
+            fontWeight: FontWeight.w500,
+            letterSpacing: 0.5,
+          ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+
+        const SizedBox(height: 2),
+
         // Brand name
         Text(
           widget.medicine.brand.toUpperCase(),

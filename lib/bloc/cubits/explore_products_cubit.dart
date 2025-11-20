@@ -127,9 +127,9 @@ class ExploreProductsCubit extends Cubit<ExploreProductsState> {
 
     try {
       print('🔄 Loading initial products from API...');
-      // Call the real API to get first page of products (40 products)
+      // Call the real API to get first page of products (20 products)
       final response =
-          await ProductApiService.getAllProducts(page: 1, limit: 40);
+          await ProductApiService.getAllProducts(page: 1, limit: 20);
 
       if (response.success && response.data != null) {
         final products = response.data!.products;
@@ -184,7 +184,7 @@ class ExploreProductsCubit extends Cubit<ExploreProductsState> {
       final request = ProductApiService.convertFilterToRequest(
         currentState.currentFilter,
         page: nextPage,
-        limit: 40,
+        limit: 20,
       );
       final response = await ProductApiService.searchProducts(request);
 
@@ -229,7 +229,7 @@ class ExploreProductsCubit extends Cubit<ExploreProductsState> {
         print('🔄 Applying filters: ${filter.toString()}');
         // Convert filter to API request and search (reset to page 1)
         final request = ProductApiService.convertFilterToRequest(filter,
-            page: 1, limit: 40);
+            page: 1, limit: 20);
         final response = await ProductApiService.searchProducts(request);
 
         if (response.success && response.data != null) {

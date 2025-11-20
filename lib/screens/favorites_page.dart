@@ -23,6 +23,18 @@ class FavoritesPage extends StatefulWidget {
 
 class _FavoritesPageState extends State<FavoritesPage> {
   @override
+  void initState() {
+    super.initState();
+    // Load favorites when page is first opened
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final currentState = context.read<FavoritesCubit>().state;
+      if (currentState is FavoritesInitial) {
+        context.read<FavoritesCubit>().loadFavorites();
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: _buildAppBar(),
@@ -49,7 +61,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
         },
         child: BlocBuilder<FavoritesCubit, FavoritesState>(
           builder: (context, state) {
-            if (state is FavoritesLoading) {
+            if (state is FavoritesInitial || state is FavoritesLoading) {
               return const Center(child: CircularProgressIndicator());
             } else if (state is FavoritesError) {
               return Center(

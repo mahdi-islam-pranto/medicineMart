@@ -14,7 +14,7 @@ class NavigationState extends Equatable {
 
   /// Initial state with default values
   const NavigationState.initial()
-      : currentIndex = 0,
+      : currentIndex = 2,
         cartItemCount = 0,
         favoritesCount = 0;
 

@@ -25,13 +25,13 @@ class MyApp extends StatelessWidget {
           create: (context) => CartCubit()..loadCart(),
         ),
         BlocProvider<FavoritesCubit>(
-          create: (context) => FavoritesCubit()..loadFavorites(),
+          create: (context) => FavoritesCubit(),
         ),
         BlocProvider<NavigationCubit>(
           create: (context) => NavigationCubit(),
         ),
         BlocProvider<CategoriesCubit>(
-          create: (context) => CategoriesCubit()..loadCategories(),
+          create: (context) => CategoriesCubit(),
         ),
         BlocProvider<OrderCubit>(
           create: (context) => OrderCubit(),

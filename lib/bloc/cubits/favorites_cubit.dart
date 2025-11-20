@@ -115,10 +115,17 @@ class FavoritesCubit extends Cubit<FavoritesState> {
   }
 
   /// Toggle favorite status of a medicine
-  void toggleFavorite(Medicine medicine) {
+  Future<void> toggleFavorite(Medicine medicine) async {
     final currentState = state;
-    if (currentState is FavoritesLoaded) {
-      if (currentState.isFavorite(medicine.id)) {
+
+    // Load favorites first if not loaded yet
+    if (currentState is FavoritesInitial) {
+      await loadFavorites();
+    }
+
+    final updatedState = state;
+    if (updatedState is FavoritesLoaded) {
+      if (updatedState.isFavorite(medicine.id)) {
         removeFromFavorites(medicine.id);
       } else {
         addToFavorites(medicine);

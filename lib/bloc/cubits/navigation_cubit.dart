@@ -62,14 +62,14 @@ class NavigationCubit extends Cubit<NavigationState> {
   /// Navigate to home tab
   void goToHome() => changeTab(0);
 
+  /// Navigate to favorites tab
+  void goToFavorites() => changeTab(1);
+
   /// Navigate to explore products tab
-  void goToExploreProducts() => changeTab(1);
+  void goToExploreProducts() => changeTab(2);
 
   /// Navigate to cart tab
-  void goToCart() => changeTab(2);
-
-  /// Navigate to favorites tab
-  void goToFavorites() => changeTab(3);
+  void goToCart() => changeTab(3);
 
   /// Navigate to profile tab
   void goToProfile() => changeTab(4);
@@ -80,11 +80,11 @@ class NavigationCubit extends Cubit<NavigationState> {
       case 0:
         return 'Home';
       case 1:
-        return 'Explore';
-      case 2:
-        return 'Cart';
-      case 3:
         return 'Favorites';
+      case 2:
+        return 'Explore';
+      case 3:
+        return 'Cart';
       case 4:
         return 'Profile';
       default:

@@ -13,7 +13,7 @@ class MedicineCubit extends Cubit<MedicineState> {
 
     try {
       // Call the real API to get all products
-      final response = await ProductApiService.getAllProducts(limit: 50);
+      final response = await ProductApiService.getAllProducts(limit: 20);
 
       if (response.success && response.data != null) {
         final medicines = response.data!.products;
@@ -53,7 +53,7 @@ class MedicineCubit extends Cubit<MedicineState> {
 
       try {
         // Call the real API to refresh data
-        final response = await ProductApiService.getAllProducts(limit: 50);
+        final response = await ProductApiService.getAllProducts(limit: 20);
 
         if (response.success && response.data != null) {
           final medicines = response.data!.products;
