@@ -23,12 +23,12 @@ class MainNavigation extends StatelessWidget {
   // List of pages for navigation
   static final List<Widget> _pages = [
     const HomePage(),
-    const CartPage(),
+    const FavoritesPage(),
     BlocProvider(
       create: (context) => ExploreProductsCubit(),
       child: const ExploreProductsPage(),
     ),
-    const FavoritesPage(),
+    const CartPage(),
     const ProfilePage(),
   ];
 
@@ -112,6 +112,7 @@ class MainNavigation extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
+              // Home
               Expanded(
                 child: _buildNavItem(
                   context: context,

@@ -210,7 +210,7 @@ class _MyOrdersPageState extends State<MyOrdersPage>
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Order #${order.id}',
+                  'Order: #${order.orderNumber}',
                   style: const TextStyle(
                     color: AppColors.textPrimary,
                     fontSize: 16,
@@ -354,7 +354,7 @@ class _MyOrdersPageState extends State<MyOrdersPage>
           ),
           const SizedBox(height: 8),
           Text(
-            message,
+            "Check Your Internet Connection. If the problem persists, please contact support.",
             style: const TextStyle(
               color: AppColors.textSecondary,
               fontSize: 14,
@@ -440,13 +440,13 @@ class _MyOrdersPageState extends State<MyOrdersPage>
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Order #${order.id}'),
+        title: Text('Order #${order.orderNumber}'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Order Number: ${order.orderNumber}'),
-            const SizedBox(height: 8),
+            // Text('Order Number: ${}'),
+            // const SizedBox(height: 8),
             Text('Status: ${order.displayStatus}'),
             const SizedBox(height: 8),
             Text('Total: ৳${order.total}'),

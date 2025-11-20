@@ -94,7 +94,7 @@ class _ExploreProductsPageState extends State<ExploreProductsPage>
                 child: CircularProgressIndicator(color: AppColors.primary),
               );
             }
-
+            // Show error state
             if (state is ExploreProductsError) {
               return Center(
                 child: Column(
@@ -128,6 +128,7 @@ class _ExploreProductsPageState extends State<ExploreProductsPage>
               );
             }
 
+// Show loaded state
             if (state is ExploreProductsLoaded) {
               return Column(
                 children: [

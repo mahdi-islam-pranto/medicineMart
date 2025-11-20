@@ -170,8 +170,10 @@ class _QuantitySelectorState extends State<QuantitySelector> {
                           },
                         ),
                       ),
+
+                      // Unit name
                       Text(
-                        ' ${widget.unitName}${(_tempSelectedQuantity > 1 && _isCustomQuantitySelected) ? 's' : ''}',
+                        '${(_tempSelectedQuantity > 1 && _isCustomQuantitySelected) ? 's' : ''}',
                         style: TextStyle(
                           color: _isCustomQuantitySelected
                               ? AppColors.primary
@@ -298,7 +300,7 @@ class _QuantitySelectorState extends State<QuantitySelector> {
 
                                 // Quantity text
                                 Text(
-                                  '$quantity ${widget.unitName}${quantity > 1 ? 's' : ''}',
+                                  '$quantity ${quantity > 1 ? '' : ''}',
                                   style: TextStyle(
                                     color: isSelected
                                         ? AppColors.primary
